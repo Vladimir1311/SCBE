@@ -60,17 +60,28 @@ namespace SituationCenterBackServer.Controllers
             });
         }
         
-        public IEnumerable<Room> GetRooms()
+        public IEnumerable<string> GetRoomNames()
         {
-            return _roomManager.Rooms;
+            return _roomManager.RoomNames;
         }
-        
-        //public IActionResult CreateRoom(string name)
-        //{
-        //    if (_roomManager.Rooms.Any(R => R.Name == name))
-        //        return Json(new { message = "Комната с таким названием уже есть!"});
 
-        //}
+        public ResponseData CreateRoom(string name)
+        {
+            try
+            {
+                var (room, clientId) = _roomManager.CreateNewRoom(null, name);
+                return new SignInRoomInfo()
+                {
+                    ClientId = clientId,
+                    RoomId = room.Id,
+                    Port = _config.Port
+                };
+            }
+            catch(Exception ex)
+            {
+                return ResponseData.ErrorRequest(ex.Message);
+            }
+        }
 
 
 

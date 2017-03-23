@@ -8,7 +8,7 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
 {
     public class RoomsManager : IRoomManager
     {
-        private byte lastId = 0;
+        private byte lastRoomId = 0;
         private List<Room> rooms = new List<Room>();
         private IConnector _connector;
 
@@ -27,6 +27,30 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
             Console.WriteLine($"Adress: {obj.IP.Address.ToString()}");
         }
 
-        public IEnumerable<Room> Rooms => rooms;
+        public (Room, byte) CreateNewRoom(ApplicationUser creater, string name)
+        {
+            if (rooms.Any(R => R.Name == name))
+                throw new Exception("Комната с таким именем уже существует!");
+            Room newRoom = new Room(creater, lastRoomId++)
+            {
+                Name = name
+            };
+            rooms.Add(newRoom);
+            return (newRoom, creater.InRoomId);
+            
+        }
+
+        public IEnumerable<Room> FindRooms(Predicate<Room> func)
+        {
+            return rooms.Where(R => func(R));
+        }
+
+        public Room FirstOrDefault(Predicate<Room> func)
+        {
+            return rooms.FirstOrDefault(R => func(R));
+        }
+
+        public IEnumerable<string> RoomNames =>
+                rooms.Select(R => R.Name);
     }
 }

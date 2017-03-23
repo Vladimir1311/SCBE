@@ -7,6 +7,12 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
 {
     public interface IRoomManager
     {
-        IEnumerable<Room> Rooms { get; }
+        (Room, byte) CreateNewRoom(ApplicationUser creater, string name);
+
+        IEnumerable<string> RoomNames { get; }
+
+        IEnumerable<Room> FindRooms(Predicate<Room> func);
+        Room FirstOrDefault(Predicate<Room> func);
+
     }
 }

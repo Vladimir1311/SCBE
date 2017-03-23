@@ -20,7 +20,8 @@ namespace SituationCenterBackServer.Controllers
     [Authorize]
     public class UnrealAPIController : Controller
     {
-        private UserManager<ApplicationUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
+
         private UnrealAPIConfiguration _config;
         private IRoomManager _roomManager;
 
@@ -65,11 +66,12 @@ namespace SituationCenterBackServer.Controllers
             return _roomManager.RoomNames;
         }
 
-        public ResponseData CreateRoom(string name)
+        public async Task<ResponseData> CreateRoom(string name)
         {
             try
             {
-                var (room, clientId) = _roomManager.CreateNewRoom(null, name);
+                var currentUser = await _userManager.GetUserAsync(User);
+                var (room, clientId) = _roomManager.CreateNewRoom(currentUser, name);
                 return new SignInRoomInfo()
                 {
                     ClientId = clientId,

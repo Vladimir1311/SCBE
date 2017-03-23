@@ -14,8 +14,11 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
         private List<ApplicationUser> users;
 
         public string Name { get; set; }
+
+        //TODO сделать умерщвтление комнаты после ухода пользователей
         public DateTime TimeOut { get; set; }
 
+        public IEnumerable<ApplicationUser> Users => users;
         public Room(ApplicationUser creater, byte id)
         {
             users = new List<ApplicationUser> { creater };

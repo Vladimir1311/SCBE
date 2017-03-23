@@ -31,6 +31,8 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
         {
             if (rooms.Any(R => R.Name == name))
                 throw new Exception("Комната с таким именем уже существует!");
+            if (rooms.Any(R => R.Users.Any(U => U.Id == creater.Id)))
+                throw new Exception("Вы уже состоите в другой комнате!");
             Room newRoom = new Room(creater, lastRoomId++)
             {
                 Name = name

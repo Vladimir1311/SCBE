@@ -25,5 +25,11 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
             creater.InRoomId = lastClientId++;
             Id = id;
         }
+
+        internal void AddUser(ApplicationUser user)
+        {
+            users.Add(user);
+            user.InRoomId = lastClientId++;
+        }
     }
 }

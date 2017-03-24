@@ -15,6 +15,7 @@ using SituationCenterBackServer.Services;
 using Microsoft.IdentityModel.Tokens;
 using SituationCenterBackServer.Models.TokenAuthModels;
 using SituationCenterBackServer.Models.VoiceChatModels;
+using SituationCenterBackServer.Logging;
 
 namespace SituationCenterBackServer
 {
@@ -67,6 +68,7 @@ namespace SituationCenterBackServer
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
+            loggerFactory.AddProvider(new SocketLoggerProvider());
 
             if (env.IsDevelopment())
             {
@@ -80,7 +82,7 @@ namespace SituationCenterBackServer
             }
 
             app.UseStaticFiles();
-
+            app.UseWebSockets();
             app.UseIdentity();
 
             // Add external authentication middleware below. To configure them please see http://go.microsoft.com/fwlink/?LinkID=532715

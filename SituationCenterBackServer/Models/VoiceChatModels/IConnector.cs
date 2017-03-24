@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 
 namespace SituationCenterBackServer.Models.VoiceChatModels
 {
@@ -8,5 +9,6 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
         void Start();
         void Stop();
         void SendPack(ToClientPack pack);
+        void SendPack(IPEndPoint endpoint, int port, byte[] data);
     }
 }

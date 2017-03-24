@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace SituationCenterBackServer.Models.VoiceChatModels
+namespace SituationCenterBackServer.Models.VoiceChatModels.ResponseTypes
 {
     public class SignInRoomInfo : ResponseData
     {
@@ -13,7 +13,7 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
 
         public SignInRoomInfo()
         {
-            Succsess = true;
+            Success = true;
         }
     }
 }

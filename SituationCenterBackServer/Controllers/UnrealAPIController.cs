@@ -2,12 +2,14 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using SituationCenterBackServer.Models;
 using SituationCenterBackServer.Models.AccountViewModels;
 using SituationCenterBackServer.Models.TokenAuthModels;
 using SituationCenterBackServer.Models.VoiceChatModels;
+using SituationCenterBackServer.Models.VoiceChatModels.ResponseTypes;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
@@ -21,28 +23,31 @@ namespace SituationCenterBackServer.Controllers
     public class UnrealAPIController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly ILogger<UnrealAPIController> _logger;
 
         private UnrealAPIConfiguration _config;
         private IRoomManager _roomManager;
 
         public UnrealAPIController(UserManager<ApplicationUser> userManager,
             IOptions<UnrealAPIConfiguration> config,
-            IRoomManager roomManager)
+            IRoomManager roomManager,
+            ILogger<UnrealAPIController> logger)
         {
             _userManager = userManager;
             _config = config.Value;
             _roomManager = roomManager;
+            _logger = logger;
         }
 
         [AllowAnonymous]
-        public async Task<IActionResult> GetToken(LoginViewModel model)
+        public async Task<ResponseData> GetToken(LoginViewModel model)
         {
-          //  if (!ModelState.IsValid)
-            //    return Json(new { message = "not correct email or password"});
-
+            if (!ModelState.IsValid)
+            {
+                _logger.LogWarning("Не переданы email и/или пароль");
+                return ResponseData.ErrorRequest("not correct email or password");
+            }
             var identity = await GetIdentity(model.Email, model.Password);
-            if (identity == null)
-                return Json(new { message = "not correct email or password" });
             var now = DateTime.UtcNow;
             var jwt = new JwtSecurityToken(
                 issuer: AuthOptions.ISSUER,
@@ -54,23 +59,26 @@ namespace SituationCenterBackServer.Controllers
                     AuthOptions.GetSymmetricSecurityKey(),
                     SecurityAlgorithms.HmacSha256));
             var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
-            return Json(new
+            _logger.LogInformation($"Выдан токен {encodedJwt} на логин {model.Email}");
+            return new GetTokenInfo()
             {
-                access_token = encodedJwt,
-                username = identity.Name
-            });
+                AccessToken = encodedJwt
+            };
         }
         
-        public IEnumerable<string> GetRoomNames()
+        public ResponseData GetRoomsData()
         {
-            return _roomManager.RoomNames;
+            _logger.LogInformation("Запрошен вывод списка комнат");
+            return new GetRoomsInfo() { Rooms = _roomManager.Rooms};
         }
 
         public async Task<ResponseData> CreateRoom(string name)
         {
             try
             {
-                var currentUser = await _userManager.GetUserAsync(User);
+                _logger.LogInformation("Запрошено создание комнаты с именем " + name);
+                var userId= _userManager.GetUserName(User);
+                var currentUser = await _userManager.FindByNameAsync(userId);
                 var (room, clientId) = _roomManager.CreateNewRoom(currentUser, name);
                 return new SignInRoomInfo()
                 {
@@ -81,15 +89,21 @@ namespace SituationCenterBackServer.Controllers
             }
             catch(Exception ex)
             {
+                _logger.LogWarning($"Ошибка при создании комнаты {ex.Message}");
                 return ResponseData.ErrorRequest(ex.Message);
             }
         }
 
-        public async Task<ResponseData> JoinToRoom (byte? roomId, string roomName)
+        public async Task<ResponseData> JoinToRoom (byte? roomId, string roomName, float? floatId)
         {
             try
             {
-                var currentUser = await _userManager.GetUserAsync(User);
+                //TODO КОСТЫЛЬ!!!
+                if (floatId != null)
+                    roomId = (byte)(floatId.Value);
+
+                var userId = _userManager.GetUserName(User);
+                var currentUser = await _userManager.FindByNameAsync(userId);
                 (Room room, byte ClientId) returned;
                 if (roomId != null)
                     returned = _roomManager.JoinToRoom(currentUser, roomId.Value);
@@ -110,7 +124,15 @@ namespace SituationCenterBackServer.Controllers
                 throw;
             }
         }
-
+        public async Task<ResponseData> LeaveTheRoom()
+        {
+            var userId = _userManager.GetUserName(User);
+            var currentUser = await _userManager.FindByNameAsync(userId);
+            if (_roomManager.RemoveFromRoom(currentUser))
+                return ResponseData.GoodResponse("Вы успещно вышли из комнаты");
+            else
+                return ResponseData.GoodResponse("Вы не состояли ни в какой комнате");
+        }
 
 
 

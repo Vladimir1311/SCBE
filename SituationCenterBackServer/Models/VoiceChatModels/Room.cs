@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -16,8 +17,10 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
         public string Name { get; set; }
 
         //TODO сделать умерщвтление комнаты после ухода пользователей
+        [JsonIgnore]
         public DateTime TimeOut { get; set; }
 
+        [JsonIgnore]
         public IEnumerable<ApplicationUser> Users => users;
         public Room(ApplicationUser creater, byte id)
         {
@@ -30,6 +33,11 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
         {
             users.Add(user);
             user.InRoomId = lastClientId++;
+        }
+
+        internal void RemoveUser(ApplicationUser user)
+        {
+            users.Remove(user);
         }
     }
 }

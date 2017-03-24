@@ -19,20 +19,18 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
             _connector.Start();
         }
 
-        private void _connector_OnRecieveData(FromClientPack obj)
+        private void _connector_OnRecieveData(FromClientPack DataPack)
         {
-            Console.WriteLine("RECIEVED!!!!");
-            Console.WriteLine($"ClientId: {obj.ClientId}, Room: {obj.RoomId}");
-            Console.WriteLine($"PackType: {obj.PackType}, buffer length: {obj.VoiceRecord.Length}");
-            Console.WriteLine($"Adress: {obj.IP.Address.ToString()}");
+            var targetRoom = rooms.FirstOrDefault(R => R.Id == DataPack.RoomId);
+            _connector.SendPack(DataPack.IP, 15000, DataPack.VoiceRecord);
         }
 
         public (Room room, byte clientId) CreateNewRoom(ApplicationUser creater, string name)
         {
-            if (rooms.Any(R => R.Name == name))
-                throw new Exception("Комната с таким именем уже существует!");
             if (rooms.Any(R => R.Users.Any(U => U.Id == creater.Id)))
                 throw new Exception("Вы уже состоите в другой комнате!");
+            if (rooms.Any(R => R.Name == name))
+                throw new Exception("Комната с таким именем уже существует!");
             Room newRoom = new Room(creater, lastRoomId++)
             {
                 Name = name
@@ -69,7 +67,14 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
             return (calledRoom,user.InRoomId);
         }
 
-        public IEnumerable<string> RoomNames =>
-                rooms.Select(R => R.Name);
+        public bool RemoveFromRoom(ApplicationUser user)
+        {
+            var targetRoom = rooms.FirstOrDefault(R => R.Users.Any(U => U.Id == user.Id));
+            if (targetRoom == null) return false;
+            targetRoom.RemoveUser(user);
+            return true;
+        }
+
+        public IEnumerable<Room> Rooms => rooms;
     }
 }

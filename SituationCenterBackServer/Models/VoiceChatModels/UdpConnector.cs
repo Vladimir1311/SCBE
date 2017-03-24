@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,7 +11,6 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
     public class UdpConnector : IConnector
     {
         private UdpClient udpClient;
-        private bool isActive = false;
         private CancellationTokenSource cts;
 
         public event Action<FromClientPack> OnRecieveData;
@@ -58,5 +58,9 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
             token.ThrowIfCancellationRequested();
         }
 
+        public void SendPack(IPEndPoint endpoint, int port, byte[] data)
+        {
+            udpClient.SendAsync(data, data.Length, endpoint.Address.ToString(), port);
+        }
     }
 }

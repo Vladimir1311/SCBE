@@ -12,7 +12,9 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
         (Room room, byte clientId) JoinToRoom(ApplicationUser user, string roomName);
         (Room room, byte clientId) JoinToRoom(ApplicationUser user, byte roomId);
 
-        IEnumerable<string> RoomNames { get; }
+        bool RemoveFromRoom(ApplicationUser user);
+
+        IEnumerable<Room> Rooms { get; }
 
         IEnumerable<Room> FindRooms(Predicate<Room> func);
         Room FirstOrDefault(Predicate<Room> func);

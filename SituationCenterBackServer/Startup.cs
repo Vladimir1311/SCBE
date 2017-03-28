@@ -69,7 +69,6 @@ namespace SituationCenterBackServer
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
             loggerFactory.AddProvider(new SocketLoggerProvider());
-
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -103,7 +102,6 @@ namespace SituationCenterBackServer
                     ValidateIssuerSigningKey = true
                 }
             });
-
 
             app.UseMvc(routes =>
             {

@@ -35,6 +35,19 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
             user.InRoomId = lastClientId++;
         }
 
+        internal void UserSended(IConnector connector, FromClientPack dataPack)
+        {
+            var sender = users.FirstOrDefault(U => U.InRoomId == dataPack.ClientId);
+            dataPack.IP.Port = 15000;
+            users.ForEach(U => connector.SendPack(new ToClientPack
+            {
+                PackType = PackType.Voice,
+                ClientId = dataPack.ClientId,
+                Data = dataPack.VoiceRecord,
+                IP = dataPack.IP
+            }));
+        }
+
         internal void RemoveUser(ApplicationUser user)
         {
             users.Remove(user);

@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,18 +12,24 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
         private byte lastRoomId = 0;
         private List<Room> rooms = new List<Room>();
         private IConnector _connector;
+        private ILogger<RoomsManager> _logger;
+        private ILoggerFactory _logFactory;
 
-        public RoomsManager(IOptions<UnrealAPIConfiguration> configs)
+        public RoomsManager(IOptions<UnrealAPIConfiguration> configs, ILogger<RoomsManager> logger, ILoggerFactory logFactory)
         {
-            _connector = new UdpConnector(configs.Value.Port);
+            _connector = new UdpConnector(configs.Value.Port, logFactory.CreateLogger<UdpConnector>());
             _connector.OnRecieveData += _connector_OnRecieveData;
             _connector.Start();
+            _logger = logger;
+            _logFactory = logFactory;
         }
 
         private void _connector_OnRecieveData(FromClientPack DataPack)
         {
+            _logger.LogInformation($"Client {DataPack.ClientId} {DataPack.VoiceRecord.Length} bytes");
             var targetRoom = rooms.FirstOrDefault(R => R.Id == DataPack.RoomId);
-            _connector.SendPack(DataPack.IP, 15000, DataPack.VoiceRecord);
+            targetRoom?.UserSended(_connector, DataPack);
+            //_connector.SendPack(DataPack.IP, 15000, DataPack.VoiceRecord);
         }
 
         public (Room room, byte clientId) CreateNewRoom(ApplicationUser creater, string name)

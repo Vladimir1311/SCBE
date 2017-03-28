@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 
-namespace SituationCenterBackServer
+namespace UDPServerTester
 {
     public class Program
     {
@@ -13,7 +13,6 @@ namespace SituationCenterBackServer
         {
             var host = new WebHostBuilder()
                 .UseKestrel()
-                //.UseUrls("http://192.168.137.214:5000")
                 .UseContentRoot(Directory.GetCurrentDirectory())
                 .UseIISIntegration()
                 .UseStartup<Startup>()

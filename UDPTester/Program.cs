@@ -18,7 +18,7 @@ namespace UDPTester
             // The IPEndPoint will allow you to read datagrams sent from any source.
             IPEndPoint RemoteIpEndPoint = new IPEndPoint(IPAddress.Any, 0);
             receivingUdpClient.SendAsync(new byte[] { 1, 2, 1, 1, 2, 3, 4, 5 },
-                8, "127.0.0.1", 12000);
+                8, "127.0.0.1", 15000);
 
             return;
             int total = 0;

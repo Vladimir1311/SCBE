@@ -9,7 +9,6 @@ namespace SituationCenterBackServer.Models.VoiceChatModels.ResponseTypes
     {
         public byte RoomId { get; set; }
         public byte ClientId { get; set; }
-        public int Port { get; set; }
 
         public SignInRoomInfo()
         {

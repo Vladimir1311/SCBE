@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace SituationCenterBackServer.Extensions
+namespace SituationCenterBackServer.Logging
 {
     public class SocketLogger : ILogger
     {

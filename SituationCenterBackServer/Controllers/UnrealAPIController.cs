@@ -62,7 +62,8 @@ namespace SituationCenterBackServer.Controllers
             _logger.LogInformation($"Выдан токен {encodedJwt} на логин {model.Email}");
             return new GetTokenInfo()
             {
-                AccessToken = encodedJwt
+                AccessToken = encodedJwt,
+                Port = _config.Port
             };
         }
         
@@ -83,8 +84,7 @@ namespace SituationCenterBackServer.Controllers
                 return new SignInRoomInfo()
                 {
                     ClientId = clientId,
-                    RoomId = room.Id,
-                    Port = _config.Port
+                    RoomId = room.Id
                 };
             }
             catch(Exception ex)
@@ -114,8 +114,7 @@ namespace SituationCenterBackServer.Controllers
                 return new SignInRoomInfo
                 {
                     ClientId = returned.ClientId,
-                    RoomId = returned.room.Id,
-                    Port = _config.Port
+                    RoomId = returned.room.Id
                 };
             }
             catch (Exception ex)

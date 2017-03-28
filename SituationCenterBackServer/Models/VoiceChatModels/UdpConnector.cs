@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -12,12 +13,14 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
     {
         private UdpClient udpClient;
         private CancellationTokenSource cts;
+        private ILogger<UdpConnector> _logger;
 
         public event Action<FromClientPack> OnRecieveData;
 
-        public UdpConnector(int port)
+        public UdpConnector(int port, ILogger<UdpConnector> logger)
         {
             udpClient = new UdpClient(port);
+            _logger = logger;
         }
 
 
@@ -32,7 +35,14 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
 
         public void SendPack(ToClientPack pack)
         {
+            _logger.LogInformation($"Sending {pack.Data.Length} bytes from client {pack.ClientId} to {pack.IP.ToString()}");
+            byte[] newData = pack.Data;
             
+            if (pack.PackType == PackType.Voice)
+            {
+                newData = new byte[] { (byte)pack.PackType, pack.ClientId }.Concat(pack.Data.Select(B => (byte)(B < 50 ? 0 : B))).ToArray();
+            }
+            udpClient.SendAsync(newData, newData.Length, pack.IP.Address.ToString(), 15000);
         }
 
         public void Stop()

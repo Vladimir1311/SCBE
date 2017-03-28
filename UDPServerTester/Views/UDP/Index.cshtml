@@ -1,0 +1,17 @@
+@using System.Net
+@model IPAddress[]
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h2>Adresses</h2>
+
+<ol>
+    @foreach(var item in Model)
+    {
+        <li>
+            @item
+        </li>
+
+    }
+</ol>

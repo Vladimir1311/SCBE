@@ -15,6 +15,8 @@ namespace UDPTester
         {
             UdpClient receivingUdpClient = new UdpClient(11000);
             int total = 0;
+            receivingUdpClient.SendAsync(new byte[] { 1, 2, 3, 4, 5}, 5, "13.84.55.187", 12000);
+            //return;
             DateTime last = DateTime.Now;
             while (true)
             {

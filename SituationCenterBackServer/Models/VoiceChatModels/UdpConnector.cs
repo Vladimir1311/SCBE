@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -56,6 +57,7 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
             while (!token.IsCancellationRequested)
             {
                 var recieve = await udpClient.ReceiveAsync();
+                _logger.LogInformation($"Received {recieve.Buffer.Length} bytes from {recieve.RemoteEndPoint.Address.ToString()}, Adress family : {recieve.RemoteEndPoint.AddressFamily}, port : {recieve.RemoteEndPoint.Port}");
                 OnRecieveData?.Invoke(new FromClientPack
                 {
                     RoomId = recieve.Buffer[0],

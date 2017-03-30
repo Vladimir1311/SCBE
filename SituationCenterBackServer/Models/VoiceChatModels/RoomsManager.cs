@@ -15,7 +15,7 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
         private ILogger<RoomsManager> _logger;
         private ILoggerFactory _logFactory;
 
-        public RoomsManager(IOptions<UnrealAPIConfiguration> configs, ILogger<RoomsManager> logger, ILoggerFactory logFactory)
+        public RoomsManager(IOptions<UnrealAPIConfiguration> configs, ILogger<RoomsManager> logger, ILoggerFactory logFactory, TCPConnector tcpConnector)
         {
             _connector = new UdpConnector(configs.Value.Port, logFactory.CreateLogger<UdpConnector>());
             _connector.OnRecieveData += _connector_OnRecieveData;

@@ -14,13 +14,6 @@ namespace UDPTester
         static void Main(string[] args)
         {
             UdpClient receivingUdpClient = new UdpClient(11000);
-            //Creates an IPEndPoint to record the IP Address and port number of the sender. 
-            // The IPEndPoint will allow you to read datagrams sent from any source.
-            IPEndPoint RemoteIpEndPoint = new IPEndPoint(IPAddress.Any, 0);
-            receivingUdpClient.SendAsync(new byte[] { 1, 2, 1, 1, 2, 3, 4, 5 },
-                8, "23.102.161.217", 13000);
-
-            return;
             int total = 0;
             DateTime last = DateTime.Now;
             while (true)

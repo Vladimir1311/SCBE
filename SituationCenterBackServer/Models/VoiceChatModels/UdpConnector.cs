@@ -43,8 +43,8 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
             {
                 newData = new byte[] { (byte)pack.PackType, pack.ClientId }.Concat(pack.Data.Select(B => (byte)(B < 50 ? 0 : B))).ToArray();
             }
-            //udpClient.SendAsync(newData, newData.Length, pack.IP.Address.ToString(), 15000);
-            udpClient.SendAsync(newData, newData.Length, pack.IP);
+            udpClient.SendAsync(newData, newData.Length, pack.IP.Address.ToString(), 15000);
+            //udpClient.SendAsync(newData, newData.Length, pack.IP);
         }
 
         public void Stop()
@@ -59,13 +59,6 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
             {
                 var recieve = await udpClient.ReceiveAsync();
                 _logger.LogInformation($"Received {recieve.Buffer.Length} bytes from {recieve.RemoteEndPoint.Address.ToString()}, Adress family : {recieve.RemoteEndPoint.AddressFamily}, port : {recieve.RemoteEndPoint.Port}");
-                SendPack(new ToClientPack()
-                {
-                    ClientId = 1,
-                    Data = recieve.Buffer,
-                    IP = recieve.RemoteEndPoint,
-                    PackType = PackType.Voice
-                });
                 OnRecieveData?.Invoke(new FromClientPack
                 {
                     RoomId = recieve.Buffer[0],

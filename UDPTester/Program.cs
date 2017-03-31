@@ -13,6 +13,32 @@ namespace UDPTester
     {
         static void Main(string[] args)
         {
+            if (args.Length != 0)
+            {
+                TcpListener listener = new TcpListener(IPAddress.Any, 53);
+                while (true)
+                {
+                    var client = listener.AcceptTcpClientAsync().Result;
+                    Console.WriteLine($"Client {client.Client.RemoteEndPoint.ToString()}. Waiting for data.");
+                    byte[] buffer = new byte[1024];
+                    var readed = client.GetStream().Read(buffer, 0, buffer.Length);
+                    Console.WriteLine($"Readed {readed} bytes");
+                    client.GetStream().Write(buffer, 0, readed);
+                    Console.WriteLine($"Sended test {readed} bytes");
+                    Console.WriteLine("Closing connection.");
+                    client.GetStream().Dispose();
+                }
+
+            }
+
+
+
+
+
+
+
+
+            return;
             UdpClient receivingUdpClient = new UdpClient(11000);
             int total = 0;
             receivingUdpClient.SendAsync(new byte[] { 1, 2, 3, 4, 5}, 5, "13.84.55.187", 12000);

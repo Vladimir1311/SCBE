@@ -15,7 +15,7 @@ namespace UDPTester
         {
             if (args.Length != 0)
             {
-                TcpListener listener = new TcpListener(IPAddress.Any, 53);
+                TcpListener listener = new TcpListener(IPAddress.Any, 56);
                 listener.Start();
                 while (true)
                 {

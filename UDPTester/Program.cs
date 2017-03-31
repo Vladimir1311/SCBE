@@ -13,6 +13,7 @@ namespace UDPTester
     {
         static void Main(string[] args)
         {
+	    Console.WriteLine("Start");
             if (args.Length != 0)
             {
                 TcpListener listener = new TcpListener(IPAddress.Any, 56);

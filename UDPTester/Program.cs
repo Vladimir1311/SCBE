@@ -25,12 +25,20 @@ namespace UDPTester
                     var client = listener.AcceptTcpClientAsync().Result;
                     Console.WriteLine($"Client {client.Client.RemoteEndPoint.ToString()}. Waiting for data.");
                     byte[] buffer = new byte[1024];
-                    var readed = client.GetStream().Read(buffer, 0, buffer.Length);
-                    Console.WriteLine($"Readed {readed} bytes");
-                    client.GetStream().Write(buffer, 0, readed);
-                    Console.WriteLine($"Sended test {readed} bytes");
+                    client.ReceiveTimeout = 50;
+                    try
+                    {
+                        var readed = client.GetStream().Read(buffer, 0, buffer.Length);
+                        Console.WriteLine($"Readed {readed} bytes");
+                        client.GetStream().Write(buffer, 0, readed);
+                        Console.WriteLine($"Sended test {readed} bytes");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                    } 
                     Console.WriteLine("Closing connection.");
-                    client.GetStream().Dispose();
+                    client.Dispose();
                 }
 
             }

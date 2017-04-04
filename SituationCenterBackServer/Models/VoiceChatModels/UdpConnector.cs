@@ -41,7 +41,7 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
             
             if (pack.PackType == PackType.Voice)
             {
-                newData = new byte[] { (byte)pack.PackType, pack.ClientId }.Concat(pack.Data.Select(B => (byte)(B < 50 ? 0 : B))).ToArray();
+                newData = new byte[] { (byte)pack.PackType, pack.ClientId }.Concat(pack.Data/*.Select(B => (byte)(B < 50 ? 0 : B))*/).ToArray();
             }
             udpClient.SendAsync(newData, newData.Length, pack.IP.Address.ToString(), 15000);
             //udpClient.SendAsync(newData, newData.Length, pack.IP);

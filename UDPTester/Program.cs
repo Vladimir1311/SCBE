@@ -13,11 +13,13 @@ namespace UDPTester
     {
         static void Main(string[] args)
         {
-	    Console.WriteLine("Start");
+	        Console.WriteLine("Start");
             if (args.Length != 0)
             {
+                Console.WriteLine("Get port " + args[0]);
                 TcpListener listener = new TcpListener(IPAddress.Any, int.Parse(args[0]));
                 listener.Start();
+                Console.WriteLine("Started listening");
                 while (true)
                 {
                     var client = listener.AcceptTcpClientAsync().Result;

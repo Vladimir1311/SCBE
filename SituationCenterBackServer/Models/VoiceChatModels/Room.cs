@@ -39,13 +39,16 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
         {
             var sender = users.FirstOrDefault(U => U.InRoomId == dataPack.ClientId);
             dataPack.IP.Port = 15000;
-            users.ForEach(U => connector.SendPack(new ToClientPack
-            {
-                PackType = PackType.Voice,
-                ClientId = dataPack.ClientId,
-                Data = dataPack.VoiceRecord,
-                IP = dataPack.IP
-            }));
+            if (sender.Adress == null)
+                sender.Adress = dataPack.IP;
+            users.Where(U => U.InRoomId != sender.InRoomId)
+                 .ForEach(U => connector.SendPack(new ToClientPack
+                 {
+                     PackType = PackType.Voice,
+                     ClientId = dataPack.ClientId,
+                     Data = dataPack.VoiceRecord,
+                     IP = sender.Adress
+                 }));
         }
 
         internal void RemoveUser(ApplicationUser user)

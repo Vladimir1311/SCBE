@@ -2,17 +2,16 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace SituationCenterBackServer.Models.VoiceChatModels
 {
     public class Room
     {
-        private static byte lastClientId;
+        private static byte _lastClientId;
 
         public byte Id { get; }
 
-        private List<ApplicationUser> users;
+        private readonly List<ApplicationUser> _users;
 
         public string Name { get; set; }
 
@@ -21,39 +20,35 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
         public DateTime TimeOut { get; set; }
 
         [JsonIgnore]
-        public IEnumerable<ApplicationUser> Users => users;
+        public IEnumerable<ApplicationUser> Users => _users;
         public Room(ApplicationUser creater, byte id)
         {
-            users = new List<ApplicationUser> { creater };
-            creater.InRoomId = lastClientId++;
+            _users = new List<ApplicationUser> { creater };
+            creater.InRoomId = _lastClientId++;
             Id = id;
         }
 
         internal void AddUser(ApplicationUser user)
         {
-            users.Add(user);
-            user.InRoomId = lastClientId++;
+            _users.Add(user);
+            user.InRoomId = _lastClientId++;
         }
 
         internal void UserSended(IConnector connector, FromClientPack dataPack)
         {
-            var sender = users.FirstOrDefault(U => U.InRoomId == dataPack.ClientId);
-            dataPack.IP.Port = 15000;
-            if (sender.Adress == null)
-                sender.Adress = dataPack.IP;
-            users.Where(U => U.InRoomId != sender.InRoomId)
-                 .ForEach(U => connector.SendPack(new ToClientPack
-                 {
+            _users.WithOut(dataPack.User)
+                 .ForEach(_ => connector.SendPack(new ToClientPack
+                 {  
+                     User = dataPack.User,
                      PackType = PackType.Voice,
-                     ClientId = dataPack.ClientId,
                      Data = dataPack.VoiceRecord,
-                     IP = sender.Adress
                  }));
         }
 
         internal void RemoveUser(ApplicationUser user)
         {
-            users.Remove(user);
+            _users.Remove(user);
+            //TODO Усли пользователей нет - начать отсчет до сметри 
         }
     }
 }

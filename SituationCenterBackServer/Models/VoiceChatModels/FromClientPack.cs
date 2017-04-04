@@ -8,10 +8,8 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
 {
     public class FromClientPack
     {
-        public byte RoomId;
-        public byte ClientId;
+        public ApplicationUser User;
         public PackType PackType;
         public byte[] VoiceRecord;
-        public IPEndPoint IP;
     }
 }

@@ -42,14 +42,6 @@ namespace UDPTester
                 }
 
             }
-
-
-
-
-
-
-
-
             return;
             UdpClient receivingUdpClient = new UdpClient(11000);
             int total = 0;

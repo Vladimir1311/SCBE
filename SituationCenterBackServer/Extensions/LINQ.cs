@@ -11,5 +11,10 @@ namespace System.Linq
         {
             source.Select(E => { action(E); return E; }).Count();
         }
+
+        public static IEnumerable<T> WithOut<T>(this IEnumerable<T> source, T item)
+        {
+            return source.Where(I => !I.Equals(item));
+        }
     }
 }

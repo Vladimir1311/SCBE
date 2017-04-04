@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -16,22 +15,23 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace SituationCenterBackServer.Controllers
 {
     [Authorize]
-    public class UnrealAPIController : Controller
+    public class UnrealApiController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly ILogger<UnrealAPIController> _logger;
+        private readonly ILogger<UnrealApiController> _logger;
 
-        private UnrealAPIConfiguration _config;
-        private IRoomManager _roomManager;
+        private readonly UnrealAPIConfiguration _config;
+        private readonly IRoomManager _roomManager;
 
-        public UnrealAPIController(UserManager<ApplicationUser> userManager,
+        public UnrealApiController(UserManager<ApplicationUser> userManager,
             IOptions<UnrealAPIConfiguration> config,
             IRoomManager roomManager,
-            ILogger<UnrealAPIController> logger)
+            ILogger<UnrealApiController> logger)
         {
             _userManager = userManager;
             _config = config.Value;
@@ -48,6 +48,11 @@ namespace SituationCenterBackServer.Controllers
                 return ResponseData.ErrorRequest("not correct email or password");
             }
             var identity = await GetIdentity(model.Email, model.Password);
+            if (identity == null)
+            {
+                _logger.LogWarning("Не верные логин и/или пароль");
+                return ResponseData.ErrorRequest("not correct email or password");
+            }
             var now = DateTime.UtcNow;
             var jwt = new JwtSecurityToken(
                 issuer: AuthOptions.ISSUER,
@@ -59,7 +64,7 @@ namespace SituationCenterBackServer.Controllers
                     AuthOptions.GetSymmetricSecurityKey(),
                     SecurityAlgorithms.HmacSha256));
             var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
-            _logger.LogInformation($"Выдан токен {encodedJwt} на логин {model.Email}");
+                _logger.LogInformation($"Выдан токен {encodedJwt} на логин {model.Email}");
             return new GetTokenInfo()
             {
                 AccessToken = encodedJwt,
@@ -127,19 +132,21 @@ namespace SituationCenterBackServer.Controllers
         {
             var userId = _userManager.GetUserName(User);
             var currentUser = await _userManager.FindByNameAsync(userId);
-            if (_roomManager.RemoveFromRoom(currentUser))
-                return ResponseData.GoodResponse("Вы успещно вышли из комнаты");
-            else
-                return ResponseData.GoodResponse("Вы не состояли ни в какой комнате");
+            return ResponseData.GoodResponse(_roomManager.RemoveFromRoom(currentUser) ? "Вы успещно вышли из комнаты" : "Вы не состояли ни в какой комнате");
         }
 
 
 
         private async Task<ClaimsIdentity> GetIdentity(string email, string password)
         {
-            ApplicationUser user = await _userManager.FindByEmailAsync(email);
+            var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
                 return null;
+            if (!await _userManager.CheckPasswordAsync(user, password))
+            {
+                _logger.LogWarning("Некоррекнтый пароль");
+                return null;
+            }
             var claims = new List<Claim>
             {
                 new Claim(ClaimsIdentity.DefaultNameClaimType, user.Email),

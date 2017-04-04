@@ -15,21 +15,23 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
         private ILogger<RoomsManager> _logger;
         private ILoggerFactory _logFactory;
 
-        public RoomsManager(IOptions<UnrealAPIConfiguration> configs, ILogger<RoomsManager> logger, ILoggerFactory logFactory)
+        public RoomsManager(IOptions<UnrealAPIConfiguration> configs,
+            ILogger<RoomsManager> logger,
+            ILoggerFactory logFactory,
+            IConnector connector)
         {
-            _connector = new UdpConnector(configs.Value.Port, logFactory.CreateLogger<UdpConnector>());
+            _connector = connector;
             _connector.OnRecieveData += _connector_OnRecieveData;
+            _connector.SetBindToUser((userId, roomId) => rooms.FirstOrDefault(R => R.Id == roomId)?.Users.FirstOrDefault(U => U.InRoomId == userId));
             _connector.Start();
             _logger = logger;
             _logFactory = logFactory;
         }
 
-        private void _connector_OnRecieveData(FromClientPack DataPack)
+        private void _connector_OnRecieveData(FromClientPack dataPack)
         {
-            _logger.LogInformation($"Client {DataPack.ClientId} {DataPack.VoiceRecord.Length} bytes");
-            var targetRoom = rooms.FirstOrDefault(R => R.Id == DataPack.RoomId);
-            targetRoom?.UserSended(_connector, DataPack);
-            //_connector.SendPack(DataPack.IP, 15000, DataPack.VoiceRecord);
+            var targetRoom = rooms.FirstOrDefault(R => R.Users.Contains(dataPack.User));
+            targetRoom?.UserSended(_connector, dataPack);
         }
 
         public (Room room, byte clientId) CreateNewRoom(ApplicationUser creater, string name)
@@ -76,7 +78,7 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
 
         public bool RemoveFromRoom(ApplicationUser user)
         {
-            var targetRoom = rooms.FirstOrDefault(R => R.Users.Any(U => U.Id == user.Id));
+            var targetRoom = rooms.FirstOrDefault(R => R.Users.Contains(user));
             if (targetRoom == null) return false;
             targetRoom.RemoveUser(user);
             return true;

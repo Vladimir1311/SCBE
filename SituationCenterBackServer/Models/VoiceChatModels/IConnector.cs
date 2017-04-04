@@ -9,6 +9,6 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
         void Start();
         void Stop();
         void SendPack(ToClientPack pack);
-        void SendPack(IPEndPoint endpoint, int port, byte[] data);
+        void SetBindToUser(Func<byte, byte, ApplicationUser> findUserFunc);
     }
 }

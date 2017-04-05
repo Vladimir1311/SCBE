@@ -16,6 +16,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace SituationCenterBackServer.Controllers
 {
@@ -47,7 +48,8 @@ namespace SituationCenterBackServer.Controllers
                 _logger.LogWarning("Не переданы email и/или пароль");
                 return ResponseData.ErrorRequest("not correct email or password");
             }
-            var identity = await GetIdentity(model.Email, model.Password);
+            string id;
+            var (identity, userid) = await GetIdentity(model.Email, model.Password);
             if (identity == null)
             {
                 _logger.LogWarning("Не верные логин и/или пароль");
@@ -68,7 +70,8 @@ namespace SituationCenterBackServer.Controllers
             return new GetTokenInfo()
             {
                 AccessToken = encodedJwt,
-                Port = _config.Port
+                Port = _config.Port,
+                ForConnection = userid
             };
         }
         
@@ -137,26 +140,27 @@ namespace SituationCenterBackServer.Controllers
 
 
 
-        private async Task<ClaimsIdentity> GetIdentity(string email, string password)
+        private async Task<(ClaimsIdentity, string)> GetIdentity(string email, string password)
         {
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
-                return null;
+                return (null, null);
             if (!await _userManager.CheckPasswordAsync(user, password))
             {
                 _logger.LogWarning("Некоррекнтый пароль");
-                return null;
+                return (null, null);
             }
             var claims = new List<Claim>
             {
                 new Claim(ClaimsIdentity.DefaultNameClaimType, user.Email),
                 new Claim(ClaimsIdentity.DefaultRoleClaimType, "user")
             };
-            return new ClaimsIdentity(
+            return (new ClaimsIdentity(
                 claims,
                 "Token",
                 ClaimsIdentity.DefaultNameClaimType,
-                ClaimsIdentity.DefaultRoleClaimType);
+                ClaimsIdentity.DefaultRoleClaimType),
+                user.Id);
 
         }
     }

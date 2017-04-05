@@ -9,6 +9,7 @@ namespace SituationCenterBackServer.Models.VoiceChatModels.ResponseTypes
     {
         public string AccessToken { get; set; }
         public int Port { get; set; }
+        public string ForConnection { get; set; }
 
         public GetTokenInfo()
         {

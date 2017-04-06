@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
 
 namespace SituationCenterBackServer.Models.VoiceChatModels
 {
@@ -18,11 +19,12 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
         public RoomsManager(IOptions<UnrealAPIConfiguration> configs,
             ILogger<RoomsManager> logger,
             ILoggerFactory logFactory,
-            IConnector connector)
+            IConnector connector,
+            UserManager<ApplicationUser> usermanager)
         {
             _connector = connector;
             _connector.OnRecieveData += _connector_OnRecieveData;
-            _connector.SetBindToUser((userId, roomId) => rooms.FirstOrDefault(R => R.Id == roomId)?.Users.FirstOrDefault(U => U.InRoomId == userId));
+            _connector.SetBindToUser(userId => usermanager.Users.FirstOrDefault(user => user.Id == userId));
             _connector.Start();
             _logger = logger;
             _logFactory = logFactory;

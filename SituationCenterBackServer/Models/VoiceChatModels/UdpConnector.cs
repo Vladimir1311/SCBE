@@ -50,6 +50,11 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
             //udpClient.SendAsync(newData, newData.Length, pack.IP);
         }
 
+        public void SetBindToUser(Func<string, ApplicationUser> findUserFunc)
+        {
+            //throw new NotImplementedException();
+        }
+
         public void Stop()
         {
             //cts.Cancel();

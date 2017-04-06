@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -45,8 +46,8 @@ namespace SituationCenterBackServer
         {
             // Add framework services.
             services.AddDbContext<ApplicationDbContext>(options =>
-                //options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
-                options.UseSqlServer(Configuration.GetConnectionString("AzureConnection")));
+                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+                //options.UseSqlServer(Configuration.GetConnectionString("AzureConnection")));
             
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
@@ -104,13 +105,24 @@ namespace SituationCenterBackServer
                     ValidateIssuerSigningKey = true
                 }
             });
-
+            
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
+            InitiUsers(app.ApplicationServices);
+        }
+
+        private void InitiUsers(IServiceProvider serviceProvider)
+        {
+            var userManager = serviceProvider.GetService<UserManager<ApplicationUser>>();
+            userManager.CreateAsync(new ApplicationUser()
+            {
+                UserName = "maksalmak@gmail.com",
+                Email = "maksalmak@gmail.com"
+            }, "CaPOnidolov2_").Wait();
         }
     }
 }

@@ -15,6 +15,7 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
         private IConnector _connector;
         private ILogger<RoomsManager> _logger;
         private ILoggerFactory _logFactory;
+        private Dictionary<ApplicationUser, Room> _userToRoom;
 
         public RoomsManager(IOptions<UnrealAPIConfiguration> configs,
             ILogger<RoomsManager> logger,
@@ -24,10 +25,16 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
         {
             _connector = connector;
             _connector.OnRecieveData += _connector_OnRecieveData;
+            _connector.OnUserConnected += _connector_OnUserConnected;
             _connector.SetBindToUser(userId => usermanager.Users.FirstOrDefault(user => user.Id == userId));
             _connector.Start();
             _logger = logger;
             _logFactory = logFactory;
+        }
+
+        private void _connector_OnUserConnected(ApplicationUser user)
+        {
+            _userToRoom[user] = null;
         }
 
         private void _connector_OnRecieveData(FromClientPack dataPack)
@@ -47,6 +54,7 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
                 Name = name
             };
             rooms.Add(newRoom);
+            _userToRoom[creater] = newRoom;
             return (newRoom, creater.InRoomId);
             
         }
@@ -55,11 +63,7 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
         {
             return rooms.Where(R => func(R));
         }
-
-        public Room FirstOrDefault(Predicate<Room> func)
-        {
-            return rooms.FirstOrDefault(R => func(R));
-        }
+        
 
         public (Room room, byte clientId) JoinToRoom(ApplicationUser user, string roomName) =>
             JoinToRoom(user, R => R.Name == roomName);
@@ -75,6 +79,7 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
             if (calledRoom == null)
                 throw new Exception("Запрашиваемой комнаты не существует");
             calledRoom.AddUser(user);
+            _userToRoom[user] = calledRoom;
             return (calledRoom,user.InRoomId);
         }
 
@@ -83,6 +88,7 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
             var targetRoom = rooms.FirstOrDefault(R => R.Users.Contains(user));
             if (targetRoom == null) return false;
             targetRoom.RemoveUser(user);
+            _userToRoom[user] = null;
             return true;
         }
 

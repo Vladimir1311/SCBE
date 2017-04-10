@@ -15,6 +15,7 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
     {
 
         public event Action<FromClientPack> OnRecieveData;
+        public event Action<ApplicationUser> OnUserConnected;
 
 
         private readonly TcpListener _listener;
@@ -64,7 +65,7 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
                 _logger.LogWarning($"User {pack.User.Email} not connected ovet TCP");
                 return;
             }
-            var bytestoSend = new[] {pack.User.InRoomId, (byte) pack.PackType}.Concat(pack.Data).ToArray();
+            var bytestoSend = new[] { (byte)pack.PackType, pack.User.InRoomId,}.Concat(pack.Data).ToArray();
             tcpClient.GetStream().Write(bytestoSend, 0, bytestoSend.Length);
         }
         public void SetBindToUser(Func<string, ApplicationUser> findUserFunc)
@@ -107,6 +108,10 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
             }
             _logger.LogInformation($"Connected user {user.UserName}");
             _connectionForUsers[user] = client;
+            OnUserConnected(user);
+            byte[] bs = new byte[50000];
+            new Random().NextBytes(bs);
+            client.GetStream().Write(bs, 0, bs.Length);
             do
             {
                 readed = client.GetStream().ReadAsync(buffer, 0, buffer.Length, token).Result;

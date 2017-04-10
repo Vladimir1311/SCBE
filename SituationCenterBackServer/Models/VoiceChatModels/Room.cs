@@ -36,7 +36,7 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
 
         internal void UserSended(IConnector connector, FromClientPack dataPack)
         {
-            _users.WithOut(dataPack.User)
+            _users//.WithOut(dataPack.User)
                  .ForEach(_ => connector.SendPack(new ToClientPack
                  {  
                      User = dataPack.User,

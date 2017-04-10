@@ -19,6 +19,7 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
         private ILogger<UdpConnector> _logger;
 
         public event Action<FromClientPack> OnRecieveData;
+        public event Action<ApplicationUser> OnUserConnected;
 
         public UdpConnector(int port, ILogger<UdpConnector> logger)
         {

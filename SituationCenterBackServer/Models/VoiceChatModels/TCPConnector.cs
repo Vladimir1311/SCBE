@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using SituationCenterBackServer.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -65,7 +66,7 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
                 _logger.LogWarning($"User {pack.User.Email} not connected ovet TCP");
                 return;
             }
-            var bytestoSend = new[] { (byte)pack.PackType, pack.User.InRoomId,}.Concat(pack.Data).ToArray();
+            var bytestoSend = CreateHeader(pack.Data.Length + 2).Concat(new[] { (byte)pack.PackType, pack.User.InRoomId,}.Concat(pack.Data)).ToArray();
             tcpClient.GetStream().WriteAsync(bytestoSend, 0, bytestoSend.Length).Wait();
         }
         public void SetBindToUser(Func<string, ApplicationUser> findUserFunc)
@@ -85,13 +86,12 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
                 token.ThrowIfCancellationRequested();
             }
         }
-        private void HandleClient(TcpClient client, CancellationToken token)
+        private async void HandleClient(TcpClient client, CancellationToken token)
         {
             _logger.LogInformation($"Client {client.Client.RemoteEndPoint}. Waiting for initial message.");
             var buffer = new byte[1024 * 8];
-            client.ReceiveTimeout = 360000;
-            var readed = client.GetStream().ReadAsync(buffer, 0, buffer.Length).Result;
-            if (readed < 3 || buffer[0] != (byte) PackType.Auth)
+            var readed = await client.ReadPacketAsync(buffer, 0, buffer.Length, token);
+            if (buffer[0] != (byte) PackType.Auth)
             {
                 //TODO Оповещение пользователя о проблеме
                 _logger.LogWarning("Client not sended auth message!!");
@@ -112,13 +112,13 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
             OnUserConnected(user);
             do
             {
-                readed = client.GetStream().ReadAsync(buffer, 0, buffer.Length, token).Result;
+                readed = await client.ReadPacketAsync(buffer, 0, buffer.Length, token);
                 _logger.LogDebug($"Recieved {readed} bytes from {client.Client.RemoteEndPoint}, {user.UserName}");
                 OnRecieveData?.Invoke(new FromClientPack()
                 {
                     User = user,
                     PackType = (PackType)buffer[0],
-                    VoiceRecord = buffer.Skip(1).Take(readed-1).ToArray()
+                    Data = buffer.Skip(1).Take(readed-1).ToArray()
                 });
             } while (readed != 0 && !token.IsCancellationRequested);
             client.Dispose();
@@ -126,6 +126,9 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
             token.ThrowIfCancellationRequested();
         }
 
-        
+        private byte[] CreateHeader(int value)
+        {
+            return new byte[] { (byte)(value >> 8), (byte)(value)};
+        }
     } 
 }

@@ -10,6 +10,6 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
     {
         public ApplicationUser User;
         public PackType PackType;
-        public byte[] VoiceRecord;
+        public byte[] Data;
     }
 }

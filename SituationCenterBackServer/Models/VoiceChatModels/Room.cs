@@ -34,14 +34,14 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
             user.InRoomId = _lastClientId++;
         }
 
-        internal void UserSended(IConnector connector, FromClientPack dataPack)
+        internal void UserSpeak(IConnector connector, ApplicationUser user, byte[] voiceData)
         {
             _users//.WithOut(dataPack.User)
                  .ForEach(_ => connector.SendPack(new ToClientPack
                  {  
-                     User = _users.First(u => dataPack.User.Id == u.Id),
+                     User = _users.First(u => user.Id == u.Id),
                      PackType = PackType.Voice,
-                     Data = dataPack.VoiceRecord,
+                     Data = voiceData,
                  }));
         }
 

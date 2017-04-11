@@ -39,9 +39,14 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
 
         private void _connector_OnRecieveData(FromClientPack dataPack)
         {
-            _logger.LogDebug($"Recieved {dataPack.VoiceRecord.Length} bytes with {dataPack.PackType} from {dataPack.User.Email}");
-            var targetRoom = rooms.FirstOrDefault(R => R.Users.Contains(dataPack.User));
-            targetRoom?.UserSended(_connector, dataPack);
+            _logger.LogDebug($"Recieved {dataPack.Data.Length} bytes with {dataPack.PackType} from {dataPack.User.Email}");
+            switch (dataPack.PackType)
+            {
+                case PackType.Voice:
+                    var targetRoom = rooms.FirstOrDefault(R => R.Users.Contains(dataPack.User));
+                    targetRoom?.UserSpeak(_connector, dataPack.User, dataPack.Data);
+                    break;
+            }
         }
 
         public (Room room, byte clientId) CreateNewRoom(ApplicationUser creater, string name)

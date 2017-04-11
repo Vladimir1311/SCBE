@@ -89,6 +89,7 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
         {
             _logger.LogInformation($"Client {client.Client.RemoteEndPoint}. Waiting for initial message.");
             var buffer = new byte[1024 * 8];
+            client.ReceiveTimeout = 360000;
             var readed = client.GetStream().ReadAsync(buffer, 0, buffer.Length).Result;
             if (readed < 3 || buffer[0] != (byte) PackType.Auth)
             {

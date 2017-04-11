@@ -77,15 +77,16 @@ namespace SituationCenterBackServer.Controllers
         
         public ResponseData GetRoomsData()
         {
-            _logger.LogInformation("Запрошен вывод списка комнат");
+            _logger.LogInformation("Request for Room list");
             return new GetRoomsInfo() { Rooms = _roomManager.Rooms};
         }
-
         public async Task<ResponseData> CreateRoom(string name)
         {
+            if (String.IsNullOrEmpty(name) || String.IsNullOrWhiteSpace(name))
+                return ResponseData.ErrorRequest("Неправильное имя комнаты");
             try
             {
-                _logger.LogInformation("Запрошено создание комнаты с именем " + name);
+                _logger.LogInformation("Request for creating room with name " + name);
                 var userId= _userManager.GetUserName(User);
                 var currentUser = await _userManager.FindByNameAsync(userId);
                 var (room, clientId) = _roomManager.CreateNewRoom(currentUser, name);
@@ -97,7 +98,7 @@ namespace SituationCenterBackServer.Controllers
             }
             catch(Exception ex)
             {
-                _logger.LogWarning($"Ошибка при создании комнаты {ex.Message}");
+                _logger.LogWarning($"Error while creating room {ex.Message}");
                 return ResponseData.ErrorRequest(ex.Message);
             }
         }

@@ -71,6 +71,7 @@ namespace SituationCenterBackServer
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
+            //loggerFactory.AddDebug(LogLevel.Trace);
             loggerFactory.AddProvider(new SocketLoggerProvider());
             if (env.IsDevelopment())
             {

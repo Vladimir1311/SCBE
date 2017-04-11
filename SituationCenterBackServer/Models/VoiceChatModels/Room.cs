@@ -39,7 +39,7 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
             _users//.WithOut(dataPack.User)
                  .ForEach(_ => connector.SendPack(new ToClientPack
                  {  
-                     User = dataPack.User,
+                     User = _users.First(u => dataPack.User.Id == u.Id),
                      PackType = PackType.Voice,
                      Data = dataPack.VoiceRecord,
                  }));

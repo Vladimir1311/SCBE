@@ -15,7 +15,7 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
         private IConnector _connector;
         private ILogger<RoomsManager> _logger;
         private ILoggerFactory _logFactory;
-        private Dictionary<ApplicationUser, Room> _userToRoom;
+        private Dictionary<ApplicationUser, Room> _userToRoom = new Dictionary<ApplicationUser, Room>();
 
         public RoomsManager(IOptions<UnrealAPIConfiguration> configs,
             ILogger<RoomsManager> logger,
@@ -39,6 +39,7 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
 
         private void _connector_OnRecieveData(FromClientPack dataPack)
         {
+            _logger.LogDebug($"Recieved {dataPack.VoiceRecord.Length} bytes with {dataPack.PackType} from {dataPack.User.Email}");
             var targetRoom = rooms.FirstOrDefault(R => R.Users.Contains(dataPack.User));
             targetRoom?.UserSended(_connector, dataPack);
         }

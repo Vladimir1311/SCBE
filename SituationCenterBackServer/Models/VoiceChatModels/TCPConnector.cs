@@ -109,9 +109,7 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
             _logger.LogInformation($"Connected user {user.UserName}");
             _connectionForUsers[user] = client;
             OnUserConnected(user);
-            byte[] bs = new byte[50000];
-            new Random().NextBytes(bs);
-            client.GetStream().Write(bs, 0, bs.Length);
+            client.ReceiveTimeout = 1000;
             do
             {
                 readed = client.GetStream().ReadAsync(buffer, 0, buffer.Length, token).Result;
@@ -120,10 +118,11 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
                 {
                     User = user,
                     PackType = (PackType)buffer[0],
-                    VoiceRecord = buffer.Skip(1).Take(readed).ToArray()
+                    VoiceRecord = buffer.Skip(1).Take(readed-1).ToArray()
                 });
             } while (readed != 0 && !token.IsCancellationRequested);
             client.Dispose();
+            _logger.LogInformation($"User {user.Email} disconnected ");
             token.ThrowIfCancellationRequested();
         }
 

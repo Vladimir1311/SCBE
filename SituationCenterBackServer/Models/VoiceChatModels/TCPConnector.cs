@@ -109,7 +109,6 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
             _logger.LogInformation($"Connected user {user.UserName}");
             _connectionForUsers[user] = client;
             OnUserConnected(user);
-            client.ReceiveTimeout = 1000;
             do
             {
                 readed = client.GetStream().ReadAsync(buffer, 0, buffer.Length, token).Result;

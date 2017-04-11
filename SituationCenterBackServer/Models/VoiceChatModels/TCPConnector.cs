@@ -66,7 +66,7 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
                 return;
             }
             var bytestoSend = new[] { (byte)pack.PackType, pack.User.InRoomId,}.Concat(pack.Data).ToArray();
-            tcpClient.GetStream().Write(bytestoSend, 0, bytestoSend.Length);
+            tcpClient.GetStream().WriteAsync(bytestoSend, 0, bytestoSend.Length).Wait();
         }
         public void SetBindToUser(Func<string, ApplicationUser> findUserFunc)
         {

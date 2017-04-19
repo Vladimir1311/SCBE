@@ -12,7 +12,7 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
         (Room room, byte clientId) JoinToRoom(ApplicationUser user, string roomName);
         (Room room, byte clientId) JoinToRoom(ApplicationUser user, byte roomId);
 
-        bool RemoveFromRoom(ApplicationUser user);
+        bool RemoveFromRoom(string UserId);
 
         IEnumerable<Room> Rooms { get; }
 

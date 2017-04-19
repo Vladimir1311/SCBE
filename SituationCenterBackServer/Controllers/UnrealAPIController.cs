@@ -17,10 +17,12 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using SituationCenterBackServer.Filters;
 
 namespace SituationCenterBackServer.Controllers
 {
     [Authorize]
+    [TypeFilter(typeof(JsonExceptionsFilterAttribute))]
     public class UnrealApiController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;
@@ -132,13 +134,18 @@ namespace SituationCenterBackServer.Controllers
                 throw;
             }
         }
-        public async Task<ResponseData> LeaveTheRoom()
+        public ResponseData LeaveTheRoom()
         {
-            var userId = _userManager.GetUserName(User);
-            var currentUser = await _userManager.FindByNameAsync(userId);
-            return ResponseData.GoodResponse(_roomManager.RemoveFromRoom(currentUser) ? "Вы успещно вышли из комнаты" : "Вы не состояли ни в какой комнате");
+            var userId = _userManager.GetUserId(User);
+            return ResponseData.GoodResponse(_roomManager.RemoveFromRoom(userId) ? "Вы успешно вышли из комнаты" : "Вы не состояли ни в какой комнате");
         }
-
+        [AllowAnonymous]
+        public ResponseData TestFilter(int id)
+        {
+            if (id == 1)
+                throw new Exception("ExceptionInfo");
+            return ResponseData.GoodResponse("Good response");
+        }
 
 
         private async Task<(ClaimsIdentity, string)> GetIdentity(string email, string password)

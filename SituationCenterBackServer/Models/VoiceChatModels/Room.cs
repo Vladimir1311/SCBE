@@ -7,13 +7,13 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
 {
     public class Room
     {
-        private static byte _lastClientId;
-
         public byte Id { get; }
+        public string Name { get; set; }
 
+
+        private static byte _lastClientId;
         private readonly List<ApplicationUser> _users;
 
-        public string Name { get; set; }
 
         //TODO сделать умерщвтление комнаты после ухода пользователей
         [JsonIgnore]

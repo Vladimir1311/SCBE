@@ -89,12 +89,15 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
             return (calledRoom,user.InRoomId);
         }
 
-        public bool RemoveFromRoom(ApplicationUser user)
+        public bool RemoveFromRoom(string UserId)
         {
-            var targetRoom = rooms.FirstOrDefault(R => R.Users.Contains(user));
-            if (targetRoom == null) return false;
-            targetRoom.RemoveUser(user);
-            _userToRoom[user] = null;
+            var targetPair = _userToRoom.FirstOrDefault(Pair => Pair.Key.Id == UserId);
+            if (targetPair.Key == null)
+                return false;
+            if (targetPair.Value == null)
+                return false;
+            targetPair.Value.RemoveUser(targetPair.Key);
+            _userToRoom[targetPair.Key] = null;
             return true;
         }
 

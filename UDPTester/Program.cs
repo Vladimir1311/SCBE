@@ -1,5 +1,6 @@
 ﻿
 
+using Castle.DynamicProxy;
 using System;
 using System.Linq;
 using System.Net;
@@ -13,6 +14,15 @@ namespace UDPTester
     {
         static void Main(string[] args)
         {
+            var proxy = new ProxyGenerator()
+                .CreateInterfaceProxyWithoutTarget<IRemoteWorker>(new ProxyClass());
+            Console.WriteLine($"Result is : {proxy.Value(4.5)}");
+
+            var alalala = Activator.CreateInstance<IRemoteWorker>();
+
+
+
+            return;
 	        Console.WriteLine("Start");
             if (args.Length != 0)
             {

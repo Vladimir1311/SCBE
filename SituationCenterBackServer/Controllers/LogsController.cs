@@ -5,9 +5,11 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using SituationCenterBackServer.Logging;
+using Microsoft.AspNetCore.Authorization;
 
 namespace SituationCenterBackServer.Controllers
 {
+    [Authorize]
     public class LogsController : Controller
     {
         ILogger<LogsController> _logger;

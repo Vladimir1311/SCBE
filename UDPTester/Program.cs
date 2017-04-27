@@ -14,79 +14,79 @@ namespace UDPTester
     {
         static void Main(string[] args)
         {
-            var proxy = new ProxyGenerator()
-                .CreateInterfaceProxyWithoutTarget<IRemoteWorker>(new ProxyClass());
-            Console.WriteLine($"Result is : {proxy.Value(4.5)}");
 
-            var alalala = Activator.CreateInstance<IRemoteWorker>();
-
-
-
-            return;
-	        Console.WriteLine("Start");
+            //Console.WriteLine("Start");
+            //   if (args.Length != 0)
+            //   {
+            //       Console.WriteLine("Get port " + args[0]);
+            //       TcpListener listener = new TcpListener(IPAddress.Any, int.Parse(args[0]));
+            //       listener.Start();
+            //       Console.WriteLine("Started listening");
+            //       while (true)
+            //       {
+            //           var client = listener.AcceptTcpClientAsync().Result;
+            //           Console.WriteLine($"Client {client.Client.RemoteEndPoint.ToString()}. Waiting for data.");
+            //           byte[] buffer = new byte[1024];
+            //           client.ReceiveTimeout = 50;
+            //           try
+            //           {
+            //               var readed = client.GetStream().Read(buffer, 0, buffer.Length);
+            //               Console.WriteLine($"Readed {readed} bytes");
+            //               client.GetStream().Write(buffer, 0, readed);
+            //               Console.WriteLine($"Sended test {readed} bytes");
+            //           }
+            //           catch (Exception ex)
+            //           {
+            //               Console.WriteLine(ex.Message);
+            //           } 
+            //           Console.WriteLine("Closing connection.");
+            //           client.Dispose();
+            //       }
+            //   }
+            //   return;
             if (args.Length != 0)
             {
-                Console.WriteLine("Get port " + args[0]);
-                TcpListener listener = new TcpListener(IPAddress.Any, int.Parse(args[0]));
-                listener.Start();
-                Console.WriteLine("Started listening");
+                UdpClient receivingUdpClient = new UdpClient(int.Parse(args[0]));
+                Console.WriteLine($"Start listenung on {args[0]} port");
                 while (true)
                 {
-                    var client = listener.AcceptTcpClientAsync().Result;
-                    Console.WriteLine($"Client {client.Client.RemoteEndPoint.ToString()}. Waiting for data.");
-                    byte[] buffer = new byte[1024];
-                    client.ReceiveTimeout = 50;
                     try
                     {
-                        var readed = client.GetStream().Read(buffer, 0, buffer.Length);
-                        Console.WriteLine($"Readed {readed} bytes");
-                        client.GetStream().Write(buffer, 0, readed);
-                        Console.WriteLine($"Sended test {readed} bytes");
+                        var recieve = receivingUdpClient.ReceiveAsync().Result;
+                        Console.WriteLine($"Receive {recieve.Buffer.Length} bytes from {recieve.RemoteEndPoint.Address}:{recieve.RemoteEndPoint.Port}");
+                        byte[] receiveBytes = recieve.Buffer;
+                        receivingUdpClient.SendAsync(receiveBytes, receiveBytes.Length, recieve.RemoteEndPoint).Wait();
+                        Console.WriteLine($"Sended bytes back");
                     }
-                    catch (Exception ex)
+                    catch (Exception e)
                     {
-                        Console.WriteLine(ex.Message);
-                    } 
-                    Console.WriteLine("Closing connection.");
-                    client.Dispose();
+                        Console.WriteLine(e.ToString());
+                    }
                 }
-
             }
-            return;
-            UdpClient receivingUdpClient = new UdpClient(11000);
-            int total = 0;
-            receivingUdpClient.SendAsync(new byte[] { 1, 2, 3, 4, 5}, 5, "13.84.55.187", 12000);
-            //return;
-            DateTime last = DateTime.Now;
-            while (true)
+            else
             {
-                try
+                IPEndPoint point = new IPEndPoint(new IPAddress(new byte[] { 127, 0, 0, 1}), 11000);
+                UdpClient sender = new UdpClient();
+                while (true)
                 {
-                    if ((DateTime.Now - last).Seconds > 1)
-                    {
-                        Console.WriteLine($"{total} bytes per second");
-                        last = DateTime.Now;
-                        total = 0;
-                    }
-                    var recieve = receivingUdpClient.ReceiveAsync().Result;
-
-                    Byte[] receiveBytes = recieve.Buffer;
-                    total += receiveBytes.Length;
-                    //for (int i = 0; i < receiveBytes.Length - 1; i +=  2)
-                    //{
-                    //    var sred = (receiveBytes[i] + receiveBytes[i + 1]) / 2;
-                    //    receiveBytes[i] = (byte)sred;
-                    //    receiveBytes[i + 1] = (byte)sred;
-                    //}
-                    var a = receivingUdpClient.SendAsync(receiveBytes, receiveBytes.Length, recieve.RemoteEndPoint.Address.ToString(), 15000).Result;
-                    //Console.WriteLine(a);
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e.ToString());
+                    Console.WriteLine("Write line for send");
+                    var toSend = Encoding.UTF8.GetBytes(Console.ReadLine());
+                    sender.SendAsync(toSend, toSend.Length, point).Wait();
+                    var receive = sender.ReceiveAsync().Result;
+                    Console.WriteLine($"Receive {receive.Buffer.Length} bytes from {receive.RemoteEndPoint.Address}:{receive.RemoteEndPoint.Port}");
                 }
             }
 
         }
     }
 }
+            //var proxy = new ProxyGenerator()
+            //    .CreateInterfaceProxyWithoutTarget<IRemoteWorker>(new ProxyClass());
+            //Console.WriteLine($"Result is : {proxy.Value(4.5)}");
+
+            //var alalala = Activator.CreateInstance<IRemoteWorker>();
+
+
+
+            //return;

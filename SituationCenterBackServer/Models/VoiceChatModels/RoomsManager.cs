@@ -25,11 +25,10 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
             UserManager<ApplicationUser> usermanager)
         {
             _stableConnector = stableConnector;
-            _stableConnector.OnRecieveData += _connector_OnRecieveData;
-            _stableConnector.OnUserConnected += _connector_OnUserConnected;
+            _stableConnector.OnRecieveData += OnReceiceDataFromUser;
+            _stableConnector.OnUserConnected += OnUserConnected;
             _stableConnector.SetBindToUser(userId => usermanager.Users.FirstOrDefault(user => user.Id == userId));
             _stableConnector.Start();
-
 
             _nonStableConnector = nonStableConnector;
             _nonStableConnector.OnRecieveData += P =>
@@ -45,19 +44,19 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
             _logger = logger;
         }
 
-        private void _connector_OnUserConnected(ApplicationUser user)
+        private void OnUserConnected(ApplicationUser user)
         {
             _userToRoom[user] = null;
         }
 
-        private void _connector_OnRecieveData(FromClientPack dataPack)
+        private void OnReceiceDataFromUser(FromClientPack dataPack)
         {
             _logger.LogDebug($"Recieved {dataPack.Data.Length} bytes with {dataPack.PackType} from {dataPack.User.Email}");
             switch (dataPack.PackType)
             {
                 case PackType.Voice:
-                    var targetRoom = rooms.FirstOrDefault(R => R.Users.Contains(dataPack.User));
-                    targetRoom?.UserSpeak(_stableConnector, dataPack.User, dataPack.Data);
+                    if (_userToRoom.TryGetValue(dataPack.User, out var room))
+                        room.UserSpeak(_nonStableConnector, dataPack.User, dataPack.Data);
                     break;
             }
         }

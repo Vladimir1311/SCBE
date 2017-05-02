@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Net;
 
-namespace SituationCenterBackServer.Models.VoiceChatModels
+namespace SituationCenterBackServer.Models.VoiceChatModels.Connectors
 {
     public interface IConnector
     {

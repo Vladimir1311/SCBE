@@ -17,6 +17,7 @@ using Microsoft.IdentityModel.Tokens;
 using SituationCenterBackServer.Models.TokenAuthModels;
 using SituationCenterBackServer.Models.VoiceChatModels;
 using SituationCenterBackServer.Logging;
+using SituationCenterBackServer.Models.VoiceChatModels.Connectors;
 
 namespace SituationCenterBackServer
 {
@@ -63,7 +64,8 @@ namespace SituationCenterBackServer
 
             services.Configure<UnrealAPIConfiguration>(Configuration.GetSection("UnrealAPI"));
             services.AddSingleton<IRoomManager, RoomsManager>();
-            services.AddSingleton<IConnector, TCPConnector>();
+            services.AddSingleton<IConnector, UdpConnector>();
+            services.AddSingleton<IStableConnector, TCPConnector>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -2,6 +2,7 @@
 {
     public class UnrealAPIConfiguration
     {
-        public int Port { get; set; }
+        public int TcpPort { get; set; }
+        public int UdpPort { get; set; }
     }
 }

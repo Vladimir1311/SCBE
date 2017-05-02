@@ -1,20 +1,35 @@
 ﻿
 
 using Castle.DynamicProxy;
+using CCF;
+using Common;
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace UDPTester
 {
-    class Program
+    public class Program
     {
+        public interface ILOL
+        {
+            void Val();
+            string WithReturn();
+        }
         static void Main(string[] args)
         {
 
+            var a = GlobalProxy.CreateFor<ILOL>();
+            a.Val();
+            Console.WriteLine(a.WithReturn());
+            Console.WriteLine("The end");
+
+            return;
             //Console.WriteLine("Start");
             //   if (args.Length != 0)
             //   {
@@ -44,6 +59,8 @@ namespace UDPTester
             //       }
             //   }
             //   return;
+            Class1.Main(new string[0]);
+            return;
             if (args.Length != 0)
             {
                 UdpClient receivingUdpClient = new UdpClient(int.Parse(args[0]));
@@ -66,15 +83,24 @@ namespace UDPTester
             }
             else
             {
-                IPEndPoint point = new IPEndPoint(new IPAddress(new byte[] { 127, 0, 0, 1}), 11000);
+                IPEndPoint point = new IPEndPoint(new IPAddress(new byte[] { 52, 187, 24, 208 }), 11000);
                 UdpClient sender = new UdpClient();
+                int i = 40000;
+                int totalbytes = 0;
+                Stopwatch timer = new Stopwatch();
+                timer.Start();
                 while (true)
                 {
-                    Console.WriteLine("Write line for send");
-                    var toSend = Encoding.UTF8.GetBytes(Console.ReadLine());
-                    sender.SendAsync(toSend, toSend.Length, point).Wait();
+                    Console.WriteLine($"Sending {i} ");
+                    sender.SendAsync(new byte[i], i, point).Wait();
                     var receive = sender.ReceiveAsync().Result;
-                    Console.WriteLine($"Receive {receive.Buffer.Length} bytes from {receive.RemoteEndPoint.Address}:{receive.RemoteEndPoint.Port}");
+                    if (receive.Buffer.Length == i)
+                        Console.WriteLine("S");
+                    else
+                        Console.WriteLine("F");
+                    totalbytes += i + receive.Buffer.Length;
+                    Console.WriteLine($"In/Out : {totalbytes / (timer.Elapsed.Seconds == 0 ? 1 : timer.Elapsed.Seconds)} bytes per second");
+                    i += 10;
                 }
             }
 

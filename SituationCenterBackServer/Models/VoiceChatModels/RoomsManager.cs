@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
+using SituationCenterBackServer.Models.VoiceChatModels.Connectors;
 
 namespace SituationCenterBackServer.Models.VoiceChatModels
 {
@@ -12,24 +13,36 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
     {
         private byte lastRoomId = 0;
         private List<Room> rooms = new List<Room>();
-        private IConnector _connector;
+        private IStableConnector _stableConnector;
         private ILogger<RoomsManager> _logger;
-        private ILoggerFactory _logFactory;
         private Dictionary<ApplicationUser, Room> _userToRoom = new Dictionary<ApplicationUser, Room>();
+        private IConnector _nonStableConnector;
 
         public RoomsManager(IOptions<UnrealAPIConfiguration> configs,
             ILogger<RoomsManager> logger,
-            ILoggerFactory logFactory,
-            IConnector connector,
+            IStableConnector stableConnector,
+            IConnector nonStableConnector,
             UserManager<ApplicationUser> usermanager)
         {
-            _connector = connector;
-            _connector.OnRecieveData += _connector_OnRecieveData;
-            _connector.OnUserConnected += _connector_OnUserConnected;
-            _connector.SetBindToUser(userId => usermanager.Users.FirstOrDefault(user => user.Id == userId));
-            _connector.Start();
+            _stableConnector = stableConnector;
+            _stableConnector.OnRecieveData += _connector_OnRecieveData;
+            _stableConnector.OnUserConnected += _connector_OnUserConnected;
+            _stableConnector.SetBindToUser(userId => usermanager.Users.FirstOrDefault(user => user.Id == userId));
+            _stableConnector.Start();
+
+
+            _nonStableConnector = nonStableConnector;
+            _nonStableConnector.OnRecieveData += P =>
+                _nonStableConnector.SendPack(new ToClientPack
+                {
+                    Data = P.Data,
+                    User = P.User,
+                    PackType = P.PackType
+                });
+            _nonStableConnector.SetBindToUser(userId => usermanager.Users.FirstOrDefault(user => user.Id == userId));
+            _nonStableConnector.Start();
+
             _logger = logger;
-            _logFactory = logFactory;
         }
 
         private void _connector_OnUserConnected(ApplicationUser user)
@@ -44,7 +57,7 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
             {
                 case PackType.Voice:
                     var targetRoom = rooms.FirstOrDefault(R => R.Users.Contains(dataPack.User));
-                    targetRoom?.UserSpeak(_connector, dataPack.User, dataPack.Data);
+                    targetRoom?.UserSpeak(_stableConnector, dataPack.User, dataPack.Data);
                     break;
             }
         }

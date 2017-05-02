@@ -10,9 +10,9 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace SituationCenterBackServer.Models.VoiceChatModels
+namespace SituationCenterBackServer.Models.VoiceChatModels.Connectors
 {
-    public class TCPConnector : IConnector
+    public class TCPConnector : IStableConnector
     {
 
         public event Action<FromClientPack> OnRecieveData;
@@ -30,7 +30,7 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
         public TCPConnector(ILogger<TCPConnector> logger, IOptions<UnrealAPIConfiguration> options)
         {
             _logger = logger;
-            _listener = new TcpListener(IPAddress.Any, options.Value.Port);
+            _listener = new TcpListener(IPAddress.Any, options.Value.TcpPort);
         }
 
         public void Start()

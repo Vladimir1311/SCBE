@@ -16,5 +16,18 @@ namespace System.Linq
         {
             return source.Where(I => !I.Equals(item));
         }
+
+        public static string SumStrings<T>(this IEnumerable<T> source)
+        {
+            return source.Select(Item => Item.ToString())
+                .Aggregate((P, N) => $"{P}, {N}");
+        }
+
+        public static IEnumerable<T> Concat<T>(this T value, IEnumerable<T> collecion)
+        {
+            yield return value;
+            foreach (var item in collecion)
+                yield return item;
+        }
     }
 }

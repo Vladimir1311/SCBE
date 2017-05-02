@@ -45,9 +45,9 @@ namespace SituationCenterBackServer.Models.VoiceChatModels.Connectors
 
         public void SendPack(ToClientPack pack)
         {
-            _logger.LogInformation($"Sending {pack.Data.Length} bytes to {pack.User.UserName}");
             if (_userEndPoints.TryGetValue(pack.User, out var endPoint))
             {
+                _logger.LogInformation($"Sending {pack.Data.Length+1} bytes to {pack.User.UserName}");
                 udpClient.SendAsync(((byte)pack.PackType).Concat(pack.Data).ToArray(),
                     pack.Data.Length + 1,
                     endPoint);
@@ -89,7 +89,7 @@ namespace SituationCenterBackServer.Models.VoiceChatModels.Connectors
                 OnRecieveData?.Invoke(new FromClientPack
                 {
                     User = user,
-                    PackType = (PackType)recieve.Buffer[2],
+                    PackType = (PackType)recieve.Buffer[0],
                     Data = buffer.Skip(1).Take(buffer.Length - 1).ToArray()
                 });
             }

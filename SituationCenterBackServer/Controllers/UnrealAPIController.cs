@@ -72,7 +72,8 @@ namespace SituationCenterBackServer.Controllers
             return new GetTokenInfo()
             {
                 AccessToken = encodedJwt,
-                Port = _config.TcpPort,
+                TcpPort = _config.TcpPort,
+                UdpPort = _config.UdpPort,
                 ForConnection = userid
             };
         }

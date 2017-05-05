@@ -27,18 +27,20 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
             _stableConnector = stableConnector;
             _stableConnector.OnRecieveData += OnReceiceDataFromUser;
             _stableConnector.OnUserConnected += OnUserConnected;
-            _stableConnector.SetBindToUser(userId => usermanager.Users.FirstOrDefault(user => user.Id == userId));
-            _stableConnector.Start();
+            _stableConnector.SetBindToUser(userId =>
+            {
+                lock(usermanager)
+                    return usermanager.Users.FirstOrDefault(user => user.Id == userId);
+            });
+            _stableConnector.Start();   
 
             _nonStableConnector = nonStableConnector;
-            _nonStableConnector.OnRecieveData += P =>
-                _nonStableConnector.SendPack(new ToClientPack
-                {
-                    Data = P.Data,
-                    User = P.User,
-                    PackType = P.PackType
-                });
-            _nonStableConnector.SetBindToUser(userId => usermanager.Users.FirstOrDefault(user => user.Id == userId));
+            _nonStableConnector.OnRecieveData += OnReceiceDataFromUser;
+            _nonStableConnector.SetBindToUser(userId =>
+            {
+                lock (usermanager)
+                    return usermanager.Users.FirstOrDefault(user => user.Id == userId);
+            });
             _nonStableConnector.Start();
 
             _logger = logger;

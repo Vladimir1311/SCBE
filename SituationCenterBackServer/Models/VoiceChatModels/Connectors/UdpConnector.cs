@@ -45,15 +45,16 @@ namespace SituationCenterBackServer.Models.VoiceChatModels.Connectors
 
         public void SendPack(ToClientPack pack)
         {
-            if (_userEndPoints.TryGetValue(pack.User, out var endPoint))
+            if (!_userEndPoints.TryGetValue(pack.Receiver, out var endPoint))
             {
-                _logger.LogInformation($"Sending {pack.Data.Length+1} bytes to {pack.User.UserName}");
-                udpClient.SendAsync(((byte)pack.PackType).Concat(pack.Data).ToArray(),
-                    pack.Data.Length + 1,
-                    endPoint);
+                _logger.LogWarning($"Try send info to User {pack.Receiver.UserName}, but this user not connected via UDP");
                 return;
             }
-            _logger.LogWarning($"Try send info to User {pack.User.UserName}, but this user not connected via udp");
+            var packedData = ((byte)pack.PackType).Concat(pack.Data).ToArray();
+            _logger.LogInformation($"Sending {packedData.Length} bytes to {pack.Receiver.UserName}, first elements: {packedData[0]} {packedData[1]} {packedData[2]}");
+            udpClient.SendAsync(packedData,
+                packedData.Length,
+                endPoint);
         }
 
         public void Stop() => cts.Cancel();

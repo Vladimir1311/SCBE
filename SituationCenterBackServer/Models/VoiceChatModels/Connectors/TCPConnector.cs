@@ -55,18 +55,18 @@ namespace SituationCenterBackServer.Models.VoiceChatModels.Connectors
 
         public void SendPack(ToClientPack pack)
         {
-            if (!_connectionForUsers.ContainsKey(pack.User))
+            if (!_connectionForUsers.ContainsKey(pack.Receiver))
             {
-                _logger.LogWarning("User " + pack.User.Email + " not found in TCP connections");
+                _logger.LogWarning("User " + pack.Receiver.Email + " not found in TCP connections");
                 return;
             }
-            var tcpClient = _connectionForUsers[pack.User];
+            var tcpClient = _connectionForUsers[pack.Receiver];
             if (!tcpClient.Connected)
             {
-                _logger.LogWarning($"User {pack.User.Email} not connected ovet TCP");
+                _logger.LogWarning($"User {pack.Receiver.Email} not connected ovet TCP");
                 return;
             }
-            var bytestoSend = CreateHeader(pack.Data.Length + 2).Concat(new[] { (byte)pack.PackType, pack.User.InRoomId,}.Concat(pack.Data)).ToArray();
+            var bytestoSend = CreateHeader(pack.Data.Count() + 2).Concat(((byte)pack.PackType).Concat(pack.Data)).ToArray();
             tcpClient.GetStream().WriteAsync(bytestoSend, 0, bytestoSend.Length).Wait();
         }
         public void SetBindToUser(Func<string, ApplicationUser> findUserFunc)

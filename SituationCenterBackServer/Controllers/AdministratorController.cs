@@ -1,31 +1,38 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using SituationCenterBackServer.Logging;
 using Microsoft.AspNetCore.Authorization;
+using SituationCenterBackServer.Logging;
+using SituationCenterBackServer.Models.VoiceChatModels;
 
 namespace SituationCenterBackServer.Controllers
 {
-    [Authorize]
-    public class LogsController : Controller
+    [Authorize(Roles = "Administrator")]
+    public class AdministratorController : Controller
     {
-        ILogger<LogsController> _logger;
-        public LogsController(ILogger<LogsController> logger)
+        private IRoomManager _roomsManager;
+
+        public AdministratorController(IRoomManager roomsManager)
         {
-            _logger = logger;
+            _roomsManager = roomsManager;
         }
         public IActionResult Index()
         {
             return View();
+            
         }
 
-        public async Task<IActionResult> Connect()
+        public async Task<IActionResult> Rooms()
+        {
+            return View(_roomsManager.Rooms);
+        }
+
+        public async Task<IActionResult> Logs()
         {
             if (!HttpContext.WebSockets.IsWebSocketRequest)
-                return Content("Адрес для WebSocket подключения");
+                return View();
             var socket = await HttpContext.WebSockets.AcceptWebSocketAsync();
             await SocketLoggerProvider.AddSocketAsync(socket);
             return new EmptyResult();

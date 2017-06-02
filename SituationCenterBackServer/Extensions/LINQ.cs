@@ -29,5 +29,13 @@ namespace System.Linq
             foreach (var item in collecion)
                 yield return item;
         }
+
+        public static IEnumerable<T> Add<T>(this IEnumerable<T> collection, int count, Func<T> creator)
+        {
+            foreach (T item in collection)
+                yield return item;
+            for (int i = 0; i < count; i++)
+                yield return creator();
+        }
     }
 }

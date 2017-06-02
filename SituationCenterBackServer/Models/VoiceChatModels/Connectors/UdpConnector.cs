@@ -66,24 +66,15 @@ namespace SituationCenterBackServer.Models.VoiceChatModels.Connectors
                 var recieve = await udpClient.ReceiveAsync();
                 var buffer = recieve.Buffer;
                 _logger.LogInformation($"Received {recieve.Buffer.Length} bytes from {recieve.RemoteEndPoint.Address.ToString()}, Adress family : {recieve.RemoteEndPoint.AddressFamily}, port : {recieve.RemoteEndPoint.Port}");
-                var user = _userEndPoints.FirstOrDefault(Pair => Pair.Value.Equals(recieve.RemoteEndPoint)).Key;
+                if (IsAuth(buffer))
+                {
+                    Auth(recieve.Buffer, recieve.RemoteEndPoint);
+                    continue;
+                }
+                var user = GetSenderFromEndPoint(recieve.RemoteEndPoint);
                 if (user == null)
                 {
                     _logger.LogInformation($"Not authorized user with Address : {recieve.RemoteEndPoint}");
-                    if (buffer[0] != (byte)PackType.Auth)
-                    {
-                        _logger.LogWarning($"User try send information without authorization : {recieve.RemoteEndPoint} Data : {recieve.Buffer.SumStrings()}");
-                        continue;
-                    }
-                    var userToken = Encoding.UTF8.GetString(buffer, 1, buffer.Length - 1);
-                    user = _findUserFunc(userToken);
-                    if (user == null)
-                    {
-                        _logger.LogWarning($"User sended unreal token: {recieve.Buffer.SumStrings().Replace(", ", "")} {recieve.RemoteEndPoint}");
-                        continue;
-                    }
-                    _userEndPoints[user] = recieve.RemoteEndPoint;
-                    OnUserConnected?.Invoke(user);
                     continue;
                 }
 
@@ -100,6 +91,23 @@ namespace SituationCenterBackServer.Models.VoiceChatModels.Connectors
         public void SetBindToUser(Func<string, ApplicationUser> findUserFunc)
         {
             _findUserFunc = findUserFunc;
+        }
+
+        private bool IsAuth(byte[] buffer) => buffer[0] == (byte)PackType.Auth;
+
+        private string ReadToken(byte[] buffer) => Encoding.UTF8.GetString(buffer, 1, buffer.Length - 1);
+
+        private ApplicationUser GetSenderFromEndPoint(IPEndPoint endpoint) =>
+            _userEndPoints.FirstOrDefault(Pair => Pair.Value.Equals(endpoint)).Key;
+
+        private void Auth(byte[] buffer, IPEndPoint endpoint)
+        {
+            var userToken = ReadToken(buffer);
+            var user = _findUserFunc(userToken);
+            if (user == null)
+                _logger.LogWarning($"User sended unreal token: {buffer.SumStrings().Replace(", ", "")} {endpoint}");
+            _userEndPoints[user] = endpoint;
+            OnUserConnected?.Invoke(user);
         }
     }
 }

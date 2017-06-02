@@ -90,26 +90,11 @@ namespace SituationCenterBackServer.Models.VoiceChatModels.Connectors
         {
             _logger.LogInformation($"Client {client.Client.RemoteEndPoint}. Waiting for initial message.");
             var buffer = new byte[1024 * 8];
-            var readed = await client.ReadPacketAsync(buffer, 0, buffer.Length, token);
-            if (buffer[0] != (byte) PackType.Auth)
-            {
-                //TODO Оповещение пользователя о проблеме
-                _logger.LogWarning("Client not sended auth message!!");
-                client.Dispose();
+            if (!Auth(client, token, out var user))
                 return;
-            }
-            var userId = Encoding.UTF8.GetString(buffer, 1, readed - 1);
-            var user = _findUserFunc(userId);
-            if (user == null)
-            {
-                //TODO Оповещение пользователя о проблеме
-                _logger.LogWarning($"Recieved pack with unreal parameters: userId: {userId}");
-                client.Dispose();
-                return;
-            }
-            _logger.LogInformation($"Connected user {user.UserName}");
-            _connectionForUsers[user] = client;
             OnUserConnected(user);
+            
+            int readed = 0;
             do
             {
                 readed = await client.ReadPacketAsync(buffer, 0, buffer.Length, token);
@@ -125,6 +110,33 @@ namespace SituationCenterBackServer.Models.VoiceChatModels.Connectors
             _logger.LogInformation($"User {user.Email} disconnected ");
             token.ThrowIfCancellationRequested();
         }
+
+        private bool Auth(TcpClient client, CancellationToken token, out ApplicationUser user)
+        {
+            user = null;
+            var buffer = new byte[1024 * 8];
+            var readed = client.ReadPacketAsync(buffer, 0, buffer.Length, token).Result;
+            if (buffer[0] != (byte)PackType.Auth)
+            {
+                //TODO Оповещение пользователя о проблеме
+                _logger.LogWarning("Client not sended auth message!!");
+                client.Dispose();
+                return false;
+            }
+            var userId = Encoding.UTF8.GetString(buffer, 1, readed - 1);
+            user = _findUserFunc(userId);
+            if (user == null)
+            {
+                //TODO Оповещение пользователя о проблеме
+                _logger.LogWarning($"Recieved pack with unreal parameters: userId: {userId}");
+                client.Dispose();
+                return false;
+            }
+            _logger.LogInformation($"Connected user {user.UserName}");
+            _connectionForUsers[user] = client;
+            return true;
+        }
+
 
         private byte[] CreateHeader(int value)
         {

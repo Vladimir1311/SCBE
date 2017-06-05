@@ -10,9 +10,10 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>DocsToPictures.Tests</RootNamespace>
     <AssemblyName>DocsToPictures.Tests</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -102,7 +103,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DocsToPictures\DocsToPictures.csproj">
-      <Project>{B14AB4E7-309D-416F-8949-F5BBBF848A5B}</Project>
+      <Project>{b14ab4e7-309d-416f-8949-f5bbbf848a5b}</Project>
       <Name>DocsToPictures</Name>
     </ProjectReference>
   </ItemGroup>

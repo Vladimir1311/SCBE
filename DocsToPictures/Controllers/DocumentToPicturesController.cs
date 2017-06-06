@@ -1,4 +1,5 @@
-﻿using DocsToPictures.Models;
+﻿using Common.ResponseObjects;
+using DocsToPictures.Models;
 using System;
 using System.Collections.Generic;
 using System.Drawing.Imaging;
@@ -12,6 +13,7 @@ using System.Web.Mvc;
 
 namespace DocsToPictures.Controllers
 {
+    
     public class DocumentToPicturesController : Controller
     {
         private static DocumentProcessor docsProcessor = DocumentProcessor.Instance;
@@ -21,33 +23,28 @@ namespace DocsToPictures.Controllers
             return View();
         }
 
-        public JsonResult GetInfo(Guid docId)
+        public ResponseBase GetInfo(Guid docId)
         {
             try
             {
                 var doc = docsProcessor.GetDocument(docId);
-                return Json(new
+                return ResponseBase.GoodResponse(new
                 {
-                    Succ = true,
                     Progress = doc.Progress,
                     AvailablePages = doc.PagesPaths
                         .Where(P => P != null)
                         .Select((P, N) => N + 1)
 
-                }, JsonRequestBehavior.AllowGet);
+                });
             }
             catch (Exception ex)
             {
-                return Json(new
-                {
-                    Succ = false,
-                    Message = ex.Message
-                }, JsonRequestBehavior.AllowGet);
+                return ResponseBase.BadResponse(ex.Message);
             }
         }
 
         [HttpPost]
-        public JsonResult Load(HttpPostedFileBase file)
+        public ResponseBase Load(HttpPostedFileBase file)
         {
             // Verify that the user selected a file
             if (file != null && file.ContentLength > 0)
@@ -71,23 +68,14 @@ namespace DocsToPictures.Controllers
                 }
                 catch(Exception ex)
                 {
-                    return Json(new
-                    {
-                        Succ = false,
-                        Message = ex.Message
-                    });
+                    return ResponseBase.BadResponse(ex.Message);
                 }
-                return Json(new
+                return ResponseBase.GoodResponse(new
                 {
-                    Succ = true,
                     PackId = folderId
                 });
             }
-            return Json(new
-            {
-                Succ = false
-            });
-            
+            return ResponseBase.BadResponse("Not valid file");
         }
         
 

@@ -234,6 +234,7 @@
     <Compile Include="Models\Document.cs" />
     <Compile Include="Models\DocumentProcessor.cs" />
     <Compile Include="Models\DocumentHandler.cs" />
+    <Compile Include="Models\ResponseBase.cs" />
     <Compile Include="Models\SupportedFormatAttribyte.cs" />
     <Compile Include="Models\WordDocsHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -269,6 +270,7 @@
     <Content Include="ApplicationInsights.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Include="Properties\PublishProfiles\ForOffice - Web Deploy.pubxml" />
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
     <Content Include="Scripts\jquery-1.10.2.js" />
     <Content Include="Scripts\jquery-1.10.2.min.js" />

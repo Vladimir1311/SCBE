@@ -9,6 +9,7 @@ using System.Net;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Web;
+using System.Web.Http;
 using System.Web.Mvc;
 
 namespace DocsToPictures.Controllers
@@ -33,9 +34,7 @@ namespace DocsToPictures.Controllers
                     Progress = doc.Progress,
                     AvailablePages = doc.PagesPaths
                         .Where(P => P != null)
-                        .Select((P, N) => N + 1)
-
-                });
+                        .Select((P, N) => N + 1)});
             }
             catch (Exception ex)
             {
@@ -43,7 +42,34 @@ namespace DocsToPictures.Controllers
             }
         }
 
-        [HttpPost]
+        public ActionResult Download(Guid docId, int pageNum)
+        {
+            try
+            {
+                var doc = docsProcessor.GetDocument(docId);
+                if (pageNum <= 0 || doc.PagesPaths.Length < pageNum || doc.PagesPaths[pageNum] == null)
+                {
+                    HttpResponseMessage message = new HttpResponseMessage(HttpStatusCode.BadRequest)
+                    {
+                        Content = new StringContent($"Page {pageNum} is not valid or not ready")
+                    };
+                    throw new HttpResponseException(message);
+                }
+                return File(doc.PagesPaths[pageNum],
+                    System.Net.Mime.MediaTypeNames.Application.Octet,
+                    $"Page {pageNum}.png");
+            }
+            catch (Exception ex)
+            {
+                HttpResponseMessage message = new HttpResponseMessage(HttpStatusCode.BadRequest)
+                {
+                    Content = new StringContent(ex.Message)
+                };
+                throw new HttpResponseException(message);
+            }
+        }
+
+        [System.Web.Mvc.HttpPost]
         public ResponseBase Load(HttpPostedFileBase file)
         {
             // Verify that the user selected a file

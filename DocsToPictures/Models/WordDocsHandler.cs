@@ -53,7 +53,7 @@ namespace DocsToPictures.Models
         }
         private static int Percents(double done, double all)
         {
-            return (int)Math.Floor((3d / 20d) * 100);
+            return (int)Math.Floor((done / all) * 100);
         }
         private static Image Transparent2Color(Image bmp1, Color target)
         {

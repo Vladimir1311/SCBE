@@ -1,0 +1,25 @@
+﻿
+@{
+    ViewData["Title"] = "Index";
+}
+@model SituationCenterBackServer.Models.StorageModels.DirectoryContent 
+    @*Говорим, что отображаем такую модель на страничке*@
+<h2>Index</h2>
+<h3>Папки</h3>
+    @*Используем циклы прямо в разметке, цикл отработает, и добавит необходимую HTML разметку
+    Таким образом, ты пишешь разметку, не думая, какие именно данные тебе придут.
+    Страничка сама отрисовывается каждый раз.*@
+@*Справка по этому инструменту : https://docs.microsoft.com/en-us/aspnet/core/mvc/views/razor*@
+<ol>
+    @foreach(var directory in Model.Directories)
+    {
+        <li>@directory.Name</li>
+    }
+</ol>
+<h3>Файлы</h3>
+<ol>
+    @foreach (var file in Model.Files)
+    {
+        <li>@file.Name</li>
+    }
+</ol>

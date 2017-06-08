@@ -38,6 +38,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Views\Logs\" />
+    <Folder Include="Views\Storage\" />
   </ItemGroup>
 
 </Project>

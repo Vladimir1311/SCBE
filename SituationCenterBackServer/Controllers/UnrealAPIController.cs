@@ -15,8 +15,6 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using SituationCenterBackServer.Filters;
 
 namespace SituationCenterBackServer.Controllers
@@ -50,7 +48,6 @@ namespace SituationCenterBackServer.Controllers
                 _logger.LogWarning("Не переданы email и/или пароль");
                 return ResponseData.ErrorRequest("not correct email or password");
             }
-            string id;
             var (identity, userid) = await GetIdentity(model.Email, model.Password);
             if (identity == null)
             {

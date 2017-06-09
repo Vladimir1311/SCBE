@@ -25,7 +25,7 @@ namespace SituationCenterBackServer.Filters
         }
         public void OnException(ExceptionContext context)
         {
-            _logger.LogWarning(new EventId(eventId), context.Exception,
+            _logger.LogWarning(new EventId(eventId++), context.Exception,
                 JsonConvert.SerializeObject(new
                 {
                     Action = context.ActionDescriptor.DisplayName

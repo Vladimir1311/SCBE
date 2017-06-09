@@ -22,7 +22,7 @@ namespace SituationCenterBackServer.Extensions
                 }
                 return readed;
             }
-            catch(Exception ex)
+            catch
             {
                 return 0;
             }

@@ -8,9 +8,10 @@ namespace Common.ResponseObjects
     {
         public bool Success { get; set; }
         public string Message { get; set; }
+        public object Object { get; set; }
 
+        public ResponseBase() {}
         public ResponseBase(bool success) =>
-        
             Success = success;
         
         public ResponseBase(bool success, string message) : this(success) =>

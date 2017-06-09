@@ -18,6 +18,7 @@ using SituationCenterBackServer.Models.TokenAuthModels;
 using SituationCenterBackServer.Models.VoiceChatModels;
 using SituationCenterBackServer.Logging;
 using SituationCenterBackServer.Models.VoiceChatModels.Connectors;
+using SituationCenterBackServer.Models.StorageModels;
 
 namespace SituationCenterBackServer
 {
@@ -66,6 +67,9 @@ namespace SituationCenterBackServer
             services.AddSingleton<IRoomManager, RoomsManager>();
             services.AddSingleton<IConnector, UdpConnector>();
             services.AddSingleton<IStableConnector, TCPConnector>();
+
+            //Storage
+            services.AddTransient<IStorageManager, InProjectSavingStorageManager>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

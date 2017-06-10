@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using SituationCenterBackServer.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,7 +28,7 @@ namespace SituationCenterBackServer.Models.StorageModels
             return GetContent(wantedPath);
         }
 
-        public void Save(string userId, string pathToFolder, IFormFile file)
+        public File Save(string userId, string pathToFolder, IFormFile file)
         {
             var folderPath = GetDirectoryPathIfCorrect(userId, pathToFolder);
             var fileName = NameFromPath(file.FileName);
@@ -36,6 +37,11 @@ namespace SituationCenterBackServer.Models.StorageModels
             {
                 file.CopyTo(filestream);
             }
+            return GetFileInfo(filePath);
+        }
+        public IO.Stream GetFileStream(string localPath)
+        {
+            return IO.File.OpenRead(IO.Path.Combine(storageRoot, localPath));
         }
 
         private DirectoryContent GetContent(string path)
@@ -43,10 +49,29 @@ namespace SituationCenterBackServer.Models.StorageModels
             return new DirectoryContent
             {
                 Directories = IO.Directory.GetDirectories(path)
-                  .Select(P => new Directory { Name = NameFromPath(P) }),
+                  .Select(P => new Directory { Name = NameFromPath(P) }).ToList(),
                 Files = IO.Directory.GetFiles(path)
-                    .Select(P => new File { Name = NameFromPath(P)})
+                    .Select(GetFileInfo).ToList()
             };
+        }
+
+        private File GetFileInfo(string pathToFile)
+        {
+            var localPath = LocalPath(pathToFile);
+            return new File()
+            {
+                Name = NameFromPath(pathToFile),
+                State = FileReadyState.Unknow,
+                Path = localPath
+            };
+        }
+
+        private string LocalPath(string absolutePath)
+        {
+            string localPath = absolutePath.Substring(absolutePath.IndexOf("ForStorageFolder"));
+            localPath = localPath.Substring("ForStorageFolder\\".Length);
+            
+            return localPath;
         }
 
         private string NameFromPath(string path)
@@ -73,5 +98,6 @@ namespace SituationCenterBackServer.Models.StorageModels
                 IO.Directory.CreateDirectory(wantedPath);
             return wantedPath;
         }
+
     }
 }

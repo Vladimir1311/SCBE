@@ -21,7 +21,7 @@
 <ol>
     @foreach (var file in Model.Files)
     {
-        <li>@file.Name</li>
+        <li>@file.Name  @file.State @file.Progress%</li>
     }
 </ol>
 <h3>Добавить в эту директорию</h3>

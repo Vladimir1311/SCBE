@@ -1,14 +1,15 @@
 ﻿using SituationCenterBackServer.Models.DocumentHandlingModels;
 using SituationCenterBackServer.Models.StorageModels;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace SituationCenterBackServer.Services
 {
     public interface IDocumentHandlerService
     {
-        DocimentAddedResponse SendDocumentToHandle(File document);
+        FileReadyState StateOf(string pathToFile);
+        bool IsSupported(string format);
+        (bool success, string message) SendDocumentToHandle(File document);
+        void FillStates(IEnumerable<File> files);
+        void FillState(File file);
     }
 }

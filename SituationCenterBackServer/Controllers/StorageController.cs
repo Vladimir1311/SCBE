@@ -8,6 +8,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using SituationCenterBackServer.Models;
 using Microsoft.AspNetCore.Http;
+using System.Net.Http;
+using System.IO;
+using SituationCenterBackServer.Services;
 
 namespace SituationCenterBackServer.Controllers
 {
@@ -17,11 +20,15 @@ namespace SituationCenterBackServer.Controllers
     {
         private readonly IStorageManager storageManager;
         private readonly UserManager<ApplicationUser> userManager;
+        private IDocumentHandlerService docHandler;
 
-        public StorageController(IStorageManager storageManager, UserManager<ApplicationUser> userManager)
+        public StorageController(IStorageManager storageManager,
+            UserManager<ApplicationUser> userManager,
+            IDocumentHandlerService docHandler)
         {
             this.storageManager = storageManager;
             this.userManager = userManager;
+            this.docHandler = docHandler;
         }
 
 
@@ -30,14 +37,20 @@ namespace SituationCenterBackServer.Controllers
 
             pathToFolder = pathToFolder ?? "";
             string userId = GetUserId();
-            return View(storageManager.GetContentInFolder(userId, pathToFolder));
+            var content = storageManager.GetContentInFolder(userId, pathToFolder);
+            docHandler.FillStates(content.Files);
+            return View(content);
         }
 
         public IActionResult Add(string pathToFolder, IFormFile file)
         {
             pathToFolder = pathToFolder ?? "";
             string userId = GetUserId();
-            storageManager.Save(userId, pathToFolder, file);
+            var savedfile = storageManager.Save(userId, pathToFolder, file);
+            //TODO handle errors with sendind doc!!!
+            if (docHandler.IsSupported(Path.GetExtension(savedfile.Name)))
+                docHandler.SendDocumentToHandle(savedfile);
+            docHandler.FillState(savedfile);
             return RedirectToAction("index");
         }
 

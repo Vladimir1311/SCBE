@@ -19,6 +19,7 @@ using SituationCenterBackServer.Models.VoiceChatModels;
 using SituationCenterBackServer.Logging;
 using SituationCenterBackServer.Models.VoiceChatModels.Connectors;
 using SituationCenterBackServer.Models.StorageModels;
+using SituationCenterBackServer.Models.Options;
 
 namespace SituationCenterBackServer
 {
@@ -64,12 +65,16 @@ namespace SituationCenterBackServer
 
 
             services.Configure<UnrealAPIConfiguration>(Configuration.GetSection("UnrealAPI"));
+            services.Configure<DocumentsHandlerConfiguration>(Configuration.GetSection("DocumentsHandler"));
+
+
             services.AddSingleton<IRoomManager, RoomsManager>();
             services.AddSingleton<IConnector, UdpConnector>();
             services.AddSingleton<IStableConnector, TCPConnector>();
+            services.AddSingleton<IDocumentHandlerService, DocumentsHandler>();
 
             //Storage
-            services.AddTransient<IStorageManager, InProjectSavingStorageManager>();
+            services.AddSingleton<IStorageManager, InProjectSavingStorageManager>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

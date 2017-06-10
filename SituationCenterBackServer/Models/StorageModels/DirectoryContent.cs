@@ -7,7 +7,7 @@ namespace SituationCenterBackServer.Models.StorageModels
 {
     public class DirectoryContent
     {
-        public IEnumerable<Directory> Directories { get; set; }
-        public IEnumerable<File> Files { get; set; }
+        public List<Directory> Directories { get; set; }
+        public List<File> Files { get; set; }
     }
 }

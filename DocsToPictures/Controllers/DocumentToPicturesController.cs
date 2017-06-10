@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.Http;
@@ -76,7 +77,8 @@ namespace DocsToPictures.Controllers
             if (file != null && file.ContentLength > 0)
             {
                 // extract only the filename
-                var fileName = Path.GetFileName(file.FileName);
+                var prepare = file.FileName.TryToGetOriginalFileName();
+                var fileName = Path.GetFileName(prepare);
                 // store the file inside ~/App_Data/uploads folder
                 Guid folderId = Guid.NewGuid();
                 var folderPath = Server.MapPath("~\\App_Data\\uploads");

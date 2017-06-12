@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using SituationCenterBackServer.Models;
 using Microsoft.AspNetCore.Http;
 using System.Net.Http;
-using System.IO;
+using IO = System.IO;
 using SituationCenterBackServer.Services;
 
 namespace SituationCenterBackServer.Controllers
@@ -46,11 +46,18 @@ namespace SituationCenterBackServer.Controllers
         {
             pathToFolder = pathToFolder ?? "";
             string userId = GetUserId();
-            var savedfile = storageManager.Save(userId, pathToFolder, file);
+            File savedFile;
+            if (docHandler.IsSupported(IO.Path.GetExtension(file.FileName)))
+            {
+                savedFile = storageManager.SaveDocument(userId, pathToFolder, file);
+                docHandler.SendDocumentToHandle(savedFile);
+            }
+            else
+            {
+                savedFile = storageManager.Save(userId, pathToFolder, file);
+            }
             //TODO handle errors with sendind doc!!!
-            if (docHandler.IsSupported(Path.GetExtension(savedfile.Name)))
-                docHandler.SendDocumentToHandle(savedfile);
-            docHandler.FillState(savedfile);
+            docHandler.FillState(savedFile);
             return RedirectToAction("index");
         }
 

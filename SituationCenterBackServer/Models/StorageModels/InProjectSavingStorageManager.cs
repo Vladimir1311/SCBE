@@ -39,20 +39,57 @@ namespace SituationCenterBackServer.Models.StorageModels
             }
             return GetFileInfo(filePath);
         }
+        public File SaveDocument(string userId, string pathToFolder, IFormFile file)
+        {
+            var folderPath = GetDirectoryPathIfCorrect(userId, pathToFolder);
+            var fileName = NameFromPath(file.FileName);
+            var fileFolderPath = IO.Path.Combine(folderPath, fileName);
+            IO.Directory.CreateDirectory(fileFolderPath);
+            var filePath = IO.Path.Combine(fileFolderPath, fileName);
+            using (var filestream = IO.File.Create(filePath))
+            {
+                file.CopyTo(filestream);
+            }
+            return GetDocumentInfo(filePath);
+        }
         public IO.Stream GetFileStream(string localPath)
         {
-            return IO.File.OpenRead(IO.Path.Combine(storageRoot, localPath));
+            var targetPath = IO.Path.Combine(storageRoot, localPath);
+            if (IO.Directory.Exists(targetPath))
+            {
+                var docName = NameFromPath(localPath);
+                return IO.File.OpenRead(
+                    IO.Path.Combine(targetPath, docName));
+                   
+            }
+            else
+                return IO.File.OpenRead(targetPath);
         }
 
         private DirectoryContent GetContent(string path)
         {
+            var folders = IO.Directory.GetDirectories(path)
+                .Select(P => (name: NameFromPath(P), path: P))
+                .ToLookup(N => N.name.Contains('.'));
+
             return new DirectoryContent
             {
-                Directories = IO.Directory.GetDirectories(path)
-                  .Select(P => new Directory { Name = NameFromPath(P) }).ToList(),
+                Directories = folders[false]
+                    .Select(N => new Directory { Name = N.name })
+                    .ToList(),
+
                 Files = IO.Directory.GetFiles(path)
-                    .Select(GetFileInfo).ToList()
+                    .Concat(folders[true]
+                            .Select(P => P.path))
+                    .Select(GetFileInfo)
+                    .ToList()
             };
+        }
+
+        private File GetDocumentInfo(string pathToDoc)
+        {
+            pathToDoc = pathToDoc.Substring(0, pathToDoc.LastIndexOf('\\'));
+            return GetFileInfo(pathToDoc);
         }
 
         private File GetFileInfo(string pathToFile)

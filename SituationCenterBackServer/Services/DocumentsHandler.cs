@@ -89,7 +89,6 @@ namespace SituationCenterBackServer.Services
             document.State = FileReadyState.InQueue;
             handlingFiles[document.Path] = document;
             return (response.Success, response.Message);
-
         }
 
         public FileReadyState StateOf(string pathToFile)
@@ -107,7 +106,7 @@ namespace SituationCenterBackServer.Services
         {
             try
             {
-
+                
                 var files = handlingFiles.Values.ToList();
                 logger.LogInformation($"Getted {files.Count} files");
                 foreach (var file in files)

@@ -12,5 +12,6 @@ namespace SituationCenterBackServer.Models.StorageModels
         DirectoryContent GetContentInFolder(string ownerId, string pathToFolder);
         File Save(string userId, string pathToFolder, IFormFile fileToSave);
         Stream GetFileStream(string localPath);
+        File SaveDocument(string userId, string pathToFolder, IFormFile file);
     }
 }

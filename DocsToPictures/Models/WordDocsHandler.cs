@@ -18,6 +18,7 @@ namespace DocsToPictures.Models
         protected override void Handle()
         {
             var wordApp = new Application();
+            wordApp.Visible = true;
             Document neededDoc = null;
             while (documentsStream.TryDequeue(out neededDoc))
             {
@@ -47,9 +48,9 @@ namespace DocsToPictures.Models
                     }
                 }
 
-                doc.Close();
+                doc.Close(Type.Missing, Type.Missing, Type.Missing);
             }
-            wordApp.Quit();
+            wordApp.Quit(Type.Missing, Type.Missing, Type.Missing);
         }
         private static int Percents(double done, double all)
         {

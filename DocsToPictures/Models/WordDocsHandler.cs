@@ -47,8 +47,8 @@ namespace DocsToPictures.Models
 
                     }
                 }
-
-                doc.Close(Type.Missing, Type.Missing, Type.Missing);
+                object doNotSaveChanges = WdSaveOptions.wdDoNotSaveChanges;
+                doc.Close(ref doNotSaveChanges, Type.Missing, Type.Missing);
             }
             wordApp.Quit(Type.Missing, Type.Missing, Type.Missing);
         }

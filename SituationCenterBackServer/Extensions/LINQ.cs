@@ -37,5 +37,13 @@ namespace System.Linq
             for (int i = 0; i < count; i++)
                 yield return creator();
         }
+
+        public static void AnyInsert<T>(this List<T> list, int index, T item)
+        {
+            if (list.Count >= index)
+                for (int i = list.Count; i <= index + 1; i++)
+                    list.Add(default(T));
+            list.Insert(index, item);
+        }
     }
 }

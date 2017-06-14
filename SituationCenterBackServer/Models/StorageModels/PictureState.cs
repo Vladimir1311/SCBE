@@ -5,10 +5,10 @@ using System.Threading.Tasks;
 
 namespace SituationCenterBackServer.Models.StorageModels
 {
-    public interface IStorageEntity
+    public enum PictureState
     {
-        string Id { get; set; }
-        string Name { get; set; }
-        string Path { get; set; }
+        Handling,
+        Downloading,
+        Ready
     }
 }

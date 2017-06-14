@@ -4,6 +4,7 @@ using SituationCenterBackServer.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using IO = System.IO;
 
@@ -89,7 +90,14 @@ namespace SituationCenterBackServer.Models.StorageModels
         private File GetDocumentInfo(string pathToDoc)
         {
             pathToDoc = pathToDoc.Substring(0, pathToDoc.LastIndexOf('\\'));
-            return GetFileInfo(pathToDoc);
+            var file = GetFileInfo(pathToDoc);
+            var pictures = IO.Directory.GetFiles(pathToDoc)
+                .Select(P => new Picture { Name = NameFromPath(P), Path = P, State = PictureState.Ready })
+                .Where(P => Regex.IsMatch(P.Name, @"\d+\..*"))
+                .Select(P => new { Picture = P, Number = int.Parse(Regex.Match(P.Name, @"\d+").Value) });
+            foreach (var picObj in pictures)
+                file.Pictures.AnyInsert(picObj.Number, picObj.Picture);
+            return file;
         }
 
         private File GetFileInfo(string pathToFile)

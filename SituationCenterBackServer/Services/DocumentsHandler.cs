@@ -17,6 +17,8 @@ namespace SituationCenterBackServer.Services
 {
     public class DocumentsHandler : IDocumentHandlerService
     {
+        public event Action<(string filePath, int pageNum)> OnPageDone;
+
         private Timer docsUpdater;
         private HttpClient httpClient;
         private readonly DocumentsHandlerConfiguration options;
@@ -38,6 +40,8 @@ namespace SituationCenterBackServer.Services
             };
             docsUpdater = new Timer(UpdateHandledDocuments, null, 1000, 1000);
         }
+
+        
 
         public void FillState(File file)
         {
@@ -90,11 +94,12 @@ namespace SituationCenterBackServer.Services
             handlingFiles[document.Path] = document;
             return (response.Success, response.Message);
         }
-
-        public FileReadyState StateOf(string pathToFile)
+        public IO.Stream GetPicture(string filePath, int pageNum)
         {
-            return FileReadyState.Ready;
-            throw new NotImplementedException();
+            using (HttpClient client = new HttpClient() { BaseAddress = new Uri(options.EndPoint) })
+            {
+                throw new NotImplementedException();
+            }
         }
 
         private ConcurrentDictionary<string, File> GetfilesIsHandling()
@@ -106,7 +111,6 @@ namespace SituationCenterBackServer.Services
         {
             try
             {
-                
                 var files = handlingFiles.Values.ToList();
                 logger.LogInformation($"Getted {files.Count} files");
                 foreach (var file in files)
@@ -125,9 +129,16 @@ namespace SituationCenterBackServer.Services
                     if (response.Object.Progress == 100)
                         file.State = FileReadyState.Ready;
                     file.Progress = response.Object.Progress;
+                    foreach(var num in response.Object.AvailablePages)
+                    {
+                        if (file.Pictures.Count > num)
+                            continue;
+                        file.Pictures.AnyInsert(num, new Picture { State = PictureState.Handling });
+                    }
                 }
             }
             catch { }
         }
+
     }
 }

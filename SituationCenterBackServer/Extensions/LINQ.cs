@@ -38,12 +38,12 @@ namespace System.Linq
                 yield return creator();
         }
 
-        public static void AnyInsert<T>(this List<T> list, int index, T item)
+        public static void AnySet<T>(this List<T> list, int index, T item)
         {
-            if (list.Count >= index)
-                for (int i = list.Count; i <= index + 1; i++)
-                    list.Add(default(T));
-            list.Insert(index, item);
+
+            while (list.Count - 1 < index)
+                list.Add(default(T));
+            list[index] = item;
         }
     }
 }

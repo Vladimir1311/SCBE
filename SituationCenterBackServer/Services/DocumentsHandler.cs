@@ -17,7 +17,7 @@ namespace SituationCenterBackServer.Services
 {
     public class DocumentsHandler : IDocumentHandlerService
     {
-        public event Action<(string filePath, int pageNum)> OnPageDone;
+        public event Action<File> NewPagesAvailable;
 
         private Timer docsUpdater;
         private HttpClient httpClient;
@@ -38,7 +38,7 @@ namespace SituationCenterBackServer.Services
             {
                 BaseAddress = new Uri(this.options.EndPoint)
             };
-            docsUpdater = new Timer(UpdateHandledDocuments, null, 1000, 1000);
+            docsUpdater = new Timer(UpdateHandledDocuments, null, 1000, -1);
         }
 
         
@@ -94,13 +94,7 @@ namespace SituationCenterBackServer.Services
             handlingFiles[document.Path] = document;
             return (response.Success, response.Message);
         }
-        public IO.Stream GetPicture(string filePath, int pageNum)
-        {
-            using (HttpClient client = new HttpClient() { BaseAddress = new Uri(options.EndPoint) })
-            {
-                throw new NotImplementedException();
-            }
-        }
+        
 
         private ConcurrentDictionary<string, File> GetfilesIsHandling()
         {
@@ -111,6 +105,7 @@ namespace SituationCenterBackServer.Services
         {
             try
             {
+                Begin:
                 var files = handlingFiles.Values.ToList();
                 logger.LogInformation($"Getted {files.Count} files");
                 foreach (var file in files)
@@ -129,16 +124,37 @@ namespace SituationCenterBackServer.Services
                     if (response.Object.Progress == 100)
                         file.State = FileReadyState.Ready;
                     file.Progress = response.Object.Progress;
-                    foreach(var num in response.Object.AvailablePages)
+                    foreach (var num in response.Object.AvailablePages)
                     {
                         if (file.Pictures.Count > num)
+                        {
                             continue;
-                        file.Pictures.AnyInsert(num, new Picture { State = PictureState.Handling });
+                        }
+                        var pic = new Picture
+                        {
+                            State = PictureState.CanBeDownloaded,
+                            Number = num,
+                            Name = $"{num}.png",//TODO change png
+                        };
+                        file.Pictures.AnySet(num, pic);
+                        NewPagesAvailable?.Invoke(file);
                     }
                 }
+                Thread.Sleep(3000);
+                goto Begin;
             }
-            catch { }
+            catch() {  }
         }
 
+        public IO.Stream GetPicture(File file, int pageNum)
+        {
+            using (HttpClient client = new HttpClient() { BaseAddress = new Uri(options.EndPoint) })
+            {
+                var result = client.GetAsync($"DocumentToPictures/download?docid={handlingFiles[file.Path].Id}&pagenum={pageNum}").Result;
+                if (result.StatusCode != System.Net.HttpStatusCode.OK)
+                    throw new Exception();
+                return result.Content.ReadAsStreamAsync().Result;
+            }
+        }
     }
 }

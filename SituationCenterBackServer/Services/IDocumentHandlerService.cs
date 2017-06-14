@@ -12,7 +12,7 @@ namespace SituationCenterBackServer.Services
         (bool success, string message) SendDocumentToHandle(File document);
         void FillStates(IEnumerable<File> files);
         void FillState(File file);
-        IO.Stream GetPicture(string filePath, int pageNum);
-        event Action<(string filePath, int pageNum)> OnPageDone;
+        IO.Stream GetPicture(File filePath, int pageNum);
+        event Action<File> NewPagesAvailable;
     }
 }

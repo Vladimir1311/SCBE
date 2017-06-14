@@ -29,8 +29,17 @@ namespace SituationCenterBackServer.Controllers
             this.storageManager = storageManager;
             this.userManager = userManager;
             this.docHandler = docHandler;
+            this.docHandler.NewPagesAvailable += DocHandler_NewPagesAvailable;
         }
 
+        private void DocHandler_NewPagesAvailable(File file)
+        {
+            foreach (var pic in file.Pictures)
+            {
+                if (pic?.State == PictureState.CanBeDownloaded)
+                    storageManager.SavePictureAsync(file, pic, docHandler.GetPicture(file, pic.Number));
+            }
+        }
 
         public IActionResult Index(string pathToFolder)
         {

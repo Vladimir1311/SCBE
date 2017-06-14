@@ -7,7 +7,7 @@ namespace SituationCenterBackServer.Models.StorageModels
 {
     public enum PictureState
     {
-        Handling,
+        CanBeDownloaded,
         Downloading,
         Ready
     }

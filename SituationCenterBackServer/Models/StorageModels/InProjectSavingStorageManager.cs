@@ -66,6 +66,16 @@ namespace SituationCenterBackServer.Models.StorageModels
             else
                 return IO.File.OpenRead(targetPath);
         }
+        public async Task SavePictureAsync(File file, Picture pic, IO.Stream stream)
+        {
+            using (var fileStream = IO.File.Create(IO.Path.Combine(storageRoot, file.Path, pic.Name)))
+            {
+                pic.State = PictureState.Downloading;
+                await stream.CopyToAsync(fileStream);
+                pic.State = PictureState.Ready;
+            }
+
+        }
 
         private DirectoryContent GetContent(string path)
         {
@@ -92,11 +102,18 @@ namespace SituationCenterBackServer.Models.StorageModels
             pathToDoc = pathToDoc.Substring(0, pathToDoc.LastIndexOf('\\'));
             var file = GetFileInfo(pathToDoc);
             var pictures = IO.Directory.GetFiles(pathToDoc)
-                .Select(P => new Picture { Name = NameFromPath(P), Path = P, State = PictureState.Ready })
-                .Where(P => Regex.IsMatch(P.Name, @"\d+\..*"))
-                .Select(P => new { Picture = P, Number = int.Parse(Regex.Match(P.Name, @"\d+").Value) });
+                .Select(P => new { path = P, name = NameFromPath(P) })
+                .Select(V => new { path = V.path, name = V.name, regex = Regex.Match(V.name, @"(\d+)\..*") })
+                .Where(V => V.regex.Success && V.regex.Value == V.name)
+                .Select(P => new Picture
+                {
+                    Name = P.name,
+                    Path = P.path,
+                    State = PictureState.Ready,
+                    Number = int.Parse(P.regex.Groups[1].Value)
+                });
             foreach (var picObj in pictures)
-                file.Pictures.AnyInsert(picObj.Number, picObj.Picture);
+                file.Pictures.AnySet(picObj.Number, picObj);
             return file;
         }
 

@@ -11,5 +11,6 @@ namespace SituationCenterBackServer.Models.StorageModels
         public string Name { get; set; }
         public string Path { get; set; }
         public PictureState State { get; set; }
+        public int Number { get; set; }
     }
 }

@@ -49,24 +49,14 @@ namespace DocsToPictures.Controllers
             {
                 var doc = docsProcessor.GetDocument(docId);
                 if (pageNum <= 0 || doc.PagesPaths.Length < pageNum || doc.PagesPaths[pageNum] == null)
-                {
-                    HttpResponseMessage message = new HttpResponseMessage(HttpStatusCode.BadRequest)
-                    {
-                        Content = new StringContent($"Page {pageNum} is not valid or not ready")
-                    };
-                    throw new HttpResponseException(message);
-                }
+                    return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
                 return File(doc.PagesPaths[pageNum],
                     System.Net.Mime.MediaTypeNames.Application.Octet,
                     $"Page {pageNum}.png");
             }
-            catch (Exception ex)
+            catch
             {
-                HttpResponseMessage message = new HttpResponseMessage(HttpStatusCode.BadRequest)
-                {
-                    Content = new StringContent(ex.Message)
-                };
-                throw new HttpResponseException(message);
+                return new HttpStatusCodeResult(HttpStatusCode.InternalServerError);
             }
         }
 

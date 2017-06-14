@@ -5,8 +5,10 @@ using CCF;
 using Common;
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
@@ -21,13 +23,26 @@ namespace UDPTester
             void Val();
             string WithReturn();
         }
+        private static object locker = new object();
+        private static void Some()
+        {
+            var vlient = new HttpClient();
+            var res = vlient.GetAsync("http://localhost:62961/DocumentToPictures/download?docid=abae3276-3881-4f5b-8502-881a98ede0ff&pagenum=1").Result;
+            using (Stream conent = res.Content.ReadAsStreamAsync().Result,
+                stream = new FileStream("lol.png", FileMode.Create, FileAccess.Write))
+            {
+                conent.CopyTo(stream);
+            }
+        }
         static void Main(string[] args)
         {
+            Some();
+            Console.ReadLine();
 
-            var a = GlobalProxy.CreateFor<ILOL>();
-            a.Val();
-            Console.WriteLine(a.WithReturn());
-            Console.WriteLine("The end");
+            //var a = GlobalProxy.CreateFor<ILOL>();
+            //a.Val();
+            //Console.WriteLine(a.WithReturn());
+            //Console.WriteLine("The end");
 
             return;
             //Console.WriteLine("Start");

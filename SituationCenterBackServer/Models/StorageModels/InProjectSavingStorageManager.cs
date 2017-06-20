@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using SituationCenterBackServer.Services;
 using System;
 using System.Collections.Generic;
@@ -29,6 +30,21 @@ namespace SituationCenterBackServer.Models.StorageModels
             return GetContent(wantedPath);
         }
 
+        public DirectoryContent GetPublicContentInFolder(string ownerId, string pathToFolder)
+        {
+            var content = GetContentInFolder(ownerId, pathToFolder);
+            foreach (var file in content.Files)
+            {
+                file.Path = PublicPath(file.Path);
+                foreach(var pic in file.Pictures.Skip(1))
+                    pic.Path = PublicPath(pic.Path);
+            }
+            foreach(var dir in content.Directories)
+                dir.Path = PublicPath(dir.Path);
+            return content;
+
+        }
+
         public File Save(string userId, string pathToFolder, IFormFile file)
         {
             var folderPath = GetDirectoryPathIfCorrect(userId, pathToFolder);
@@ -51,7 +67,7 @@ namespace SituationCenterBackServer.Models.StorageModels
             {
                 file.CopyTo(filestream);
             }
-            return GetDocumentInfo(filePath);
+            return GetDocumentInfo(filePath.Substring(0, filePath.LastIndexOf("\\")));
         }
         public IO.Stream GetFileStream(string localPath)
         {
@@ -77,29 +93,40 @@ namespace SituationCenterBackServer.Models.StorageModels
 
         }
 
+        public IO.Stream GetFileStream(string ownerId, string pathToFile)
+        {
+            var userFolder = GetPathToUserFolder(ownerId);
+            var wantedPath = IO.Path.Combine(userFolder, pathToFile);
+            if (IO.File.Exists(wantedPath))
+                return IO.File.OpenRead(wantedPath);
+            if (IO.Directory.Exists(wantedPath))
+                return IO.File.OpenRead(IO.Path.Combine(wantedPath, NameFromPath(wantedPath)));
+            throw new Exception();
+        }
+
         private DirectoryContent GetContent(string path)
         {
             var folders = IO.Directory.GetDirectories(path)
                 .Select(P => (name: NameFromPath(P), path: P))
                 .ToLookup(N => N.name.Contains('.'));
+            var docs = folders[true]
+                            .Select(P => P.path)
+                            .Select(GetDocumentInfo)
+                            .ToList();
+            var files = docs.Concat(IO.Directory.GetFiles(path)
+                    .Select(GetFileInfo));
 
             return new DirectoryContent
             {
                 Directories = folders[false]
-                    .Select(N => new Directory { Name = N.name })
+                    .Select(N => new Directory { Name = N.name, Path = LocalPath(N.path) })
                     .ToList(),
-
-                Files = IO.Directory.GetFiles(path)
-                    .Concat(folders[true]
-                            .Select(P => P.path))
-                    .Select(GetFileInfo)
-                    .ToList()
+                Files = files.ToList()
             };
         }
 
         private File GetDocumentInfo(string pathToDoc)
         {
-            pathToDoc = pathToDoc.Substring(0, pathToDoc.LastIndexOf('\\'));
             var file = GetFileInfo(pathToDoc);
             var pictures = IO.Directory.GetFiles(pathToDoc)
                 .Select(P => new { path = P, name = NameFromPath(P) })
@@ -108,7 +135,7 @@ namespace SituationCenterBackServer.Models.StorageModels
                 .Select(P => new Picture
                 {
                     Name = P.name,
-                    Path = P.path,
+                    Path = LocalPath(P.path),
                     State = PictureState.Ready,
                     Number = int.Parse(P.regex.Groups[1].Value)
                 });
@@ -136,6 +163,11 @@ namespace SituationCenterBackServer.Models.StorageModels
             return localPath;
         }
 
+        private string PublicPath(string localPath)
+        {
+            return localPath.Substring("676853f6-5229-4832-b03c-c81b9d8e1606".Length);
+        }
+
         private string NameFromPath(string path)
         {
             return path.Substring(path.LastIndexOf('\\') + 1);
@@ -161,5 +193,6 @@ namespace SituationCenterBackServer.Models.StorageModels
             return wantedPath;
         }
 
+        
     }
 }

@@ -40,8 +40,9 @@ namespace SituationCenterBackServer.Controllers
             _logger = logger;
         }
 
+        [HttpPost]
         [AllowAnonymous]
-        public async Task<ResponseData> GetToken(LoginViewModel model)
+        public async Task<ResponseData> GetToken([FromBody]LoginViewModel model)
         {
             if (!ModelState.IsValid)
             {

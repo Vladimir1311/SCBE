@@ -45,5 +45,10 @@ namespace System.Linq
                 list.Add(default(T));
             list[index] = item;
         }
+
+        public static IEnumerable<T> NoNull<T>(this IEnumerable<T> collection)
+        {
+            return collection.Where(I => I != null);
+        }
     }
 }

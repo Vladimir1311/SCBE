@@ -143,7 +143,7 @@ namespace SituationCenterBackServer.Services
                 Thread.Sleep(3000);
                 goto Begin;
             }
-            catch() {  }
+            catch {  }
         }
 
         public IO.Stream GetPicture(File file, int pageNum)

@@ -77,6 +77,7 @@ namespace SituationCenterBackServer
             services.AddSingleton<IConnector, UdpConnector>();
             services.AddSingleton<IStableConnector, TCPConnector>();
             services.AddSingleton<IDocumentHandlerService, DocumentsHandler>();
+            services.AddSingleton<IBuffer, ASPNETBufferService>();
 
             //Storage
             services.AddSingleton<IStorageManager, InProjectSavingStorageManager>();
@@ -85,31 +86,7 @@ namespace SituationCenterBackServer
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
-            app.Use(async (context, next) =>
-            {
-                var newContent = string.Empty;
-
-                //if (context.Request.Path == "/api/v1/storage/download/Belyaeva_Olya_k_pr.doc/2.png")
-                //{
-                //    var storageManager = app.ApplicationServices.GetService<IStorageManager>();
-                //    var fileres = new FileStreamResult(storageManager.GetFileStream("8bbf0059-72d1-4ddc-a748-97995d183d52", "Belyaeva_Olya_k_pr.doc/10.png"), "application/octet-stream");
-                //    await fileres.ExecuteResultAsync(new ActionContext(context, new Microsoft.AspNetCore.Routing.RouteData(), new Microsoft.AspNetCore.Mvc.Abstractions.ActionDescriptor()));
-                //}
-                //else
-                {
-                    context.Response.Headers.Add("Cache-Control", "no-cache, no-store, must-revalidate");
-                    context.Response.Headers.Add("Pragma", "no-cache"); // HTTP 1.0.
-                    context.Response.Headers.Add("Expires", "0"); // Proxies.
-                    await next();
-                    if (context.Response.Body.CanRead)
-                    {
-                        //var existingBodyLength = context.Response.Body.Length;
-                        //context.Response.ContentLength = existingBodyLength;
-                    }
-
-                }
-            });
-
+            
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
             //loggerFactory.AddDebug(LogLevel.Trace);

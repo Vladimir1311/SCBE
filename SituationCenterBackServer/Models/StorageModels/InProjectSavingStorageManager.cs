@@ -36,11 +36,11 @@ namespace SituationCenterBackServer.Models.StorageModels
             foreach (var file in content.Files)
             {
                 file.Path = PublicPath(file.Path);
-                foreach(var pic in file.Pictures.NoNull())
+                foreach (var pic in file.Pictures.NoNull())
                     pic.Path = PublicPath(pic.Path);
                 file.Pictures = file.Pictures.NoNull().ToList();//TODO Отдельный метод
             }
-            foreach(var dir in content.Directories)
+            foreach (var dir in content.Directories)
                 dir.Path = PublicPath(dir.Path);
             return content;
 
@@ -78,7 +78,7 @@ namespace SituationCenterBackServer.Models.StorageModels
                 var docName = NameFromPath(localPath);
                 return IO.File.OpenRead(
                     IO.Path.Combine(targetPath, docName));
-                   
+
             }
             else
                 return IO.File.OpenRead(targetPath);
@@ -115,6 +115,13 @@ namespace SituationCenterBackServer.Models.StorageModels
                 pic.Path = PublicPath(pic.Path);
             file.Pictures.RemoveAt(0);
             return file;
+        }
+
+        public File GetFileInfo(string ownerId, string pathToFile)
+        {
+            var userFolder = GetPathToUserFolder(ownerId);
+            var wantedPath = IO.Path.Combine(userFolder, pathToFile);
+            return GetFileInfo(wantedPath);
         }
 
         private DirectoryContent GetContent(string path)
@@ -172,7 +179,7 @@ namespace SituationCenterBackServer.Models.StorageModels
         {
             string localPath = absolutePath.Substring(absolutePath.IndexOf("ForStorageFolder"));
             localPath = localPath.Substring("ForStorageFolder\\".Length);
-            
+
             return localPath;
         }
 
@@ -205,6 +212,5 @@ namespace SituationCenterBackServer.Models.StorageModels
                 IO.Directory.CreateDirectory(wantedPath);
             return wantedPath;
         }
-
     }
 }

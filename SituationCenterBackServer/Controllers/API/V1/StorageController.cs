@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Http.Features;
 using System.IO;
 using System.Text;
 using Microsoft.Extensions.Logging;
+using SituationCenterBackServer.Services;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -24,13 +25,16 @@ namespace SituationCenterBackServer.Controllers.API.V1
         private readonly IStorageManager storageManager;
         private readonly UserManager<ApplicationUser> userManager;
         private ILogger<StorageController> logger;
+        private IBuffer fileBuffer;
 
         public StorageController(IStorageManager storageManager, UserManager<ApplicationUser> userManager,
-            ILogger<StorageController> logger)
+            ILogger<StorageController> logger,
+            IBuffer fileBuffer)
         {
             this.storageManager = storageManager;
             this.userManager = userManager;
             this.logger = logger;
+            this.fileBuffer = fileBuffer;
         }
         [HttpGet]
         public IActionResult DirectoryContent(string pathToFolder)
@@ -74,6 +78,22 @@ namespace SituationCenterBackServer.Controllers.API.V1
                 return Json(new {
                     Pictures = pictures
                 });
+            }
+            catch
+            {
+                return BadRequest();
+            }
+        }
+
+
+        [HttpGet]
+        public IActionResult GetLinkToFile(string pathToFolder)
+        {
+            var userId = userManager.FindByNameAsync(userManager.GetUserName(User)).Result.Id;
+            try
+            {
+                var file = storageManager.GetFileInfo(userId, pathToFolder ?? "");
+                return Content(fileBuffer.ServLink + fileBuffer.GetLinkFor(file));
             }
             catch
             {

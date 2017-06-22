@@ -112,6 +112,8 @@ namespace SituationCenterBackServer.Controllers
                 if (floatId != null)
                     roomId = (byte)(floatId.Value);
 
+                LeaveTheRoom();         // Кривошея
+
                 var userId = _userManager.GetUserName(User);
                 var currentUser = await _userManager.FindByNameAsync(userId);
                 (Room room, byte ClientId) returned;
@@ -142,7 +144,7 @@ namespace SituationCenterBackServer.Controllers
         public ResponseData TestFilter(int id)
         {
             if (id == 1)
-                throw new Exception("ExceptionInfo");
+                throw new Exception("ExceptionInfo");//TODO WTF
             return ResponseData.GoodResponse("Good response");
         }
 

@@ -27,6 +27,7 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
             _stableConnector = stableConnector;
             _stableConnector.OnRecieveData += OnReceiceDataFromUser;
             _stableConnector.OnUserConnected += OnUserConnected;
+            _stableConnector.OnUserDisconnected += OnUserDisconnected;
             _stableConnector.SetBindToUser(userId =>
             {
                 lock(usermanager)
@@ -46,6 +47,18 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
             _logger = logger;
         }
 
+        private void OnUserDisconnected(ApplicationUser user)
+        {
+            try
+            {
+                RemoveFromRoom(user.Id);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex.Message);
+            }
+        }
+
         private void OnUserConnected(ApplicationUser user)
         {
             _userToRoom[user] = null;
@@ -58,7 +71,7 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
             {
                 case PackType.Voice:
                     if (_userToRoom.TryGetValue(dataPack.User, out var room))
-                        room.UserSpeak(_nonStableConnector, dataPack.User, dataPack.Data);
+                        room?.UserSpeak(_nonStableConnector, dataPack.User, dataPack.Data);
                     break;
             }
         }

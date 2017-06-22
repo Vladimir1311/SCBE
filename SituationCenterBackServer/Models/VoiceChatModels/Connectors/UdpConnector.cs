@@ -51,7 +51,7 @@ namespace SituationCenterBackServer.Models.VoiceChatModels.Connectors
                 return;
             }
             var packedData = ((byte)pack.PackType).Concat(pack.Data).ToArray();
-            _logger.LogInformation($"Sending {packedData.Length} bytes to {pack.Receiver.UserName}, first elements: {packedData[0]} {packedData[1]} {packedData[2]}");
+            //_logger.LogInformation($"Sending {packedData.Length} bytes to {pack.Receiver.UserName}, first elements: {packedData[0]} {packedData[1]} {packedData[2]}");
             udpClient.SendAsync(packedData,
                 packedData.Length,
                 endPoint);
@@ -63,7 +63,16 @@ namespace SituationCenterBackServer.Models.VoiceChatModels.Connectors
         {
             while (!token.IsCancellationRequested)
             {
-                var recieve = await udpClient.ReceiveAsync();
+                UdpReceiveResult recieve;
+                try
+                {
+                    recieve = await udpClient.ReceiveAsync();
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex.Message);
+                    continue;
+                }
                 var buffer = recieve.Buffer;
                 _logger.LogInformation($"Received {recieve.Buffer.Length} bytes from {recieve.RemoteEndPoint.Address.ToString()}, Adress family : {recieve.RemoteEndPoint.AddressFamily}, port : {recieve.RemoteEndPoint.Port}");
                 if (IsAuth(buffer))

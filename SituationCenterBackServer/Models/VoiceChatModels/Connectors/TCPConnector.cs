@@ -17,7 +17,7 @@ namespace SituationCenterBackServer.Models.VoiceChatModels.Connectors
 
         public event Action<FromClientPack> OnRecieveData;
         public event Action<ApplicationUser> OnUserConnected;
-
+        public event Action<ApplicationUser> OnUserDisconnected;
 
         private readonly TcpListener _listener;
 
@@ -108,6 +108,7 @@ namespace SituationCenterBackServer.Models.VoiceChatModels.Connectors
             } while (readed != 0 && !token.IsCancellationRequested);
             client.Dispose();
             _logger.LogInformation($"User {user.Email} disconnected ");
+            OnUserDisconnected.Invoke(user);
             token.ThrowIfCancellationRequested();
         }
 
@@ -133,6 +134,7 @@ namespace SituationCenterBackServer.Models.VoiceChatModels.Connectors
                 return false;
             }
             _logger.LogInformation($"Connected user {user.UserName}");
+            OnUserConnected?.Invoke(user);
             _connectionForUsers[user] = client;
             return true;
         }

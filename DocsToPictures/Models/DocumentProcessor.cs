@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using System.Web;
 
 namespace DocsToPictures.Models
@@ -23,6 +25,7 @@ namespace DocsToPictures.Models
                 .Select(T => Activator.CreateInstance(T) as DocumentHandler)
                 .ToList();
             documentsBase = new ConcurrentDictionary<Guid, Document>();
+            Task.Factory.StartNew(async () => await DocsCheck());
         }
 
 
@@ -42,6 +45,26 @@ namespace DocsToPictures.Models
             if (!documentsBase.TryGetValue(Id, out doc))
                 throw new Exception("No doc with id " + Id);
             return doc;
+        }
+
+        private async Task DocsCheck()
+        {
+            while(true)
+            {
+                foreach(var doc in documentsBase.Values.ToArray())
+                    if (DateTime.Now - Directory.GetCreationTime(doc.Folder) > TimeSpan.FromHours(2))
+                        DeleteDocument(doc.Id);
+                await Task.Delay(TimeSpan.FromMinutes(20));
+            }
+        }
+
+        private void DeleteDocument(Guid id)
+        {
+            Document document;
+            if (documentsBase.TryRemove(id, out document))
+            {
+                Directory.Delete(document.Folder, true);
+            }
         }
 
 

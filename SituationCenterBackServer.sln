@@ -4,6 +4,10 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 15.0.26430.12
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SituationCenterBackServer", "SituationCenterBackServer\SituationCenterBackServer.csproj", "{E168B5BB-3F5E-47D2-A8CA-E7771DB579BD}"
+	ProjectSection(ProjectDependencies) = postProject
+		{B14AB4E7-309D-416F-8949-F5BBBF848A5B} = {B14AB4E7-309D-416F-8949-F5BBBF848A5B}
+		{138931FE-2A0D-4A41-A502-8BA110AF9B04} = {138931FE-2A0D-4A41-A502-8BA110AF9B04}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UDPTester", "UDPTester\UDPTester.csproj", "{E4705EF3-6B2C-4C6C-89FB-C94A0AED4737}"
 EndProject

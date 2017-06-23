@@ -15,8 +15,6 @@ namespace SituationCenterBackServer.Models.VoiceChatModels.Connectors
 {
     public class UdpConnector : IConnector
     {
-        //TODO Дописать класс для UDP подключения
-
         private UdpClient udpClient;
         private CancellationTokenSource cts;
         private ILogger<UdpConnector> _logger;

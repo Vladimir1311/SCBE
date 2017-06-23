@@ -140,13 +140,6 @@ namespace SituationCenterBackServer.Controllers
             var userId = _userManager.GetUserId(User);
             return ResponseData.GoodResponse(_roomManager.RemoveFromRoom(userId) ? "Вы успешно вышли из комнаты" : "Вы не состояли ни в какой комнате");
         }
-        [AllowAnonymous]
-        public ResponseData TestFilter(int id)
-        {
-            if (id == 1)
-                throw new Exception("ExceptionInfo");//TODO WTF
-            return ResponseData.GoodResponse("Good response");
-        }
 
 
         private async Task<(ClaimsIdentity, string)> GetIdentity(string email, string password)

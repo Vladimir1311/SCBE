@@ -50,17 +50,14 @@ namespace SituationCenterBackServer.Controllers.API.V1
             }
         }
         
-        [AllowAnonymous]
         [HttpGet]
-        public IActionResult Download(string pathToFolder)
+        public IActionResult Download(string pathToFile)
         {
-            //var userId = userManager.FindByNameAsync(userManager.GetUserName(User)).Result.Id;
-            var userId = "8bbf0059-72d1-4ddc-a748-97995d183d52";//TODO БЛЯТЬ ТАК НЕЛЬЗЯ ДЕЛАТЬ
+            var userId = userManager.FindByNameAsync(userManager.GetUserName(User)).Result.Id;
             try
             {
-                foreach (var feature in HttpContext.Features)
-                    logger.LogInformation($"feature type {feature.Key.FullName} value {feature.Value.ToString()}");
-                return PhysicalFile(@"D:\WindowsLibrares\Documents\Visual Studio 2017\Projects\SituationCenterBackServer\SituationCenterBackServer\AppData\ForStorageFolder\8bbf0059-72d1-4ddc-a748-97995d183d52\Belyaeva_Olya_k_pr.doc\1.png", "application/octet-stream");
+                var stream = storageManager.GetFileStream(userId, pathToFile);
+                return File(stream, "application/octet-stream");
             }
             catch
             {

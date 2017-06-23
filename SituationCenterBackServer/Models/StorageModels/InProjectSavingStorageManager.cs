@@ -34,12 +34,7 @@ namespace SituationCenterBackServer.Models.StorageModels
         {
             var content = GetContentInFolder(ownerId, pathToFolder);
             foreach (var file in content.Files)
-            {
-                file.Path = PublicPath(file.Path);
-                foreach (var pic in file.Pictures.NoNull())
-                    pic.Path = PublicPath(pic.Path);
-                file.Pictures = file.Pictures.NoNull().ToList();//TODO Отдельный метод
-            }
+               ConvertToPublic(file);
             foreach (var dir in content.Directories)
                 dir.Path = PublicPath(dir.Path);
             return content;
@@ -111,9 +106,7 @@ namespace SituationCenterBackServer.Models.StorageModels
             var userFolder = GetPathToUserFolder(ownerId);
             var wantedPath = IO.Path.Combine(userFolder, pathToFile);
             var file = GetDocumentInfo(wantedPath);
-            foreach (var pic in file.Pictures.Skip(1))
-                pic.Path = PublicPath(pic.Path);
-            file.Pictures.RemoveAt(0);
+            ConvertToPublic(file);
             return file;
         }
 
@@ -122,6 +115,14 @@ namespace SituationCenterBackServer.Models.StorageModels
             var userFolder = GetPathToUserFolder(ownerId);
             var wantedPath = IO.Path.Combine(userFolder, pathToFile);
             return GetFileInfo(wantedPath);
+        }
+
+        private void ConvertToPublic(File file)
+        {
+            file.Path = PublicPath(file.Path);
+            file.Pictures.RemoveAll(Pic => Pic == null);
+            foreach (var pic in file.Pictures.NoNull())
+                pic.Path = PublicPath(pic.Path);
         }
 
         private DirectoryContent GetContent(string path)

@@ -104,18 +104,14 @@ namespace SituationCenterBackServer.Controllers
             }
         }
 
-        public async Task<ResponseData> JoinToRoom (byte? roomId, string roomName, float? floatId)
+        public async Task<ResponseData> JoinToRoom (byte? roomId, string roomName)
         {
             try
             {
-                //TODO КОСТЫЛЬ!!!
-                if (floatId != null)
-                    roomId = (byte)(floatId.Value);
-
-                LeaveTheRoom();         // Кривошея
-
-                var userId = _userManager.GetUserName(User);
-                var currentUser = await _userManager.FindByNameAsync(userId);
+                //Выбрать один тдентификатор комнаты
+                var userName = _userManager.GetUserName(User);
+                var currentUser = await _userManager.FindByNameAsync(userName);
+                _logger.LogDebug($"client {currentUser.Id} try join in room {roomId?.ToString() ?? roomName}");
                 (Room room, byte ClientId) returned;
                 if (roomId != null)
                     returned = _roomManager.JoinToRoom(currentUser, roomId.Value);
@@ -137,7 +133,8 @@ namespace SituationCenterBackServer.Controllers
         }
         public ResponseData LeaveTheRoom()
         {
-            var userId = _userManager.GetUserId(User);
+            var userId = _userManager.FindByNameAsync(_userManager.GetUserName(User)).Result.Id;
+            _logger.LogInformation($"try leave from room user id: {userId}");
             return ResponseData.GoodResponse(_roomManager.RemoveFromRoom(userId) ? "Вы успешно вышли из комнаты" : "Вы не состояли ни в какой комнате");
         }
 

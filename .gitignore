@@ -261,3 +261,4 @@ __pycache__/
 *.pyc
 /DocsToPictures/App_Data/uploads
 /SituationCenterBackServer/AppData/ForStorageFolder
+/WorkAroundFilterBuffer/App_Data

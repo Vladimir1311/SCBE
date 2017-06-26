@@ -22,27 +22,15 @@ namespace UDPTester
         {
             void Val();
             string WithReturn();
+            int Prop { get; set; }
         }
         private static object locker = new object();
-        private static void Some()
-        {
-            var vlient = new HttpClient();
-            var res = vlient.GetAsync("http://localhost:62961/DocumentToPictures/download?docid=abae3276-3881-4f5b-8502-881a98ede0ff&pagenum=1").Result;
-            using (Stream conent = res.Content.ReadAsStreamAsync().Result,
-                stream = new FileStream("lol.png", FileMode.Create, FileAccess.Write))
-            {
-                conent.CopyTo(stream);
-            }
-        }
         static void Main(string[] args)
         {
-            Some();
-            Console.ReadLine();
 
-            //var a = GlobalProxy.CreateFor<ILOL>();
-            //a.Val();
-            //Console.WriteLine(a.WithReturn());
-            //Console.WriteLine("The end");
+            ILOL loler = RemoteWorker<ILOL>.Create("http://localhost");
+            loler.Val();
+            loler.Prop += 1;
 
             return;
             //Console.WriteLine("Start");
@@ -122,12 +110,3 @@ namespace UDPTester
         }
     }
 }
-            //var proxy = new ProxyGenerator()
-            //    .CreateInterfaceProxyWithoutTarget<IRemoteWorker>(new ProxyClass());
-            //Console.WriteLine($"Result is : {proxy.Value(4.5)}");
-
-            //var alalala = Activator.CreateInstance<IRemoteWorker>();
-
-
-
-            //return;

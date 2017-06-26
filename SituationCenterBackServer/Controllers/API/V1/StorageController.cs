@@ -86,6 +86,7 @@ namespace SituationCenterBackServer.Controllers.API.V1
         [HttpGet]
         public IActionResult GetLinkToFile(string pathToFolder)
         {
+            return StatusCode(405);
             var userId = userManager.FindByNameAsync(userManager.GetUserName(User)).Result.Id;
             try
             {

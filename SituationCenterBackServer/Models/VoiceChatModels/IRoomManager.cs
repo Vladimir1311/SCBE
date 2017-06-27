@@ -18,6 +18,7 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
 
         IEnumerable<Room> FindRooms(Predicate<Room> func);
 
+        IEnumerable<ApplicationUser> Users { get; }
 
     }
 }

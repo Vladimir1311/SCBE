@@ -129,5 +129,7 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
         }
 
         public IEnumerable<Room> Rooms => rooms;
+
+        public IEnumerable<ApplicationUser> Users => _userToRoom.Select(P => P.Key).ToArray();
     }
 }

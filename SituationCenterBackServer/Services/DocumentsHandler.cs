@@ -41,7 +41,7 @@ namespace SituationCenterBackServer.Services
             docsUpdater = new Timer(UpdateHandledDocuments, null, 1000, -1);
         }
 
-        
+
 
         public void FillState(File file)
         {
@@ -94,7 +94,7 @@ namespace SituationCenterBackServer.Services
             handlingFiles[document.Path] = document;
             return (response.Success, response.Message);
         }
-        
+
 
         private ConcurrentDictionary<string, File> GetfilesIsHandling()
         {
@@ -103,47 +103,51 @@ namespace SituationCenterBackServer.Services
 
         private void UpdateHandledDocuments(object mock)
         {
-            try
+            while (true)
             {
-                Begin:
-                var files = handlingFiles.Values.ToList();
-                logger.LogInformation($"Getted {files.Count} files");
-                foreach (var file in files)
+                try
                 {
-                    var result = httpClient.GetAsync("DocumentToPictures/getinfo?docid=" + file.Id)
-                        .Result
-                        .Content
-                        .ReadAsStringAsync()
-                        .Result;
-                    logger.LogInformation(result);
-                    var response = JsonConvert.DeserializeObject<GetDocumentInfoResponse>(result);
-                    if (!response.Success)
-                        continue;
-                    if (response.Object.Progress > 0)
-                        file.State = FileReadyState.Handling;
-                    if (response.Object.Progress == 100)
-                        file.State = FileReadyState.Ready;
-                    file.Progress = response.Object.Progress;
-                    foreach (var num in response.Object.AvailablePages)
+                    var files = handlingFiles.Values.ToList();
+                    //logger.LogDebug($"Getted {files.Count} files");
+                    foreach (var file in files)
                     {
-                        if (file.Pictures.Count > num)
-                        {
+                        var result = httpClient.GetAsync("DocumentToPictures/getinfo?docid=" + file.Id)
+                            .Result
+                            .Content
+                            .ReadAsStringAsync()
+                            .Result;
+                        //logger.LogDebug(result);
+                        var response = JsonConvert.DeserializeObject<GetDocumentInfoResponse>(result);
+                        if (!response.Success)
                             continue;
-                        }
-                        var pic = new Picture
+                        if (response.Object.Progress > 0)
+                            file.State = FileReadyState.Handling;
+                        if (response.Object.Progress == 100)
+                            file.State = FileReadyState.Ready;
+                        file.Progress = response.Object.Progress;
+                        foreach (var num in response.Object.AvailablePages)
                         {
-                            State = PictureState.CanBeDownloaded,
-                            Number = num,
-                            Name = $"{num}.png",//TODO change png
-                        };
-                        file.Pictures.AnySet(num, pic);
-                        NewPagesAvailable?.Invoke(file);
+                            if (file.Pictures.Count > num)
+                            {
+                                continue;
+                            }
+                            var pic = new Picture
+                            {
+                                State = PictureState.CanBeDownloaded,
+                                Number = num,
+                                Name = $"{num}.png",//TODO change png
+                            };
+                            file.Pictures.AnySet(num, pic);
+                            NewPagesAvailable?.Invoke(file);
+                        }
                     }
+                    Thread.Sleep(3000);
                 }
-                Thread.Sleep(3000);
-                goto Begin;
+                catch(Exception ex)
+                {
+                    logger.LogWarning(ex.Message);
+                }
             }
-            catch {  }
         }
 
         public IO.Stream GetPicture(File file, int pageNum)

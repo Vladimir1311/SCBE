@@ -88,8 +88,7 @@ namespace SituationCenterBackServer.Controllers
             try
             {
                 _logger.LogInformation("Request for creating room with name " + name);
-                var userId= _userManager.GetUserName(User);
-                var currentUser = await _userManager.FindByNameAsync(userId);
+                var currentUser = await _userManager.GetUserAsync(User);
                 var (room, clientId) = _roomManager.CreateNewRoom(currentUser, name);
                 return new SignInRoomInfo()
                 {
@@ -109,8 +108,7 @@ namespace SituationCenterBackServer.Controllers
             try
             {
                 //Выбрать один тдентификатор комнаты
-                var userName = _userManager.GetUserName(User);
-                var currentUser = await _userManager.FindByNameAsync(userName);
+                var currentUser = await _userManager.GetUserAsync(User);
                 _logger.LogDebug($"client {currentUser.Id} try join in room {roomId?.ToString() ?? roomName}");
                 (Room room, byte ClientId) returned;
                 if (roomId != null)
@@ -133,11 +131,10 @@ namespace SituationCenterBackServer.Controllers
         }
         public ResponseData LeaveTheRoom()
         {
-            var userId = _userManager.FindByNameAsync(_userManager.GetUserName(User)).Result.Id;
+            var userId = _userManager.GetUserId(User);
             _logger.LogInformation($"try leave from room user id: {userId}");
             return ResponseData.GoodResponse(_roomManager.RemoveFromRoom(userId) ? "Вы успешно вышли из комнаты" : "Вы не состояли ни в какой комнате");
         }
-
 
         private async Task<(ClaimsIdentity, string)> GetIdentity(string email, string password)
         {
@@ -152,7 +149,8 @@ namespace SituationCenterBackServer.Controllers
             var claims = new List<Claim>
             {
                 new Claim(ClaimsIdentity.DefaultNameClaimType, user.Email),
-                new Claim(ClaimsIdentity.DefaultRoleClaimType, "user")
+                new Claim(ClaimsIdentity.DefaultRoleClaimType, "user"),
+                new Claim(ClaimTypes.NameIdentifier, user.Id)
             };
             return (new ClaimsIdentity(
                 claims,

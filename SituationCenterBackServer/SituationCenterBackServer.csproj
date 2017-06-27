@@ -39,7 +39,9 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="AppData\ForStorageFolder\" />
+    <Folder Include="Models\ViewComponents\" />
     <Folder Include="Views\Logs\" />
+    <Folder Include="Views\Administrator\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.csproj" />

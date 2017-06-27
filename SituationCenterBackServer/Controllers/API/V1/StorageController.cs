@@ -39,7 +39,7 @@ namespace SituationCenterBackServer.Controllers.API.V1
         [HttpGet]
         public IActionResult DirectoryContent(string pathToFolder)
         {
-            var userId = userManager.FindByNameAsync(userManager.GetUserName(User)).Result.Id;
+            var userId = userManager.GetUserId(User);
             try
             {           
                 return Json(storageManager.GetPublicContentInFolder(userId, pathToFolder ?? ""));
@@ -53,7 +53,7 @@ namespace SituationCenterBackServer.Controllers.API.V1
         [HttpGet]
         public IActionResult Download(string pathToFile)
         {
-            var userId = userManager.FindByNameAsync(userManager.GetUserName(User)).Result.Id;
+            var userId = userManager.GetUserId(User);
             try
             {
                 var stream = storageManager.GetFileStream(userId, pathToFile);
@@ -68,7 +68,7 @@ namespace SituationCenterBackServer.Controllers.API.V1
         [HttpGet]
         public IActionResult GetPicturesFor(string pathToFolder)
         {
-            var userId = userManager.FindByNameAsync(userManager.GetUserName(User)).Result.Id;
+            var userId = userManager.GetUserId(User);
             try
             {
                 var pictures = storageManager.GetPublicFileInfo(userId, pathToFolder).Pictures;
@@ -87,7 +87,7 @@ namespace SituationCenterBackServer.Controllers.API.V1
         public IActionResult GetLinkToFile(string pathToFolder)
         {
             return StatusCode(405);
-            var userId = userManager.FindByNameAsync(userManager.GetUserName(User)).Result.Id;
+            var userId = userManager.GetUserId(User);
             try
             {
                 var file = storageManager.GetFileInfo(userId, pathToFolder ?? "");

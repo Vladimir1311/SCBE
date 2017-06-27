@@ -1,0 +1,33 @@
+﻿
+@{
+    ViewData["Title"] = "Index";
+}
+@using SituationCenterBackServer.Models.VoiceChatModels;
+@model dynamic
+<h2>Панель администратора</h2>
+<div class="row">
+    <div class="col-lg-6">
+        <h1>Текущие комнаты</h1>
+        <ul>
+            @foreach (var room in Model.rooms)
+            {
+                <li>@room.Name</li>
+            }
+        </ul>
+    </div>
+    <div class="col-lg-6">
+        <h1>Состояние пользователей</h1>
+        <table>
+            <tr>
+                <td>email</td>
+                
+            </tr>
+            @foreach (var user in Model.users)
+            {
+                <tr>
+                    <td>@user.Email</td>
+                </tr>
+            }
+        </table>
+    </div>
+</div>

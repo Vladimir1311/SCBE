@@ -16,16 +16,6 @@
     <tbody id="body"></tbody>
 </table>
 <script>
-    document.getElementById("sendlog").onclick = function ()
-    {
-        var ajaxSettings = {
-            complete: function (arg) {alert(arg.responseText)
-            }
-        };
-
-        $.ajax("logs/testlogs", ajaxSettings)
-    }
-
     var sort = function () {
         var filter = field.value.toUpperCase();
         var tr = document.getElementById("body").getElementsByTagName("tr");

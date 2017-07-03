@@ -41,7 +41,7 @@ namespace SituationCenterBackServer.Controllers.API.V1
         {
             var userId = userManager.GetUserId(User);
             try
-            {           
+            {
                 return Json(storageManager.GetPublicContentInFolder(userId, pathToFolder ?? ""));
             }
             catch
@@ -49,7 +49,7 @@ namespace SituationCenterBackServer.Controllers.API.V1
                 return BadRequest();
             }
         }
-        
+
         [HttpGet]
         public IActionResult Download(string pathToFile)
         {
@@ -64,7 +64,7 @@ namespace SituationCenterBackServer.Controllers.API.V1
                 return BadRequest();
             }
         }
-        
+
         [HttpGet]
         public IActionResult GetPicturesFor(string pathToFolder)
         {
@@ -72,7 +72,12 @@ namespace SituationCenterBackServer.Controllers.API.V1
             try
             {
                 var pictures = storageManager.GetPublicFileInfo(userId, pathToFolder).Pictures;
-                return Json(new {
+                foreach (var pic in pictures)
+                {
+                    pic.Link = LinkToFile(userId, pic.Path);
+                }
+                return Json(new
+                {
                     Pictures = pictures
                 });
             }
@@ -86,7 +91,7 @@ namespace SituationCenterBackServer.Controllers.API.V1
         [HttpGet]
         public IActionResult GetLinkToFile(string pathToFolder)
         {
-            return StatusCode(405);
+            //return StatusCode(405);
             var userId = userManager.GetUserId(User);
             try
             {
@@ -98,5 +103,12 @@ namespace SituationCenterBackServer.Controllers.API.V1
                 return BadRequest();
             }
         }
+
+        private string LinkToFile(string userId, string pathToFile)
+        {
+            var file = storageManager.GetFileInfo(userId, pathToFile ?? "");
+            return fileBuffer.ServLink + fileBuffer.GetLinkFor(file);
+        }
+
     }
 }

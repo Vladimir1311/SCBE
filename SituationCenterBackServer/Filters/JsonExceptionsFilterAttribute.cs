@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Common.ResponseObjects;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Internal;
 using Microsoft.Extensions.Logging;
@@ -30,7 +31,7 @@ namespace SituationCenterBackServer.Filters
                 {
                     Action = context.ActionDescriptor.DisplayName
                 }, Formatting.Indented));
-            var toWrite = Encoding.UTF8.GetBytes(ResponseData.ErrorRequest(context.Exception.Message).ToJson());
+            var toWrite = Encoding.UTF8.GetBytes(ResponseBase.BadResponse(context.Exception.Message, _logger).ToJson());
             context.HttpContext.Response.ContentType = "application/json; charset=utf-8";
             context.HttpContext.Response.Body.Write(toWrite, 0, toWrite.Length);
             context.ExceptionHandled = true;

@@ -16,6 +16,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using SituationCenterBackServer.Filters;
+using Newtonsoft.Json;
 
 namespace SituationCenterBackServer.Controllers
 {
@@ -28,16 +29,19 @@ namespace SituationCenterBackServer.Controllers
 
         private readonly UnrealAPIConfiguration _config;
         private readonly IRoomManager _roomManager;
+        private readonly AuthOptions authOptions;
 
         public UnrealApiController(UserManager<ApplicationUser> userManager,
-            IOptions<UnrealAPIConfiguration> config,
+            IOptions<UnrealAPIConfiguration> unrealApiOptions,
             IRoomManager roomManager,
+            IOptions<AuthOptions> authOptions,
             ILogger<UnrealApiController> logger)
         {
             _userManager = userManager;
-            _config = config.Value;
+            _config = unrealApiOptions.Value;
             _roomManager = roomManager;
             _logger = logger;
+            this.authOptions = authOptions.Value;
         }
 
         [HttpPost]
@@ -57,16 +61,16 @@ namespace SituationCenterBackServer.Controllers
             }
             var now = DateTime.UtcNow;
             var jwt = new JwtSecurityToken(
-                issuer: AuthOptions.ISSUER,
-                audience: AuthOptions.AUDIENCE,
-                notBefore: now,
+                issuer: authOptions.Issuer,
+                audience: authOptions.Audience,
+                notBefore: DateTime.Now,
                 claims: identity.Claims,
-                expires: now.Add(TimeSpan.FromMinutes(AuthOptions.LIFETIME)),
+                expires: DateTime.Now.Add(authOptions.Expiration),
                 signingCredentials: new SigningCredentials(
-                    AuthOptions.GetSymmetricSecurityKey(),
+                    authOptions.GetSymmetricSecurityKey(),
                     SecurityAlgorithms.HmacSha256));
             var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
-                _logger.LogInformation($"Выдан токен {encodedJwt} на логин {model.Email}");
+            _logger.LogInformation($"Выдан токен {encodedJwt} на логин {model.Email}");
             return new GetTokenInfo()
             {
                 AccessToken = encodedJwt,
@@ -75,14 +79,17 @@ namespace SituationCenterBackServer.Controllers
                 ForConnection = userid
             };
         }
-        
+
         public ResponseData GetRoomsData()
         {
             _logger.LogInformation("Request for Room list");
-            return new GetRoomsInfo() { Rooms = _roomManager.Rooms};
+            return new GetRoomsInfo() { Rooms = _roomManager.Rooms };
         }
-        public async Task<ResponseData> CreateRoom(string name)
+
+        [HttpPost]
+        public async Task<ResponseData> CreateRoom([FromBody]CreateRoomInfo info)
         {
+            var name = info.Name;
             if (String.IsNullOrEmpty(name) || String.IsNullOrWhiteSpace(name))
                 return ResponseData.ErrorRequest("Неправильное имя комнаты");
             try
@@ -96,14 +103,14 @@ namespace SituationCenterBackServer.Controllers
                     RoomId = room.Id
                 };
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _logger.LogWarning($"Error while creating room {ex.Message}");
                 return ResponseData.ErrorRequest(ex.Message);
             }
         }
 
-        public async Task<ResponseData> JoinToRoom (byte? roomId, string roomName)
+        public async Task<ResponseData> JoinToRoom(byte? roomId, string roomName)
         {
             try
             {
@@ -160,5 +167,11 @@ namespace SituationCenterBackServer.Controllers
                 user.Id);
 
         }
+    }
+
+    public class CreateRoomInfo
+    {
+        [JsonProperty("name")]
+        public string Name { get; set; }
     }
 }

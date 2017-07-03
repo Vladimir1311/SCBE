@@ -20,11 +20,7 @@ using SituationCenterBackServer.Logging;
 using SituationCenterBackServer.Models.VoiceChatModels.Connectors;
 using SituationCenterBackServer.Models.StorageModels;
 using SituationCenterBackServer.Models.Options;
-
-
-
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+using System.Text;
 
 namespace SituationCenterBackServer
 {
@@ -55,8 +51,8 @@ namespace SituationCenterBackServer
             // Add framework services.
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
-                //options.UseSqlServer(Configuration.GetConnectionString("AzureConnection")));
-            
+            //options.UseSqlServer(Configuration.GetConnectionString("AzureConnection")));
+
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
@@ -71,6 +67,7 @@ namespace SituationCenterBackServer
 
             services.Configure<UnrealAPIConfiguration>(Configuration.GetSection("UnrealAPI"));
             services.Configure<DocumentsHandlerConfiguration>(Configuration.GetSection("DocumentsHandler"));
+            services.Configure<AuthOptions>(Configuration.GetSection("TokenAuthentication"));
 
 
             services.AddSingleton<IRoomManager, RoomsManager>();
@@ -86,8 +83,8 @@ namespace SituationCenterBackServer
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
-            
-            loggerFactory.AddConsole(Configuration.GetSection("Logging"));
+
+            //loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
             //loggerFactory.AddDebug(LogLevel.Trace);
             loggerFactory.AddProvider(new SocketLoggerProvider());
@@ -102,31 +99,30 @@ namespace SituationCenterBackServer
                 app.UseExceptionHandler("/Home/Error");
             }
 
-            
+
 
             app.UseStaticFiles();
             app.UseWebSockets();
             app.UseIdentity();
 
             // Add external authentication middleware below. To configure them please see http://go.microsoft.com/fwlink/?LinkID=532715
-
+            var signingKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(Configuration.GetSection("TokenAuthentication:SecretKey").Value));
             app.UseJwtBearerAuthentication(new JwtBearerOptions
             {
                 AutomaticAuthenticate = true,
                 AutomaticChallenge = true,
                 TokenValidationParameters = new TokenValidationParameters
                 {
-                    ValidateIssuer = true, ValidIssuer = AuthOptions.ISSUER,
-
-                    ValidateAudience = true, ValidAudience = AuthOptions.AUDIENCE,
-
+                    ValidateIssuer = true,
+                    ValidIssuer = Configuration.GetSection("TokenAuthentication:Issuer").Value,
+                    ValidateAudience = true,
+                    ValidAudience = Configuration.GetSection("TokenAuthentication:Audience").Value,
                     ValidateLifetime = true,
-
-                    IssuerSigningKey = AuthOptions.GetSymmetricSecurityKey(),
+                    IssuerSigningKey = signingKey,
                     ValidateIssuerSigningKey = true
                 }
             });
-            
+
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
@@ -140,11 +136,12 @@ namespace SituationCenterBackServer
         private void InitiUsers(IServiceProvider serviceProvider)
         {
             var userManager = serviceProvider.GetService<UserManager<ApplicationUser>>();
-            userManager.CreateAsync(new ApplicationUser()
-            {
-                UserName = "maksalmak@gmail.com",
-                Email = "maksalmak@gmail.com"
-            }, "CaPOnidolov2_").Wait();
+            if (userManager.FindByEmailAsync("maksalmak@gmail.com").Result == null)
+                userManager.CreateAsync(new ApplicationUser()
+                {
+                    UserName = "maksalmak@gmail.com",
+                    Email = "maksalmak@gmail.com"
+                }, "CaPOnidolov2_").Wait();
         }
     }
 }

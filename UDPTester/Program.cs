@@ -4,6 +4,7 @@ using Castle.DynamicProxy;
 using CCF;
 using Common;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -18,95 +19,23 @@ namespace UDPTester
 {
     public class Program
     {
-        public interface ILOL
-        {
-            void Val();
-            string WithReturn();
-            int Prop { get; set; }
-        }
-        private static object locker = new object();
         static void Main(string[] args)
         {
-
-            ILOL loler = RemoteWorker<ILOL>.Create("http://localhost");
-            loler.Val();
-            loler.Prop += 1;
-
-            return;
-            //Console.WriteLine("Start");
-            //   if (args.Length != 0)
-            //   {
-            //       Console.WriteLine("Get port " + args[0]);
-            //       TcpListener listener = new TcpListener(IPAddress.Any, int.Parse(args[0]));
-            //       listener.Start();
-            //       Console.WriteLine("Started listening");
-            //       while (true)
-            //       {
-            //           var client = listener.AcceptTcpClientAsync().Result;
-            //           Console.WriteLine($"Client {client.Client.RemoteEndPoint.ToString()}. Waiting for data.");
-            //           byte[] buffer = new byte[1024];
-            //           client.ReceiveTimeout = 50;
-            //           try
-            //           {
-            //               var readed = client.GetStream().Read(buffer, 0, buffer.Length);
-            //               Console.WriteLine($"Readed {readed} bytes");
-            //               client.GetStream().Write(buffer, 0, readed);
-            //               Console.WriteLine($"Sended test {readed} bytes");
-            //           }
-            //           catch (Exception ex)
-            //           {
-            //               Console.WriteLine(ex.Message);
-            //           } 
-            //           Console.WriteLine("Closing connection.");
-            //           client.Dispose();
-            //       }
-            //   }
-            //   return;
-            Class1.Main(new string[0]);
-            return;
-            if (args.Length != 0)
+            HttpClient cl = new HttpClient();
+            Stopwatch watch = new Stopwatch();
+            watch.Start();
+            cl.DefaultRequestHeaders.Add("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoibWFrc2FsbWFrQGdtYWlsLmNvbSIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6InVzZXIiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjhiYmYwMDU5LTcyZDEtNGRkYy1hNzQ4LTk3OTk1ZDE4M2Q1MiIsIm5iZiI6MTQ5OTExNjk4MCwiZXhwIjoxNDk5MTE5OTgwLCJpc3MiOiJEZW1vSXNzdWVyIiwiYXVkIjoiRGVtb0F1ZGllbmNlIn0.eTRCevKOdHOsr719Ae_mfbFXMnS3lHMqETbM2uXzOvY");
+            Task[] tasks = new Task[10];
+            for (int i = 0; i < 10; i++)
             {
-                UdpClient receivingUdpClient = new UdpClient(int.Parse(args[0]));
-                Console.WriteLine($"Start listenung on {args[0]} port");
-                while (true)
-                {
-                    try
-                    {
-                        var recieve = receivingUdpClient.ReceiveAsync().Result;
-                        Console.WriteLine($"Receive {recieve.Buffer.Length} bytes from {recieve.RemoteEndPoint.Address}:{recieve.RemoteEndPoint.Port}");
-                        byte[] receiveBytes = recieve.Buffer;
-                        receivingUdpClient.SendAsync(receiveBytes, receiveBytes.Length, recieve.RemoteEndPoint).Wait();
-                        Console.WriteLine($"Sended bytes back");
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e.ToString());
-                    }
-                }
+                tasks[i] = cl.GetAsync("http://localhost/api/v1/rooms/roomslist");
+                //cl.GetAsync("http://localhost/api/v1/rooms/roomslist").Wait();
+                //tasks[i] = Task.CompletedTask;
             }
-            else
-            {
-                IPEndPoint point = new IPEndPoint(new IPAddress(new byte[] { 52, 187, 24, 208 }), 11000);
-                UdpClient sender = new UdpClient();
-                int i = 40000;
-                int totalbytes = 0;
-                Stopwatch timer = new Stopwatch();
-                timer.Start();
-                while (true)
-                {
-                    Console.WriteLine($"Sending {i} ");
-                    sender.SendAsync(new byte[i], i, point).Wait();
-                    var receive = sender.ReceiveAsync().Result;
-                    if (receive.Buffer.Length == i)
-                        Console.WriteLine("S");
-                    else
-                        Console.WriteLine("F");
-                    totalbytes += i + receive.Buffer.Length;
-                    Console.WriteLine($"In/Out : {totalbytes / (timer.Elapsed.Seconds == 0 ? 1 : timer.Elapsed.Seconds)} bytes per second");
-                    i += 10;
-                }
-            }
-
+            Task.WaitAll(tasks);
+            Console.WriteLine(watch.ElapsedMilliseconds);
+            Console.ReadKey();
+            
         }
     }
 }

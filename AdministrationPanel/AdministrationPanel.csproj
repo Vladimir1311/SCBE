@@ -115,6 +115,7 @@
     <Compile Include="Models\Order.cs" />
     <Compile Include="Services\ActivationService.cs" />
     <Compile Include="Activation\DefaultLaunchActivationHandler.cs" />
+    <Compile Include="Services\AuthorizeService.cs" />
     <Compile Include="Services\NavigationService.cs" />
     <Compile Include="Services\SampleDataService.cs" />
     <Compile Include="Views\ConfigsDetailControl.xaml.cs">

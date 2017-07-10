@@ -93,6 +93,7 @@ namespace AdministrationPanel.Views
             _primaryItems.Add(ShellNavigationItem.FromType<ConfigsPage>("Shell_Configs".GetLocalized(), Symbol.Back));
             _primaryItems.Add(ShellNavigationItem.FromType<StatisticPage>("Shell_Statistic".GetLocalized(), Symbol.Download));
             _primaryItems.Add(ShellNavigationItem.FromType<IPResolverPanel>("Shell_IP_Resolver".GetLocalized(), Symbol.Setting));
+            _primaryItems.Add(ShellNavigationItem.FromType<LogsPage>("Shell_Logs".GetLocalized(), Symbol.Setting));
         }
 
         private void NavigationService_Navigated(object sender, NavigationEventArgs e)

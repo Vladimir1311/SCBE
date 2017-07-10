@@ -84,7 +84,7 @@ namespace SituationCenterBackServer
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
 
-            //loggerFactory.AddConsole(Configuration.GetSection("Logging"));
+            loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
             //loggerFactory.AddDebug(LogLevel.Trace);
             loggerFactory.AddProvider(new SocketLoggerProvider());

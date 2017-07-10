@@ -51,12 +51,12 @@ namespace SituationCenterBackServer.Controllers.API.V1
         }
 
         [HttpGet]
-        public IActionResult Download(string pathToFile)
+        public IActionResult Download(string pathToFolder)
         {
             var userId = userManager.GetUserId(User);
             try
             {
-                var stream = storageManager.GetFileStream(userId, pathToFile);
+                var stream = storageManager.GetFileStream(userId, pathToFolder);
                 return File(stream, "application/octet-stream");
             }
             catch
@@ -106,6 +106,8 @@ namespace SituationCenterBackServer.Controllers.API.V1
 
         private string LinkToFile(string userId, string pathToFile)
         {
+
+            return ("http://192.168.137.73/api/v1/storage/download/" + pathToFile).Replace(@"\", "/");
             var file = storageManager.GetFileInfo(userId, pathToFile ?? "");
             return fileBuffer.ServLink + fileBuffer.GetLinkFor(file);
         }

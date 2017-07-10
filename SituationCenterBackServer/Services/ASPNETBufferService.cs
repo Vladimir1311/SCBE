@@ -12,7 +12,7 @@ namespace SituationCenterBackServer.Services
     public class ASPNETBufferService : IBuffer
     {
 
-        private const string linkToServer = "http://localhost:62631/";
+        private const string linkToServer = "http://172.22.104.101:62631/";
         private IStorageManager storageManager;
 
         public ASPNETBufferService(IStorageManager storageManager)

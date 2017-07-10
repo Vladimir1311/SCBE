@@ -34,12 +34,10 @@
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
-            <ProgressBar
-                x:Name="OperationInProgressBar"
-                IsIndeterminate="True"/>
-            <ListView Grid.Row="1">
+            <ListView x:Name="Lol">
                 
             </ListView>
+
         </Grid>
 
         <!--  Adaptive triggers  -->
@@ -61,9 +59,9 @@
             </VisualStateGroup>
         </VisualStateManager.VisualStateGroups>
     </Grid>
-    <Page.BottomAppBar>
+    <!--<Page.BottomAppBar>
         <CommandBar>
             <AppBarButton x:Name="RefreshButton" Icon="Refresh" Click="RefreshButton_Click"/>
         </CommandBar>
-    </Page.BottomAppBar>
+    </Page.BottomAppBar>-->
 </Page>

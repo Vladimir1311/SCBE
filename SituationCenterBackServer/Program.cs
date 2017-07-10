@@ -15,7 +15,7 @@ namespace SituationCenterBackServer
                 .UseKestrel()
                 .UseUrls("http://*:80")
                 .UseContentRoot(Directory.GetCurrentDirectory())
-                .UseIISIntegration()
+                //.UseIISIntegration()
                 .UseStartup<Startup>()
                 .UseApplicationInsights()
                 .Build();

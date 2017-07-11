@@ -6,6 +6,6 @@ namespace Common.Services
 {
     public class GlobalTokens
     {
-        public string RegisterServiseToken => "YAaSkjn3g9EgbgKWTWrMFzAeNVsKk99Wv9zcSqpQdBdrgtQmYBzEN92kNPVXpPPw3mtWEZBH";
+        public const string RegisterServiseToken = "YAaSkjn3g9EgbgKWTWrMFzAeNVsKk99Wv9zcSqpQdBdrgtQmYBzEN92kNPVXpPPw3mtWEZBH";
     }
 }

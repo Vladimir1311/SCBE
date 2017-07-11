@@ -8,6 +8,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using IPResolver.Services;
+using IPResolver.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace IPResolver
 {
@@ -28,6 +30,13 @@ namespace IPResolver
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+
+            // получаем строку подключения из файла конфигурации
+            string connection = Configuration.GetConnectionString("DefaultConnection");
+            // добавляем контекст MobileContext в качестве сервиса в приложение
+            services.AddDbContext<ServicesContext>(options =>
+                options.UseSqlServer(connection));
+
             // Add framework services.
             services.AddMvc();
 

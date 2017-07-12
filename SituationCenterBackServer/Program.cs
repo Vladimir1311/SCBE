@@ -13,9 +13,9 @@ namespace SituationCenterBackServer
         {
             var host = new WebHostBuilder()
                 .UseKestrel()
-                .UseUrls("http://*:80")
+                //.UseUrls("http://*:80")
                 .UseContentRoot(Directory.GetCurrentDirectory())
-                //.UseIISIntegration()
+                .UseIISIntegration()
                 .UseStartup<Startup>()
                 .UseApplicationInsights()
                 .Build();

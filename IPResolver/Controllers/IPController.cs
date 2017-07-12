@@ -1,4 +1,5 @@
 ﻿using Common.ResponseObjects;
+using Common.ResponseObjects.IPRows;
 using Common.Services;
 using IPResolver.Models;
 using IPResolver.Models.RequestModels;
@@ -23,6 +24,13 @@ namespace IPResolver.Controllers
             this.servicesDb = servicesDB;
 
         }
+
+        public ResponseBase Get()
+        {
+            var rows = servicesDb.ServiseRows.ToArray();
+            return IPRowsListResponse.Create(rows);
+        }
+
         public JsonResult CoreIP()
         {
             return Json(new

@@ -21,6 +21,7 @@ using SituationCenterBackServer.Models.VoiceChatModels.Connectors;
 using SituationCenterBackServer.Models.StorageModels;
 using SituationCenterBackServer.Models.Options;
 using System.Text;
+using Common.Services;
 
 namespace SituationCenterBackServer
 {
@@ -50,8 +51,8 @@ namespace SituationCenterBackServer
         {
             // Add framework services.
             services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
-            //options.UseSqlServer(Configuration.GetConnectionString("AzureConnection")));
+            //    options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+            options.UseSqlServer(Configuration.GetConnectionString("AzureConnection")));
 
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
@@ -71,8 +72,8 @@ namespace SituationCenterBackServer
 
 
             services.AddSingleton<IRoomManager, RoomsManager>();
-            services.AddSingleton<IConnector, UdpConnector>();
-            services.AddSingleton<IStableConnector, TCPConnector>();
+            //services.AddSingleton<IConnector, UdpConnector>();
+            //services.AddSingleton<IStableConnector, TCPConnector>();
             services.AddSingleton<IDocumentHandlerService, DocumentsHandler>();
             services.AddSingleton<IBuffer, ASPNETBufferService>();
 
@@ -129,7 +130,7 @@ namespace SituationCenterBackServer
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
-            //app.UseResponseBuffering();
+            app.RegisterAsService(ServiceTypes.Core);
             InitiUsers(app.ApplicationServices);
         }
 

@@ -4,8 +4,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
-namespace IPResolver.Models
+namespace Common.ResponseObjects.IPRows
 {
     public class ServiceRow
     {
@@ -20,7 +21,7 @@ namespace IPResolver.Models
             ServiceType = serviceType;
         }
 
-        [NotMapped]
+        [NotMapped][JsonIgnore]
         public IPAddress IP {
 
             get => IPAddress.Parse(StringIP);

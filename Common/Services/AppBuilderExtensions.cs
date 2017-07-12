@@ -9,7 +9,9 @@ namespace Common.Services
 {
     public static class AppBuilderExtensions
     {
-        public static IApplicationBuilder RegisterAsService(this IApplicationBuilder app, ServiceTypes serviceType)
+        public static IApplicationBuilder RegisterAsService(this IApplicationBuilder app,
+            ServiceTypes serviceType,
+            string IPResolverHost)
         {
             using (var client = new HttpClient())
             {
@@ -19,7 +21,7 @@ namespace Common.Services
                     serviceType = serviceType.ToString()
                 });
                 StringContent content = new StringContent(jsonString, Encoding.UTF8, "application/json");
-                var result = client.PostAsync("http://ipresolver.azurewebsites.net/ip/register", content).Result;
+                var result = client.PostAsync($"http://{IPResolverHost}/ip/register", content).Result;
                 if (result.StatusCode != System.Net.HttpStatusCode.OK)
                     throw new Exception("Can't register service!!!");
             }

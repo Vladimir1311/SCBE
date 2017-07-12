@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace IPResolver.Controllers
@@ -71,6 +72,15 @@ namespace IPResolver.Controllers
             }
             await servicesDb.SaveChangesAsync();
             return ResponseBase.GoodResponse();
+        }
+
+
+        private IPAddress ClientIP()
+        {
+            var ip = HttpContext.Connection.RemoteIpAddress;
+            
+
+            return ip;
         }
     }
 }

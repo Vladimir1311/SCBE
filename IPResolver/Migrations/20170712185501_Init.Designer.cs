@@ -8,8 +8,8 @@ using IPResolver.Models;
 namespace IPResolver.Migrations
 {
     [DbContext(typeof(ServicesContext))]
-    [Migration("20170710235042_RorsToRows")]
-    partial class RorsToRows
+    [Migration("20170712185501_Init")]
+    partial class Init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -17,7 +17,7 @@ namespace IPResolver.Migrations
                 .HasAnnotation("ProductVersion", "1.1.2")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-            modelBuilder.Entity("IPResolver.Models.ServiceRow", b =>
+            modelBuilder.Entity("Common.ResponseObjects.IPRows.ServiceRow", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd();

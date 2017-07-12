@@ -18,7 +18,9 @@ namespace SituatuionCenterTests.Controllers
     [TestClass]
     public class UnrealAPIControllerTest
     {
+#pragma warning disable CS0169 // The field 'UnrealAPIControllerTest.userManagerMock' is never used
         private Mock<UserManager<ApplicationUser>> userManagerMock;
+#pragma warning restore CS0169 // The field 'UnrealAPIControllerTest.userManagerMock' is never used
         private Mock<IOptions<UnrealAPIConfiguration>> configMock;
         private Mock<IRoomManager> roomManagerMock;
         private Mock<ILogger<UnrealApiController>> loggerMock;

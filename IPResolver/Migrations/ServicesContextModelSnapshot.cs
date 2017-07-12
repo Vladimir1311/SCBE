@@ -16,7 +16,7 @@ namespace IPResolver.Migrations
                 .HasAnnotation("ProductVersion", "1.1.2")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-            modelBuilder.Entity("IPResolver.Models.ServiceRow", b =>
+            modelBuilder.Entity("Common.ResponseObjects.IPRows.ServiceRow", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd();

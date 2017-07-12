@@ -5,6 +5,8 @@
     <TargetFramework>netcoreapp1.1</TargetFramework>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugOffline|AnyCPU'" />
+
   <ItemGroup>
     <PackageReference Include="Castle.Core" Version="4.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.2" />

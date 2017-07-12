@@ -129,7 +129,7 @@ namespace SituationCenterBackServer
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
-            app.RegisterAsService(ServiceTypes.Core);
+            app.RegisterAsService(ServiceTypes.Core, Configuration.GetConnectionString("IPResolverHost"));
             InitiUsers(app.ApplicationServices);
         }
 

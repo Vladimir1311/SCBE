@@ -14,6 +14,7 @@ namespace IPResolver
         {
             var host = new WebHostBuilder()
                 .UseKestrel()
+                .UseUrls("http://*:3000")
                 .UseContentRoot(Directory.GetCurrentDirectory())
                 .UseIISIntegration()
                 .UseStartup<Startup>()

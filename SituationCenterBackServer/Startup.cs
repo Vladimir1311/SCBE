@@ -50,8 +50,8 @@ namespace SituationCenterBackServer
         {
             // Add framework services.
             services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
-            //options.UseSqlServer(Configuration.GetConnectionString("AzureConnection")));
+                //options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+                options.UseSqlServer(Configuration.GetConnectionString("DataBaseConnection")));
 
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
@@ -130,6 +130,7 @@ namespace SituationCenterBackServer
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
             //app.UseResponseBuffering();
+            
             InitiUsers(app.ApplicationServices);
         }
 

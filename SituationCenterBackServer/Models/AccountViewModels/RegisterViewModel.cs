@@ -23,5 +23,12 @@ namespace SituationCenterBackServer.Models.AccountViewModels
         [Display(Name = "Confirm password")]
         [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
         public string ConfirmPassword { get; set; }
+
+        
+        [Required]
+        [StringLength(11, ErrorMessage = "Please enter phone number is format 89008007654")]
+        [DataType(DataType.PhoneNumber)]
+        [Display(Name = "Phone number")]
+        public string PhoneNumber { get; set; }
     }
 }

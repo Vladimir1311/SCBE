@@ -13,36 +13,13 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
     {
         private byte lastRoomId = 0;
         private List<Room> rooms = new List<Room>();
-        private IStableConnector _stableConnector;
         private ILogger<RoomsManager> _logger;
         private Dictionary<ApplicationUser, Room> _userToRoom = new Dictionary<ApplicationUser, Room>();
-        private IConnector _nonStableConnector;
 
         public RoomsManager(IOptions<UnrealAPIConfiguration> configs,
             ILogger<RoomsManager> logger,
-            IStableConnector stableConnector,
-            IConnector nonStableConnector,
             UserManager<ApplicationUser> usermanager)
         {
-            _stableConnector = stableConnector;
-            _stableConnector.OnRecieveData += OnReceiceDataFromUser;
-            _stableConnector.OnUserConnected += OnUserConnected;
-            _stableConnector.OnUserDisconnected += OnUserDisconnected;
-            _stableConnector.SetBindToUser(userId =>
-            {
-                lock(usermanager)
-                    return usermanager.Users.FirstOrDefault(user => user.Id == userId);
-            });
-            _stableConnector.Start();   
-
-            _nonStableConnector = nonStableConnector;
-            _nonStableConnector.OnRecieveData += OnReceiceDataFromUser;
-            _nonStableConnector.SetBindToUser(userId =>
-            {
-                lock (usermanager)
-                    return usermanager.Users.FirstOrDefault(user => user.Id == userId);
-            });
-            _nonStableConnector.Start();
 
             _logger = logger;
         }
@@ -67,13 +44,13 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
         private void OnReceiceDataFromUser(FromClientPack dataPack)
         {
             _logger.LogDebug($"Recieved {dataPack.Data.Length} bytes with {dataPack.PackType} from {dataPack.User.Email}");
-            switch (dataPack.PackType)
-            {
-                case PackType.Voice:
-                    if (_userToRoom.TryGetValue(dataPack.User, out var room))
-                        room?.UserSpeak(_nonStableConnector, dataPack.User, dataPack.Data);
-                    break;
-            }
+            //switch (dataPack.PackType)
+            //{
+            //    case PackType.Voice:
+            //        if (_userToRoom.TryGetValue(dataPack.User, out var room))
+            //            room?.UserSpeak(_nonStableConnector, dataPack.User, dataPack.Data);
+            //        break;
+            //}
         }
 
         public (Room room, byte clientId) CreateNewRoom(ApplicationUser creater, string name)

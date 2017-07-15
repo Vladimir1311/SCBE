@@ -16,6 +16,7 @@ using SituationCenterBackServer.Models.TokenAuthModels;
 using Microsoft.IdentityModel.Tokens;
 using Common.ResponseObjects.Account;
 using Microsoft.Extensions.Options;
+using SituationCenterBackServer.Data;
 
 namespace SituationCenterBackServer.Controllers.API.V1
 {
@@ -27,14 +28,17 @@ namespace SituationCenterBackServer.Controllers.API.V1
         private readonly ILogger<AccountController> logger;
         private readonly UserManager<ApplicationUser> userManager;
         private readonly AuthOptions authOptions;
+        private readonly ApplicationDbContext database;
 
         public AccountController(ILogger<AccountController> logger,
             UserManager<ApplicationUser> userManager,
-            IOptions<AuthOptions> option)
+            IOptions<AuthOptions> option,
+            ApplicationDbContext database)
         {
             this.logger = logger;
             this.userManager = userManager;
             this.authOptions = option.Value;
+            this.database = database;
         }
         [HttpPost]
         [AllowAnonymous]
@@ -66,6 +70,13 @@ namespace SituationCenterBackServer.Controllers.API.V1
             logger.LogDebug($"Send token for {user.Email}");
             return AuthorizeResponse.Create(encodetJwt);
                 
+        }
+
+        [HttpGet]
+        public async Task<ResponseBase> Search(string firstName, string lastName, string phone)
+        {
+            var users = database.Users.Where(U => U.PhoneNumber.Contains(phone));
+            return Common.ResponseObjects.Account.Search.Create(users.Select(U => new UserPresent { Phone = U.PhoneNumber }));
         }
 
 

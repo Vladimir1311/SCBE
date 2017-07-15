@@ -13,17 +13,24 @@ namespace Common.Services
             ServiceTypes serviceType,
             string IPResolverHost)
         {
-            using (var client = new HttpClient())
+            try
             {
-                var jsonString = JsonConvert.SerializeObject(new
+                using (var client = new HttpClient())
                 {
-                    token = GlobalTokens.RegisterServiseToken,
-                    serviceType = serviceType.ToString()
-                });
-                StringContent content = new StringContent(jsonString, Encoding.UTF8, "application/json");
-                var result = client.PostAsync($"http://{IPResolverHost}/ip/register", content).Result;
-                if (result.StatusCode != System.Net.HttpStatusCode.OK)
-                    throw new Exception("Can't register service!!!");
+                    var jsonString = JsonConvert.SerializeObject(new
+                    {
+                        token = GlobalTokens.RegisterServiseToken,
+                        serviceType = serviceType.ToString()
+                    });
+                    StringContent content = new StringContent(jsonString, Encoding.UTF8, "application/json");
+                    var result = client.PostAsync($"http://{IPResolverHost}/ip/register", content).Result;
+                    if (result.StatusCode != System.Net.HttpStatusCode.OK)
+                        throw new Exception("Can't register service!!!");
+                }
+            }
+            catch
+            {
+                Console.WriteLine("ERROR BLYAT");
             }
             return app;
 

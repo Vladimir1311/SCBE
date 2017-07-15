@@ -18,7 +18,7 @@ namespace DocsToPictures.Models
         protected override void Handle()
         {
             var wordApp = new Application();
-            //wordApp.Visible = true;
+            wordApp.Visible = true;
             Document neededDoc = null;
             while (documentsStream.TryDequeue(out neededDoc))
             {

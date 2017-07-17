@@ -28,5 +28,8 @@ namespace SituationCenterBackServer.Models
         {
             return Id.GetHashCode();
         }
+
+
+        //public List<ApplicationUser> Contacts { get; set; }
     }
 }

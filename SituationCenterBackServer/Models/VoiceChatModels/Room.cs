@@ -22,6 +22,7 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
 
         [JsonIgnore]
         public IEnumerable<ApplicationUser> Users => _users;
+
         public Room(ApplicationUser creater, byte id)
         {
             _users = new List<ApplicationUser> { creater };
@@ -33,19 +34,6 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
         {
             _users.Add(user);
             user.InRoomId = _lastClientId++;
-        }
-
-        internal void UserSpeak(IConnector connector, ApplicationUser user, byte[] voiceData)
-        {
-            var packedData = _users.FirstOrDefault(U => U.Id == user.Id).InRoomId.Concat(voiceData);
-            _users//.WithOut(dataPack.User)
-                 .ForEach(receiver => connector.SendPack(new ToClientPack
-                 {  
-                     Sender = user,
-                     Receiver = receiver,
-                     PackType = PackType.Voice,
-                     Data = packedData
-                 }));
         }
 
         internal void RemoveUser(ApplicationUser user)

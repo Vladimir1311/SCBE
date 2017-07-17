@@ -108,8 +108,8 @@ namespace SituationCenterBackServer.Controllers.API.V1
         {
 
             return ("http://192.168.137.73/api/v1/storage/download/" + pathToFile).Replace(@"\", "/");
-            var file = storageManager.GetFileInfo(userId, pathToFile ?? "");
-            return fileBuffer.ServLink + fileBuffer.GetLinkFor(file);
+            //var file = storageManager.GetFileInfo(userId, pathToFile ?? "");
+            //return fileBuffer.ServLink + fileBuffer.GetLinkFor(file);
         }
 
     }

@@ -36,7 +36,8 @@ namespace IPResolver.Controllers
         {
             return Json(new
             {
-                ip = configsManager.CoreIP
+                //ip = configsManager.CoreIP
+                ip = servicesDb.ServiseRows.First(R => R.ServiceType == "Core").IP.ToString()
             }
             );
         }

@@ -45,7 +45,7 @@ namespace Common.ResponseObjects
         [StatusCodeDescription("Такой комнаты не существует")]
         DontExistRoom,
         [StatusCodeDescription("Комната заполнена")]
-        RommFilled
+        RoomFilled
     }
 
 

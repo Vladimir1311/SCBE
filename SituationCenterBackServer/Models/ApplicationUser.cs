@@ -18,6 +18,8 @@ namespace SituationCenterBackServer.Models
         [NotMapped]
         public byte InRoomId { get; set; }
 
+        public string Name { get; set; }
+        public string Surname { get; set; }
         public override bool Equals(object obj)
         {
             return (obj as ApplicationUser)?.Id == Id;

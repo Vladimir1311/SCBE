@@ -26,7 +26,6 @@ namespace SituationCenterBackServer.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<UnrealApiController> _logger;
-
         private readonly UnrealAPIConfiguration _config;
         private readonly IRoomManager _roomManager;
         private readonly AuthOptions authOptions;

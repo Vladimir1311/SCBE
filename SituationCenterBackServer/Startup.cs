@@ -136,6 +136,17 @@ namespace SituationCenterBackServer
         private void InitiUsers(IServiceProvider serviceProvider)
         {
             var userManager = serviceProvider.GetService<UserManager<ApplicationUser>>();
+            var roleManager = serviceProvider.GetService<RoleManager<IdentityRole>>();
+            roleManager.CreateAsync(new IdentityRole("Administrator")).Wait();
+            var identity = userManager.CreateAsync(new ApplicationUser()
+            {
+                UserName = "maksalmak@gmail.com",
+                Email = "maksalmak@gmail.com"
+            }, "CaPOnidolov2_").Result;
+            //if (!identity.Succeeded)
+                //return;
+            var user = userManager.FindByEmailAsync("maksalmak@gmail.com").Result;
+            userManager.AddToRoleAsync(user, "Administrator").Wait();
             if (userManager.FindByEmailAsync("maksalmak@gmail.com").Result == null)
                 userManager.CreateAsync(new ApplicationUser()
                 {

@@ -13,6 +13,7 @@
 }
 @model SituationCenterBackServer.Models.AdministratorViewModels.IndexViewModel
     <h2>Administrator panel</h2>
+    <a href="Administrator/logs"><input type="button" class="btn-primary btn-lg" value="Logs" /></a>
     <div class="row">
         <div class="col-lg-6">
             <h1>Users table</h1>
@@ -53,8 +54,7 @@
     </div>
 <div class="row">
     <div class="col-lg-4">
-        <h1>Roles in system</h1>
-        <h1>@Model.ControllerId</h1>
+        <h1>All roles</h1>
         <ol>
             @foreach(var role in Model.Roles)
             {

@@ -45,11 +45,6 @@ namespace SituationCenterBackServer.Controllers
             
         }
 
-        public async Task<IActionResult> Rooms()
-        {
-            return View(roomsManager.Rooms);
-        }
-
         public async Task<IActionResult> Logs()
         {
             if (!HttpContext.WebSockets.IsWebSocketRequest)

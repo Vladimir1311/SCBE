@@ -46,7 +46,17 @@ namespace IPResolver.Controllers
         {
             try
             {
-                configsManager.CoreIP = value;
+                var createdRow = servicesDb.ServiseRows.FirstOrDefault(R => R.ServiceType == "Core");
+                if (createdRow != null)
+                {
+                    createdRow.IP = IPAddress.Parse(value);
+                }
+                else
+                {
+                    createdRow = new ServiceRow(IPAddress.Parse(value), "Core");
+                    servicesDb.ServiseRows.Add(createdRow);
+                }
+                servicesDb.SaveChanges();
                 return "OK";
             }
             catch (Exception ex)

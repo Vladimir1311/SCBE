@@ -6,27 +6,48 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using SituationCenterBackServer.Logging;
 using SituationCenterBackServer.Models.VoiceChatModels;
+using SituationCenterBackServer.Data;
+using SituationCenterBackServer.Models.AdministratorViewModels;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using SituationCenterBackServer.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace SituationCenterBackServer.Controllers
 {
     [Authorize(Roles = "Administrator")]
     public class AdministratorController : Controller
     {
-        private IRoomManager _roomsManager;
+        private IRoomManager roomsManager;
+        private readonly ApplicationDbContext dataBase;
+        private readonly RoleManager<IdentityRole> roleManager;
+        private readonly UserManager<ApplicationUser> userManager;
 
-        public AdministratorController(IRoomManager roomsManager)
+        public AdministratorController(IRoomManager roomsManager,
+            ApplicationDbContext context,
+            UserManager<ApplicationUser> userManager,
+            RoleManager<IdentityRole> roleManager)
         {
-            _roomsManager = roomsManager;
+            this.roomsManager = roomsManager;
+            this.dataBase = context;
+            this.userManager = userManager;
+            this.roleManager = roleManager;
         }
         public IActionResult Index()
         {
-            return View();
+            var model = new IndexViewModel
+            {
+                Users = userManager.Users.Include(U => U.Roles).ToList(),
+                Rooms = roomsManager.Rooms.ToList(),
+                Roles = roleManager.Roles.ToList()
+            };
+            return View(model);
             
         }
 
         public async Task<IActionResult> Rooms()
         {
-            return View(_roomsManager.Rooms);
+            return View(roomsManager.Rooms);
         }
 
         public async Task<IActionResult> Logs()

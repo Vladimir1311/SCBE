@@ -6,6 +6,9 @@
 
 <h2>@ViewData["Title"].</h2>
 
-@foreach (var room in Model)
-{
-}
+<ol>
+    @foreach (var room in Model)
+    {
+        <li>@room.Name</li>
+    }
+</ol>

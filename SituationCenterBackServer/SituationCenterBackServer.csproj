@@ -13,6 +13,13 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugOffline|AnyCPU'" />
+
+  <ItemGroup>
+    <Compile Remove="Views\Logs\**" />
+    <Content Remove="Views\Logs\**" />
+    <EmbeddedResource Remove="Views\Logs\**" />
+    <None Remove="Views\Logs\**" />
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.0.0" />
     <PackageReference Include="Microsoft.AspNetCore" Version="1.0.3" />
@@ -43,7 +50,6 @@
   <ItemGroup>
     <Folder Include="AppData\ForStorageFolder\" />
     <Folder Include="Models\ViewComponents\" />
-    <Folder Include="Views\Logs\" />
     <Folder Include="Views\Administrator\" />
     <Folder Include="Views\Docs\" />
   </ItemGroup>

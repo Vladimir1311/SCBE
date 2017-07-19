@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Common.Requests.Room.CreateRoom;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -7,7 +8,7 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
 {
     public interface IRoomManager
     {
-        (Room room, byte clientId) CreateNewRoom(ApplicationUser creater, string name);
+        (Room room, byte clientId) CreateNewRoom(ApplicationUser creater, CreateRoomRequest createRoomInfo);
 
         (Room room, byte clientId) JoinToRoom(ApplicationUser user, string roomName);
         (Room room, byte clientId) JoinToRoom(ApplicationUser user, byte roomId);

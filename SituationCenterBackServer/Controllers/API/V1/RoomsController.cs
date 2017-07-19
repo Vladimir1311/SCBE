@@ -1,4 +1,4 @@
-﻿using Common.Requests.Room;
+﻿using Common.Requests.Room.CreateRoom;
 using Common.ResponseObjects;
 using Common.ResponseObjects.Rooms;
 using Microsoft.AspNetCore.Authorization;
@@ -39,8 +39,9 @@ namespace SituationCenterBackServer.Controllers.API.V1
         [HttpPost]
         public async Task<ResponseBase> Create([FromBody]CreateRoomRequest info)
         {
+            await Task.Delay(1000);
             var user = await userManager.FindByIdAsync(userManager.GetUserId(User));
-            roomsManager.CreateNewRoom(user, info.Name);
+            roomsManager.CreateNewRoom(user, info);
             return ResponseBase.GoodResponse();
         }
     }

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using SituationCenterBackServer.Models.VoiceChatModels.Connectors;
+using Common.Requests.Room.CreateRoom;
 
 namespace SituationCenterBackServer.Models.VoiceChatModels
 {
@@ -53,20 +54,20 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
             //}
         }
 
-        public (Room room, byte clientId) CreateNewRoom(ApplicationUser creater, string name)
+        public (Room room, byte clientId) CreateNewRoom(ApplicationUser creater, CreateRoomRequest createRoomInfo)
         {
             if (rooms.Any(R => R.Users.Any(U => U.Id == creater.Id)))
                 throw new Exception("Вы уже состоите в другой комнате!");
-            if (rooms.Any(R => R.Name == name))
+            if (rooms.Any(R => R.Name == createRoomInfo.Name))
                 throw new Exception("Комната с таким именем уже существует!");
             Room newRoom = new Room(creater, lastRoomId++)
             {
-                Name = name
+                Name = createRoomInfo.Name
             };
             rooms.Add(newRoom);
             _userToRoom[creater] = newRoom;
             return (newRoom, creater.InRoomId);
-            
+
         }
 
         public IEnumerable<Room> FindRooms(Predicate<Room> func)

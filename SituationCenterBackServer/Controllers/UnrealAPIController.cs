@@ -95,7 +95,7 @@ namespace SituationCenterBackServer.Controllers
             {
                 _logger.LogInformation("Request for creating room with name " + name);
                 var currentUser = await _userManager.GetUserAsync(User);
-                var (room, clientId) = _roomManager.CreateNewRoom(currentUser, name);
+                var (room, clientId) = _roomManager.CreateNewRoom(currentUser, new Common.Requests.Room.CreateRoom.CreateRoomRequest { Name = name});
                 return new SignInRoomInfo()
                 {
                     ClientId = clientId,

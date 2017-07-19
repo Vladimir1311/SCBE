@@ -71,6 +71,37 @@ namespace SituationCenterBackServer.Controllers.API.V1
             return AuthorizeResponse.Create(encodetJwt);
                 
         }
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<ResponseBase> Register([FromBody]RegisterViewModel model, string returnUrl = null)
+        {
+            ViewData["ReturnUrl"] = returnUrl;
+            if (ModelState.IsValid)
+            {
+                var user = new ApplicationUser
+                {
+                    UserName = model.Email,
+                    Email = model.Email,
+                    Name = model.Name,
+                    Surname = model.Surname,
+                    PhoneNumber = model.PhoneNumber
+                };
+
+                var result = await userManager.CreateAsync(user, model.Password);
+                if (result.Succeeded)
+                {
+                    // For more information on how to enable account confirmation and password reset please visit http://go.microsoft.com/fwlink/?LinkID=532713
+                    // Send an email with this link
+                    //var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                    //var callbackUrl = Url.Action(nameof(ConfirmEmail), "Account", new { userId = user.Id, code = code }, protocol: HttpContext.Request.Scheme);
+                    //await _emailSender.SendEmailAsync(model.Email, "Confirm your account",
+                    //    $"Please confirm your account by clicking this link: <a href='{callbackUrl}'>link</a>");
+                    logger.LogInformation(3, "User created a new account with password.");
+                    return ResponseBase.GoodResponse();
+                }
+            }
+            return ResponseBase.BadResponse("What?!");
+        }
 
         [HttpGet]
         public async Task<ResponseBase> Search(string firstName, string lastName, string phone)

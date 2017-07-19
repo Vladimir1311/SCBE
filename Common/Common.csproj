@@ -14,7 +14,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Models\Rooms\" />
     <Folder Include="Services\Interface\" />
   </ItemGroup>
 

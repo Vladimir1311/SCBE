@@ -7,6 +7,10 @@ using System.Reflection;
 using Microsoft.Office.Interop.Word;
 using System.Drawing;
 using System.Drawing.Imaging;
+using Spire.Pdf;
+
+using org.pdfclown.documents;
+using org.pdfclown.tools;
 
 namespace DocsToPictures.Models
 {
@@ -22,33 +26,39 @@ namespace DocsToPictures.Models
             Document neededDoc = null;
             while (documentsStream.TryDequeue(out neededDoc))
             {
-                var doc = wordApp.Documents.Add(Path.Combine(neededDoc.Folder, neededDoc.Name));
-                var window = doc.ActiveWindow;
-                var pane = window.ActivePane;
-                neededDoc.PagesPaths = new string[pane.Pages.Count + 1];
-                for (var i = 1; i <= pane.Pages.Count; i++)
-                {
-                    var bits = pane.Pages[i].EnhMetaFileBits;
-                    try
-                    {
-                        using (var ms = new MemoryStream((byte[])(bits)))
-                        {
-                            var image = Image.FromStream(ms);
-                            image = Transparent2Color(image, Color.White);
-                            string imagePath = Path.Combine(neededDoc.Folder, $"{i}.png");
-                            image.Save(imagePath, ImageFormat.Png);
-                            image.Dispose();
-                            neededDoc.PagesPaths[i] = imagePath;
-                            neededDoc.Progress = Percents(i, pane.Pages.Count);
-                        }
-                    }
-                    catch
-                    {
+                var wordFileName = Path.Combine(neededDoc.Folder, neededDoc.Name);
+                var doc = wordApp.Documents.Add(wordFileName);
+                var pdfFileName = Path.ChangeExtension(wordFileName, "pdf");
+                doc.SaveAs2(pdfFileName, WdSaveFormat.wdFormatPDF);
+                doc.Close(WdSaveOptions.wdDoNotSaveChanges, Type.Missing, Type.Missing);
 
+                using (var file = new org.pdfclown.files.File(pdfFileName))
+                {
+                    var pdfDoc = file.Document;
+                    Renderer renderer = new Renderer();
+                    neededDoc.PagesPaths = new string[pdfDoc.Pages.Count + 1];
+                    for (var i = 0; i < pdfDoc.Pages.Count; i++)
+                    {
+                        var image = renderer.Render(pdfDoc.Pages[i], pdfDoc.Pages[i].Size);
+                        string imagePath = Path.Combine(neededDoc.Folder, $"{i}.png");
+                        image.Save(imagePath, ImageFormat.Png);
+                        image.Dispose();
+                        neededDoc.PagesPaths[i] = imagePath;
+                        neededDoc.Progress = Percents(i, pdfDoc.Pages.Count);
                     }
+
                 }
-                object doNotSaveChanges = WdSaveOptions.wdDoNotSaveChanges;
-                doc.Close(ref doNotSaveChanges, Type.Missing, Type.Missing);
+
+
+
+
+
+
+
+                //PdfDocument pdfDoc = new PdfDocument();
+                //pdfDoc.LoadFromFile(pdfFileName);
+
+                
             }
             wordApp.Quit(Type.Missing, Type.Missing, Type.Missing);
         }

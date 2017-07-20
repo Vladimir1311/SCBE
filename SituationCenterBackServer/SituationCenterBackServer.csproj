@@ -12,8 +12,6 @@
     <UserSecretsId>aspnet-SituationCenterBackServer-dc2a7cad-9783-43c1-9d16-5673beb6057d</UserSecretsId>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugOffline|AnyCPU'" />
-
   <ItemGroup>
     <Compile Remove="Views\Logs\**" />
     <Content Remove="Views\Logs\**" />

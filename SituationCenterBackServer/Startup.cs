@@ -98,6 +98,9 @@ namespace SituationCenterBackServer
             }
             else
             {
+                app.RegisterAsService(ServiceTypes.Core,
+                    Configuration.GetConnectionString("IPResolverHost"),
+                    loggerFactory.CreateLogger("Service registrator"));
                 app.UseExceptionHandler("/Home/Error");
             }
 
@@ -131,7 +134,6 @@ namespace SituationCenterBackServer
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
-            //app.RegisterAsService(ServiceTypes.Core, Configuration.GetConnectionString("IPResolverHost"));
             InitiUsers(app.ApplicationServices);
         }
 

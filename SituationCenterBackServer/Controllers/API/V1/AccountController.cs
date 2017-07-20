@@ -99,6 +99,10 @@ namespace SituationCenterBackServer.Controllers.API.V1
                     logger.LogInformation(3, "User created a new account with password.");
                     return ResponseBase.GoodResponse();
                 }
+                else
+                {
+                    logger.LogWarning(string.Join(" ", result.Errors.Select(E => $"{E.Code}---{E.Description}")));
+                }
             }
             return ResponseBase.BadResponse("What?!");
         }

@@ -41,11 +41,13 @@
             <table class="table-bordered table-condensed">
                 <tr>
                     <td>Name</td>
+                    <td>Privacy rule</td>
                 </tr>
                 @foreach(var room in Model.Rooms)
                 {
                     <tr>
-                        <td>@room.Name</td>
+                        <td>@Html.ActionLink(room.Name, "room", new { roomid=room.Id })</td>
+                        <td>@room.SecurityRule.PrivacyRule</td>
                     </tr>
 
                 }

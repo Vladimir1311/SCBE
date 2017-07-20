@@ -104,7 +104,7 @@ namespace SituationCenterBackServer.Controllers.API.V1
         }
 
         [HttpGet]
-        public async Task<ResponseBase> Search(string firstName, string lastName, string phone)
+        public ResponseBase Search(string firstName, string lastName, string phone)
         {
             var users = database.Users.Where(U => U.PhoneNumber.Contains(phone));
             return Common.ResponseObjects.Account.Search.Create(users.Select(U => new UserPresent { Phone = U.PhoneNumber }));

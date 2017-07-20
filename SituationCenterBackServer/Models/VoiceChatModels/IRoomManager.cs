@@ -10,16 +10,15 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
     {
         (Room room, byte clientId) CreateNewRoom(ApplicationUser creater, CreateRoomRequest createRoomInfo);
 
-        (Room room, byte clientId) JoinToRoom(ApplicationUser user, string roomName);
-        (Room room, byte clientId) JoinToRoom(ApplicationUser user, byte roomId);
+        (Room room, byte clientId) JoinToRoom(ApplicationUser user, Guid roomId, string securityData);
 
         bool RemoveFromRoom(string UserId);
 
         IEnumerable<Room> Rooms { get; }
 
         IEnumerable<Room> FindRooms(Predicate<Room> func);
+        Room FindRoom(Guid roomId);
 
-        IEnumerable<ApplicationUser> Users { get; }
-
+        event Action<ApplicationUser> SaveState;
     }
 }

@@ -18,6 +18,9 @@ namespace SituationCenterBackServer.Models
         [NotMapped]
         public byte InRoomId { get; set; }
 
+        public Guid? RoomId { get; set; }
+        public Room Room { get; set; }
+
         public string Name { get; set; }
         public string Surname { get; set; }
         public override bool Equals(object obj)

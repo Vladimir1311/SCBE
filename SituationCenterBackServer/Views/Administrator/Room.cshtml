@@ -1,0 +1,30 @@
+﻿@using SituationCenterBackServer.Models.VoiceChatModels
+@model Room
+@{
+    ViewData["Title"] = $"Room {Model.Name}";
+}
+
+<h2>@ViewData["Title"].</h2>
+
+<div class="row">
+    <div class="col-lg-4">
+        <h3>Users</h3>
+        <ol>
+            @foreach (var user in Model.Users)
+            {
+                <li>@user.Email</li>
+            }
+        </ol>
+    </div>
+    <div class="col-lg-5">
+        <h3>Security</h3>
+        <dl class="dl-horizontal">
+            <dt>Privacy type</dt>
+            <dd>@Model.SecurityRule.PrivacyRule</dd>
+            <dt>Data</dt>
+            <dd>@Model.SecurityRule.Data</dd>
+            <dt>Id</dt>
+            <dd>@Model.SecurityRule.Id</dd>
+        </dl>
+    </div>
+</div>

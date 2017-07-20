@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using SituationCenterBackServer.Models.RoomSecurity;
 using SituationCenterBackServer.Models.VoiceChatModels.Connectors;
 using System;
 using System.Collections.Generic;
@@ -8,37 +9,41 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
 {
     public class Room
     {
-        public byte Id { get; }
+
+        public Guid Id { get; set; }
         public string Name { get; set; }
 
 
+        public Guid RoomSecurityRuleId { get; set; }
+        public RoomSecurityRule SecurityRule { get; set; }
+
+
+
+
         private static byte _lastClientId;
-        private readonly List<ApplicationUser> _users;
+        public List<ApplicationUser> Users { get; set; }
 
 
         //TODO сделать умерщвтление комнаты после ухода пользователей
         [JsonIgnore]
         public DateTime TimeOut { get; set; }
 
-        [JsonIgnore]
-        public IEnumerable<ApplicationUser> Users => _users;
 
-        public Room(ApplicationUser creater, byte id)
+        public Room()
         {
-            _users = new List<ApplicationUser> { creater };
-            creater.InRoomId = _lastClientId++;
-            Id = id;
+            Users = new List<ApplicationUser>();
         }
+        
 
         internal void AddUser(ApplicationUser user)
         {
-            _users.Add(user);
+            Users.Add(user);
             user.InRoomId = _lastClientId++;
         }
 
         internal void RemoveUser(ApplicationUser user)
         {
-            _users.Remove(user);
+            Users.Remove(user);
             //TODO Усли пользователей нет - начать отсчет до сметри 
         }
     }

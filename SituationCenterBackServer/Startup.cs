@@ -22,6 +22,7 @@ using SituationCenterBackServer.Models.StorageModels;
 using SituationCenterBackServer.Models.Options;
 using System.Text;
 using Common.Services;
+using SituationCenterBackServer.Models.RoomSecurity;
 
 namespace SituationCenterBackServer
 {
@@ -71,6 +72,7 @@ namespace SituationCenterBackServer
 
 
             services.AddSingleton<IRoomManager, RoomsManager>();
+            services.AddTransient<IRoomSecurityManager, RoomSecurityManager>();
             //services.AddSingleton<IConnector, UdpConnector>();
             //services.AddSingleton<IStableConnector, TCPConnector>();
             services.AddSingleton<IDocumentHandlerService, DocumentsHandler>();

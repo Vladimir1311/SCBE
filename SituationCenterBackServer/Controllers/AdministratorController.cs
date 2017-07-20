@@ -44,6 +44,14 @@ namespace SituationCenterBackServer.Controllers
             return View(model);
             
         }
+        public IActionResult Room(Guid roomId)
+        {
+            var room = roomsManager.FindRoom(roomId);
+            if (room != null)
+                return View(room);
+            else
+                return RedirectToAction("Index");
+        }
 
         public async Task<IActionResult> Logs()
         {

@@ -109,18 +109,16 @@ namespace SituationCenterBackServer.Controllers
             }
         }
 
-        public async Task<ResponseData> JoinToRoom(byte? roomId, string roomName)
+        public async Task<ResponseData> JoinToRoom(Guid roomId)
         {
             try
             {
                 //Выбрать один тдентификатор комнаты
                 var currentUser = await _userManager.GetUserAsync(User);
-                _logger.LogDebug($"client {currentUser.Id} try join in room {roomId?.ToString() ?? roomName}");
+                _logger.LogDebug($"client {currentUser.Id} try join in room {roomId}");
                 (Room room, byte ClientId) returned;
                 if (roomId != null)
-                    returned = _roomManager.JoinToRoom(currentUser, roomId.Value);
-                else if (roomName != null)
-                    returned = _roomManager.JoinToRoom(currentUser, roomName);
+                    returned = _roomManager.JoinToRoom(currentUser, roomId, "");
                 else throw new Exception("Передайте параметр для входа в комнату");
 
                 return new SignInRoomInfo

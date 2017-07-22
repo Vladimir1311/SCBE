@@ -54,7 +54,14 @@ namespace SituationCenterBackServer.Controllers.API.V1
         {
             var user = await userManager.FindUser(User);
             roomsManager.JoinToRoom(user, roomId, data);
-            return ResponseBase.BadResponse(":(");
+            return ResponseBase.GoodResponse();
+        }
+
+        public async Task<ResponseBase> Leave()
+        {
+            var user = await userManager.FindUser(User);
+            roomsManager.LeaveFromRoom(user);
+            return ResponseBase.GoodResponse();
         }
     }
 }

@@ -12,6 +12,8 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
 
         (Room room, byte clientId) JoinToRoom(ApplicationUser user, Guid roomId, string securityData);
 
+        void LeaveFromRoom(ApplicationUser user);
+
         bool RemoveFromRoom(string UserId);
 
         IEnumerable<Room> Rooms { get; }

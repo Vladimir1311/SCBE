@@ -123,6 +123,12 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
             return room;
         }
 
+        public void LeaveFromRoom(ApplicationUser user)
+        {
+            user.RoomId = null;
+            SaveState?.Invoke(user);
+        }
+
         public IEnumerable<Room> Rooms => FindRooms(R => true);
     }
 }

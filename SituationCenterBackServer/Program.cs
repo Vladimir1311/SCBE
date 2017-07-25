@@ -11,13 +11,9 @@ namespace SituationCenterBackServer
     {
         public static void Main(string[] args)
         {
-            var hostBuilder = new WebHostBuilder();
-            Console.WriteLine(hostBuilder.GetSetting("environment"));
-            var url = hostBuilder.GetSetting("environment") == "Production" ?
-                "http://localhost:5000" : "http://*:80";
-            var host = hostBuilder
+            var host = new WebHostBuilder()
                 .UseKestrel()
-                .UseUrls(url)
+         //       .UseUrls(url)
                 .UseContentRoot(Directory.GetCurrentDirectory())
                 .UseIISIntegration()
                 .UseStartup<Startup>()

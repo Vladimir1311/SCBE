@@ -45,8 +45,7 @@ namespace SituationCenterBackServer.Controllers.API.V1
         [HttpPost]
         public async Task<ResponseBase> Create([FromBody]CreateRoomRequest info)
         {
-            var user = await userManager.FindByIdAsync(userManager.GetUserId(User));
-            roomsManager.CreateNewRoom(user, info);
+            roomsManager.CreateNewRoom(Guid.Parse(userManager.GetUserId(User)), info);
             return ResponseBase.GoodResponse();
         }
 
@@ -57,10 +56,17 @@ namespace SituationCenterBackServer.Controllers.API.V1
             return ResponseBase.GoodResponse();
         }
 
-        public async Task<ResponseBase> Leave()
+        public ResponseBase Leave()
         {
-            var user = await userManager.FindUser(User);
-            roomsManager.LeaveFromRoom(user);
+            var userId = userManager.GetUserGuid(User);
+            roomsManager.LeaveFromRoom(userId);
+            return ResponseBase.GoodResponse();
+        }
+
+        public ResponseBase DeleteRoom(Guid roomId)
+        {
+            var userId = userManager.GetUserGuid(User);
+            roomsManager.DeleteRoom(userId, roomId);
             return ResponseBase.GoodResponse();
         }
     }

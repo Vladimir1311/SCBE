@@ -12,6 +12,8 @@ namespace SituationCenterBackServer.Models.RoomSecurity
         void CreatePublicRule(Room room);
         void CreatePasswordRule(Room room, string pasword);
         void CreateInvationRule(Room room, IEnumerable<ApplicationUser> users);
-        
+        void AddAdminRole(ApplicationUser user, Room room);
+        bool CanDelete(ApplicationUser user, Room room);
+        void ClearRoles(Room room);
     }
 }

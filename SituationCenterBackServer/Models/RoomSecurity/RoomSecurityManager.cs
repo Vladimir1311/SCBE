@@ -15,14 +15,21 @@ namespace SituationCenterBackServer.Models.RoomSecurity
     {
         private readonly ApplicationDbContext dataBase;
         private readonly RoleManager<IdentityRole> roleManager;
+        private readonly UserManager<ApplicationUser> userManager;
         private readonly ILogger<RoomSecurityManager> logger;
+
+        //TODO Add rules generator in DI
+        private RoomRolesGenerator roomRolesGenerator = new RoomRolesGenerator();
+
 
         public RoomSecurityManager(ApplicationDbContext dataBase,
             RoleManager<IdentityRole> roleManager,
+            UserManager<ApplicationUser> userManager,
             ILogger<RoomSecurityManager> logger)
         {
             this.dataBase = dataBase;
             this.roleManager = roleManager;
+            this.userManager = userManager;
             this.logger = logger;
         }
 
@@ -77,6 +84,34 @@ namespace SituationCenterBackServer.Models.RoomSecurity
             logger.LogDebug($"validate password");
             if (securityRule.Data != password)
                 throw new Exception("Password not correct");
+        }
+
+
+        public void AddAdminRole(ApplicationUser user, Room room)
+        {
+            var adminRole = roomRolesGenerator.GetAdministratorRole(room);
+            var createResult = roleManager.CreateAsync(new IdentityRole(adminRole)).Result;
+            if (!createResult.Succeeded)
+                throw new Exception("Can't create role for room " + string.Join(" ", createResult.Errors.Select(E => $"{E.Code} {E.Description}")));
+            var addToRoleResult = userManager.AddToRoleAsync(user, adminRole).Result;
+            if (!addToRoleResult.Succeeded)
+                throw new Exception("Can't add to room" + string.Join(" ", addToRoleResult.Errors.Select(E => $"{E.Code} {E.Description}")));
+        }
+
+        public bool CanDelete(ApplicationUser user, Room room)
+        {
+            var adminRole = roomRolesGenerator.GetAdministratorRole(room);
+            return userManager.IsInRoleAsync(user, adminRole).Result
+                || userManager.IsInRoleAsync(user, "Administrator").Result
+                ;
+        }
+
+        public void ClearRoles(Room room)
+        {
+            var adminRoleName = roomRolesGenerator.GetAdministratorRole(room);
+            var adminRole = roleManager.FindByNameAsync(adminRoleName).Result;
+            if (adminRole != null)
+                roleManager.DeleteAsync(adminRole).Wait();
         }
     }
 }

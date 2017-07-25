@@ -14,5 +14,10 @@ namespace SituationCenterBackServer.Extensions
         {
             return await userManager.FindByIdAsync(userManager.GetUserId(user));
         }
+
+        public static Guid GetUserGuid(this UserManager<ApplicationUser> userManager, ClaimsPrincipal user)
+        {
+            return Guid.Parse(userManager.GetUserId(user));
+        }
     }
 }

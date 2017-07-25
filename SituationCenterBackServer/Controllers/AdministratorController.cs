@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using SituationCenterBackServer.Models;
 using Microsoft.EntityFrameworkCore;
+using SituationCenterBackServer.Extensions;
 
 namespace SituationCenterBackServer.Controllers
 {
@@ -37,7 +38,10 @@ namespace SituationCenterBackServer.Controllers
         {
             var model = new IndexViewModel
             {
-                Users = userManager.Users.Include(U => U.Roles).ToList(),
+                Users = userManager.Users
+                .Include(U => U.Roles)
+                .Include(U => U.Room)
+                .ToList(),
                 Rooms = roomsManager.Rooms.ToList(),
                 Roles = roleManager.Roles.ToList()
             };
@@ -60,6 +64,31 @@ namespace SituationCenterBackServer.Controllers
             var socket = await HttpContext.WebSockets.AcceptWebSocketAsync();
             await SocketLoggerProvider.AddSocketAsync(socket);
             return new EmptyResult();
+        }
+
+        public async Task<IActionResult> RemoveRoleFromUser(Guid userId, Guid roleId)
+        {
+            try
+            {
+                var user = await userManager.FindUser(User);
+                var role = await roleManager.FindByIdAsync(roleId.ToString());
+                userManager.RemoveFromRoleAsync(user, role.Name).Wait();
+                var usersInRole = await userManager.GetUsersInRoleAsync(role.Name);
+                if (usersInRole.Count == 0)
+                    await roleManager.DeleteAsync(role);
+            }
+            catch
+            {
+                return RedirectToAction("Index");
+            }
+            return RedirectToAction("Index");
+        }
+
+        public async Task<IActionResult> DeleteRoom(Guid roomId)
+        {
+            await Task.CompletedTask;
+            roomsManager.DeleteRoom(userManager.GetUserGuid(User), roomId);
+            return RedirectToAction("Index");
         }
     }
 }

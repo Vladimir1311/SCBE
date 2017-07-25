@@ -36,20 +36,11 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
             this.dataBase = dataBase;
             this.roomSecyrityManager = roomSecyrityManager;
         }
-
-        private void OnUserDisconnected(ApplicationUser user)
+        public (Room room, byte clientId) CreateNewRoom(Guid createrId, CreateRoomRequest createRoomInfo)
         {
-            try
-            {
-                RemoveFromRoom(user.Id);
-            }
-            catch (Exception ex)
-            {
-                logger.LogWarning(ex.Message);
-            }
-        }
-        public (Room room, byte clientId) CreateNewRoom(ApplicationUser creater, CreateRoomRequest createRoomInfo)
-        {
+            var creater = dataBase.Users
+                .Include(U => U.Room)
+                .FirstOrDefault(U => U.Id == createrId.ToString());
             if (creater.RoomId != null)
                 throw new Exception("Вы уже состоите в другой комнате!");
             if (dataBase.Rooms.Any(R => R.Name == createRoomInfo.Name))
@@ -75,9 +66,10 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
                     break;
             }
             dataBase.Add(newRoom);
+            roomSecyrityManager.AddAdminRole(creater, newRoom);
+            creater.RoomId = newRoom.Id;
+            //SaveState?.Invoke(creater);
             dataBase.SaveChanges();
-            newRoom.AddUser(creater);
-            SaveState?.Invoke(creater);
             return (newRoom, creater.InRoomId);
 
         }
@@ -106,14 +98,6 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
             return (calledRoom,user.InRoomId);
         }
 
-        public bool RemoveFromRoom(string UserId)
-        {
-            var user = dataBase.Users.FirstOrDefault(U => U.Id == UserId);
-            user.RoomId = null;
-            dataBase.SaveChanges();
-            return true;
-        }
-
         public Room FindRoom(Guid roomId)
         {
             var room = dataBase.Rooms
@@ -123,12 +107,36 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
             return room;
         }
 
-        public void LeaveFromRoom(ApplicationUser user)
+        public void LeaveFromRoom(Guid userId)
         {
+            var user = dataBase.Users.FirstOrDefault(U => U.Id == userId.ToString());
             user.RoomId = null;
-            SaveState?.Invoke(user);
+            dataBase.SaveChanges();
+        }
+
+        public void DeleteRoom(Guid userId, Guid roomId)
+        {
+            var user = FindUser(userId);
+            var room = FindRoom(roomId);
+            if (!roomSecyrityManager.CanDelete(user, room))
+                throw new Exception("Нет права на удаление комнаты!");
+            foreach (var person in room.Users)
+                person.RoomId = null;
+            dataBase.SaveChanges();
+            roomSecyrityManager.ClearRoles(room);
+            dataBase.Rooms.Remove(room);
+            dataBase.SaveChanges();
+            dataBase.Rules.Remove(room.SecurityRule);
+            dataBase.SaveChanges();
         }
 
         public IEnumerable<Room> Rooms => FindRooms(R => true);
+
+
+
+        private ApplicationUser FindUser(Guid userId)
+        {
+            return dataBase.Users.FirstOrDefault(U => U.Id == userId.ToString());
+        }
     }
 }

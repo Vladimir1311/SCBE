@@ -8,13 +8,11 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
 {
     public interface IRoomManager
     {
-        (Room room, byte clientId) CreateNewRoom(ApplicationUser creater, CreateRoomRequest createRoomInfo);
+        (Room room, byte clientId) CreateNewRoom(Guid createrId, CreateRoomRequest createRoomInfo);
 
         (Room room, byte clientId) JoinToRoom(ApplicationUser user, Guid roomId, string securityData);
 
-        void LeaveFromRoom(ApplicationUser user);
-
-        bool RemoveFromRoom(string UserId);
+        void LeaveFromRoom(Guid UserId);
 
         IEnumerable<Room> Rooms { get; }
 
@@ -22,5 +20,7 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
         Room FindRoom(Guid roomId);
 
         event Action<ApplicationUser> SaveState;
+
+        void DeleteRoom(Guid userId, Guid roomId);
     }
 }

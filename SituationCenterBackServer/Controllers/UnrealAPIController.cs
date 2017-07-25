@@ -95,7 +95,7 @@ namespace SituationCenterBackServer.Controllers
             {
                 _logger.LogInformation("Request for creating room with name " + name);
                 var currentUser = await _userManager.GetUserAsync(User);
-                var (room, clientId) = _roomManager.CreateNewRoom(currentUser, new Common.Requests.Room.CreateRoom.CreateRoomRequest { Name = name});
+                var (room, clientId) = _roomManager.CreateNewRoom(Guid.Empty, new Common.Requests.Room.CreateRoom.CreateRoomRequest { Name = name});
                 return new SignInRoomInfo()
                 {
                     ClientId = clientId,
@@ -137,7 +137,7 @@ namespace SituationCenterBackServer.Controllers
         {
             var userId = _userManager.GetUserId(User);
             _logger.LogInformation($"try leave from room user id: {userId}");
-            return ResponseData.GoodResponse(_roomManager.RemoveFromRoom(userId) ? "Вы успешно вышли из комнаты" : "Вы не состояли ни в какой комнате");
+            return ResponseData.GoodResponse("");
         }
 
         private async Task<(ClaimsIdentity, string)> GetIdentity(string email, string password)

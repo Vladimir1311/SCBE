@@ -9,9 +9,6 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using Spire.Pdf;
 
-using org.pdfclown.documents;
-using org.pdfclown.tools;
-
 namespace DocsToPictures.Models
 {
     [SupportedFormatAttribyte(".docx")]
@@ -32,32 +29,20 @@ namespace DocsToPictures.Models
                 doc.SaveAs2(pdfFileName, WdSaveFormat.wdFormatPDF);
                 doc.Close(WdSaveOptions.wdDoNotSaveChanges, Type.Missing, Type.Missing);
 
-                using (var file = new org.pdfclown.files.File(pdfFileName))
+                using (var pdfFile = new PdfDocument(pdfFileName))
                 {
-                    var pdfDoc = file.Document;
-                    Renderer renderer = new Renderer();
-                    neededDoc.PagesPaths = new string[pdfDoc.Pages.Count + 1];
-                    for (var i = 0; i < pdfDoc.Pages.Count; i++)
+                    neededDoc.PagesPaths = new string[pdfFile.Pages.Count + 1];
+                    for (var i = 0; i < pdfFile.Pages.Count; i++)
                     {
-                        var image = renderer.Render(pdfDoc.Pages[i], pdfDoc.Pages[i].Size);
+                        var image = pdfFile.SaveAsImage(i);
                         string imagePath = Path.Combine(neededDoc.Folder, $"{i}.png");
                         image.Save(imagePath, ImageFormat.Png);
                         image.Dispose();
                         neededDoc.PagesPaths[i] = imagePath;
-                        neededDoc.Progress = Percents(i, pdfDoc.Pages.Count);
+                        neededDoc.Progress = Percents(i, pdfFile.Pages.Count);
                     }
 
                 }
-
-
-
-
-
-
-
-                //PdfDocument pdfDoc = new PdfDocument();
-                //pdfDoc.LoadFromFile(pdfFileName);
-
                 
             }
             wordApp.Quit(Type.Missing, Type.Missing, Type.Missing);

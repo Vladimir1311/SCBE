@@ -43,6 +43,7 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
                 .FirstOrDefault(U => U.Id == createrId.ToString());
             if (creater.RoomId != null)
                 throw new Exception("Вы уже состоите в другой комнате!");
+            //TODO Искать только в видимых для пользователя комнатах
             if (dataBase.Rooms.Any(R => R.Name == createRoomInfo.Name))
                 throw new Exception("Комната с таким именем уже существует!");
 
@@ -61,14 +62,12 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
                     roomSecyrityManager.CreatePasswordRule(newRoom, password);
                     break;
                 case Common.Models.Rooms.PrivacyRoomType.InvationPrivate:
-                    break;
                 default:
-                    break;
+                    throw new NotImplementedException("Данный функционал еще не готов");
             }
             dataBase.Add(newRoom);
             roomSecyrityManager.AddAdminRole(creater, newRoom);
             creater.RoomId = newRoom.Id;
-            //SaveState?.Invoke(creater);
             dataBase.SaveChanges();
             return (newRoom, creater.InRoomId);
 

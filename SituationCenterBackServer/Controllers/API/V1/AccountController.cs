@@ -70,7 +70,6 @@ namespace SituationCenterBackServer.Controllers.API.V1
             var encodetJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
             logger.LogDebug($"Send token for {user.Email}");
             return AuthorizeResponse.Create(encodetJwt);
-                
         }
         [HttpPost]
         [AllowAnonymous]
@@ -84,7 +83,9 @@ namespace SituationCenterBackServer.Controllers.API.V1
                     Email = model.Email,
                     Name = model.Name,
                     Surname = model.Surname,
-                    PhoneNumber = model.PhoneNumber
+                    PhoneNumber = model.PhoneNumber,
+                    Sex = model.Sex,
+                    Birthday = model.ParsedBirthday()
                 };
 
                 var result = await userManager.CreateAsync(user, model.Password);

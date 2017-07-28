@@ -10,6 +10,8 @@
         return Model.Roles.FirstOrDefault(R => R.Id == userRole.RoleId)?.Name ?? "UNKNOWN ROLE!!!";
     }
 
+    string Sex(bool sex) => sex ? "Man" : "Woman"; 
+
 }
 @model SituationCenterBackServer.Models.AdministratorViewModels.IndexViewModel
 <h2>Administrator panel</h2>
@@ -21,6 +23,8 @@
             <tr>
                 <td>email</td>
                 <td>phone number</td>
+                <td>sex</td>
+                <td>birthday</td>
                 <td>roles</td>
                 <td>In room</td>
             </tr>
@@ -29,6 +33,8 @@
                 <tr>
                     <td>@user.Email</td>
                     <td>@user.PhoneNumber</td>
+                    <td>@Sex(user.Sex)</td>
+                    <td>@user.Birthday.Day / @user.Birthday.Month / @user.Birthday.Year</td>
                     <td>
                         <table class="table-bordered">
                             @foreach(var role in user.Roles)

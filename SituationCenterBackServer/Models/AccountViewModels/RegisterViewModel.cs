@@ -47,5 +47,29 @@ namespace SituationCenterBackServer.Models.AccountViewModels
         [Display(Name = "Surname")]
         [JsonProperty("surname")]
         public string Surname { get; set; }
+
+        [Required]
+        [DataType(DataType.Text)]
+        [Display(Name = "Birthday")]
+        //[CustomValidation()]
+        [JsonProperty("birthday")]
+        public string Birthday { get; set; }
+
+        [Required]
+        [DataType(DataType.Text)]
+        [Display(Name = "Sex")]
+        [JsonProperty("isMan")]
+        public bool Sex { get; set; }
+
+
+        public DateTime ParsedBirthday()
+        {
+            var numbers = Birthday
+                .Split('/')
+                .Select(T => int.Parse(T))
+                .Reverse()
+                .ToArray();
+            return new DateTime(numbers[0], numbers[1], numbers[2]);
+        }
     }
 }

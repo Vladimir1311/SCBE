@@ -51,8 +51,7 @@ namespace SituationCenterBackServer.Controllers.API.V1
 
         public async Task<ResponseBase> Join(Guid roomId, string data = null)
         {
-            var user = await userManager.FindUser(User);
-            roomsManager.JoinToRoom(user, roomId, data);
+            roomsManager.JoinToRoom(userManager.GetUserGuid(User), roomId, data);
             return ResponseBase.GoodResponse();
         }
 

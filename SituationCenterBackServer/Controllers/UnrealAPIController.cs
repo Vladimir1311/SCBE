@@ -118,7 +118,7 @@ namespace SituationCenterBackServer.Controllers
                 _logger.LogDebug($"client {currentUser.Id} try join in room {roomId}");
                 (Room room, byte ClientId) returned;
                 if (roomId != null)
-                    returned = _roomManager.JoinToRoom(currentUser, roomId, "");
+                    returned = _roomManager.JoinToRoom(Guid.Empty, roomId, "");
                 else throw new Exception("Передайте параметр для входа в комнату");
 
                 return new SignInRoomInfo

@@ -10,7 +10,7 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
     {
         (Room room, byte clientId) CreateNewRoom(Guid createrId, CreateRoomRequest createRoomInfo);
 
-        (Room room, byte clientId) JoinToRoom(ApplicationUser user, Guid roomId, string securityData);
+        (Room room, byte clientId) JoinToRoom(Guid userId, Guid roomId, string securityData);
 
         void LeaveFromRoom(Guid UserId);
 

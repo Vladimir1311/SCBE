@@ -118,9 +118,9 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
 
         public void DeleteRoom(Guid userId, Guid roomId)
         {
-            var user = FindUser(userId);
             var room = FindRoom(roomId);
-            if (!roomSecyrityManager.CanDelete(user, room))
+            var user = room.Users.FirstOrDefault(U => U.Id  == userId.ToString());
+            if (user == null || !roomSecyrityManager.CanDelete(user, room))
                 throw new Exception("Нет права на удаление комнаты!");
             foreach (var person in room.Users)
                 person.RoomId = null;

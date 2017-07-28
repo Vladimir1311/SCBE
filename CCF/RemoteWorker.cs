@@ -70,12 +70,15 @@ namespace CCF
                     invocation.Arguments.ToArray()),
                 MethodName = invocation.Method.Name
             };
+            var data = JsonConvert.SerializeObject(message);
+            Console.WriteLine(data);
 
-            //ManualResetEvent reset = new ManualResetEvent(false);
+            MultipartFormDataContent multiContent = new MultipartFormDataContent();
 
-            //reset.WaitOne();
-            Console.WriteLine(JsonConvert.SerializeObject(message));
-            invocation.ReturnValue = 1;
+            StringContent content = new StringContent(data);
+            multiContent.Add(content, "simpleargs");
+            var res = httpClient.PostAsync("CCF/Recieve", multiContent).Result.Content.ReadAsStringAsync().Result;
+            invocation.ReturnValue = int.Parse(res);
         }
     }
 }

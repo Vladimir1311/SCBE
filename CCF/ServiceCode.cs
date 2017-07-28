@@ -7,10 +7,12 @@ using System.Reflection;
 using Newtonsoft.Json.Linq;
 using System.Linq;
 using Newtonsoft.Json;
+using Microsoft.AspNetCore.Http;
 
 namespace CCF
 {
     public class ServiceCode<T>
+    
     {
         private T worker;
         private Type workerType;
@@ -20,12 +22,12 @@ namespace CCF
             workerType = targetObject.GetType();
         }
 
-        public string Handle(string request)
+        public string Handle(IFormCollection request)
         {
             var message = JsonConvert.DeserializeObject<InvokeMessage>(request);
             var targetMethod = workerType.GetMethod(message.MethodName, ArgTypes(message.Args));
-
-            return "lol";
+            var result = targetMethod.Invoke(worker, message.Args.ToObject<object[]>());
+            return result.ToString();
         }
 
 

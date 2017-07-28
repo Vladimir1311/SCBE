@@ -17,6 +17,7 @@ using Microsoft.IdentityModel.Tokens;
 using Common.ResponseObjects.Account;
 using Microsoft.Extensions.Options;
 using SituationCenterBackServer.Data;
+using Newtonsoft.Json;
 
 namespace SituationCenterBackServer.Controllers.API.V1
 {
@@ -73,9 +74,8 @@ namespace SituationCenterBackServer.Controllers.API.V1
         }
         [HttpPost]
         [AllowAnonymous]
-        public async Task<ResponseBase> Register([FromBody]RegisterViewModel model, string returnUrl = null)
+        public async Task<ResponseBase> Registration([FromBody]RegisterViewModel model)
         {
-            ViewData["ReturnUrl"] = returnUrl;
             if (ModelState.IsValid)
             {
                 var user = new ApplicationUser
@@ -99,12 +99,20 @@ namespace SituationCenterBackServer.Controllers.API.V1
                     logger.LogInformation(3, "User created a new account with password.");
                     return ResponseBase.GoodResponse();
                 }
+                logger.LogWarning(string.Join(" ", result.Errors.Select(E => $"{E.Code}---{E.Description}")));
+                logger.LogWarning("Model valid but error");
+                logger.LogWarning(JsonConvert.SerializeObject(ModelState, Formatting.Indented));
+                logger.LogWarning(JsonConvert.SerializeObject(model, Formatting.Indented));
             }
+            //ModelState.
+            logger.LogWarning("Model not valid");
+            logger.LogWarning(JsonConvert.SerializeObject(ModelState, Formatting.Indented));
+            logger.LogWarning(JsonConvert.SerializeObject(model, Formatting.Indented));
             return ResponseBase.BadResponse("What?!");
         }
 
         [HttpGet]
-        public async Task<ResponseBase> Search(string firstName, string lastName, string phone)
+        public ResponseBase Search(string firstName, string lastName, string phone)
         {
             var users = database.Users.Where(U => U.PhoneNumber.Contains(phone));
             return Common.ResponseObjects.Account.Search.Create(users.Select(U => new UserPresent { Phone = U.PhoneNumber }));

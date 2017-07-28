@@ -7,7 +7,7 @@ namespace SituationCenterBackServer.Models.VoiceChatModels.ResponseTypes
 {
     public class SignInRoomInfo : ResponseData
     {
-        public byte RoomId { get; set; }
+        public Guid RoomId { get; set; }
         public byte ClientId { get; set; }
 
         public SignInRoomInfo()

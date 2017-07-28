@@ -10,4 +10,10 @@
     <PackageReference Include="Castle.Core" Version="4.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>C:\Users\maksa\.nuget\packages\newtonsoft.json\10.0.2\lib\netstandard1.3\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>

@@ -7,22 +7,34 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using SituationCenterBackServer.Models.VoiceChatModels.Connectors;
 using Common.Requests.Room.CreateRoom;
+using SituationCenterBackServer.Data;
+using SituationCenterBackServer.Models.RoomSecurity;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Microsoft.EntityFrameworkCore;
 
 namespace SituationCenterBackServer.Models.VoiceChatModels
 {
     public class RoomsManager : IRoomManager
     {
-        private byte lastRoomId = 0;
-        private List<Room> rooms = new List<Room>();
-        private ILogger<RoomsManager> _logger;
-        private Dictionary<ApplicationUser, Room> _userToRoom = new Dictionary<ApplicationUser, Room>();
+        
+        private ILogger<RoomsManager> logger;
+        private ApplicationDbContext dataBase;
+        private readonly IRoomSecurityManager roomSecyrityManager;
+
+        public event Action<ApplicationUser> SaveState;
 
         public RoomsManager(IOptions<UnrealAPIConfiguration> configs,
             ILogger<RoomsManager> logger,
-            UserManager<ApplicationUser> usermanager)
+            UserManager<ApplicationUser> usermanager,
+            ApplicationDbContext dataBase,
+            IRoomSecurityManager roomSecyrityManager)
+
         {
 
-            _logger = logger;
+            this.logger = logger;
+            this.dataBase = dataBase;
+            this.roomSecyrityManager = roomSecyrityManager;
         }
 
         private void OnUserDisconnected(ApplicationUser user)
@@ -33,81 +45,84 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex.Message);
+                logger.LogWarning(ex.Message);
             }
         }
-
-        private void OnUserConnected(ApplicationUser user)
-        {
-            _userToRoom[user] = null;
-        }
-
-        private void OnReceiceDataFromUser(FromClientPack dataPack)
-        {
-            _logger.LogDebug($"Recieved {dataPack.Data.Length} bytes with {dataPack.PackType} from {dataPack.User.Email}");
-            //switch (dataPack.PackType)
-            //{
-            //    case PackType.Voice:
-            //        if (_userToRoom.TryGetValue(dataPack.User, out var room))
-            //            room?.UserSpeak(_nonStableConnector, dataPack.User, dataPack.Data);
-            //        break;
-            //}
-        }
-
         public (Room room, byte clientId) CreateNewRoom(ApplicationUser creater, CreateRoomRequest createRoomInfo)
         {
-            if (rooms.Any(R => R.Users.Any(U => U.Id == creater.Id)))
+            if (creater.RoomId != null)
                 throw new Exception("Вы уже состоите в другой комнате!");
-            if (rooms.Any(R => R.Name == createRoomInfo.Name))
+            if (dataBase.Rooms.Any(R => R.Name == createRoomInfo.Name))
                 throw new Exception("Комната с таким именем уже существует!");
-            Room newRoom = new Room(creater, lastRoomId++)
+
+
+            Room newRoom = new Room()
             {
                 Name = createRoomInfo.Name
             };
-            rooms.Add(newRoom);
-            _userToRoom[creater] = newRoom;
+            switch (createRoomInfo.PrivacyType)
+            {
+                case Common.Models.Rooms.PrivacyRoomType.Public:
+                    roomSecyrityManager.CreatePublicRule(newRoom);
+                    break;
+                case Common.Models.Rooms.PrivacyRoomType.Password:
+                    var password = createRoomInfo.Args["password"].ToString();
+                    roomSecyrityManager.CreatePasswordRule(newRoom, password);
+                    break;
+                case Common.Models.Rooms.PrivacyRoomType.InvationPrivate:
+                    break;
+                default:
+                    break;
+            }
+            dataBase.Add(newRoom);
+            dataBase.SaveChanges();
+            newRoom.AddUser(creater);
+            SaveState?.Invoke(creater);
             return (newRoom, creater.InRoomId);
 
         }
 
         public IEnumerable<Room> FindRooms(Predicate<Room> func)
         {
-            return rooms.Where(R => func(R));
+            return dataBase.Rooms.Include(R => R.SecurityRule).Where(R => func(R));
         }
         
 
-        public (Room room, byte clientId) JoinToRoom(ApplicationUser user, string roomName) =>
-            JoinToRoom(user, R => R.Name == roomName);
-
-        public (Room room, byte clientId) JoinToRoom(ApplicationUser user, byte roomId) =>
-            JoinToRoom(user, R => R.Id == roomId);
-
-        private (Room, byte clientId) JoinToRoom(ApplicationUser user, Func<Room, bool> predicate)
+        public (Room room, byte clientId) JoinToRoom(ApplicationUser user, Guid roomId, string securityData)
         {
-            if (rooms.Any(R => R.Users.Any(U => U.Id == user.Id)))
+            if (user.RoomId != null)
                 throw new Exception("Вы уже состоите в другой комнате!");
-            var calledRoom = rooms.FirstOrDefault(predicate);
+            var calledRoom = dataBase
+                .Rooms
+                .Include(R => R.Users)
+                .FirstOrDefault(R => R.Id == roomId);
             if (calledRoom == null)
                 throw new Exception("Запрашиваемой комнаты не существует");
+            logger.LogDebug("Validate user");
+            roomSecyrityManager.Validate(user, calledRoom, securityData);
+            logger.LogDebug("Validated user");
             calledRoom.AddUser(user);
-            _userToRoom[user] = calledRoom;
+            SaveState?.Invoke(user);
             return (calledRoom,user.InRoomId);
         }
 
         public bool RemoveFromRoom(string UserId)
         {
-            var targetPair = _userToRoom.FirstOrDefault(Pair => Pair.Key.Id == UserId);
-            if (targetPair.Key == null)
-                return false;
-            if (targetPair.Value == null)
-                return false;
-            targetPair.Value.RemoveUser(targetPair.Key);
-            _userToRoom[targetPair.Key] = null;
+            var user = dataBase.Users.FirstOrDefault(U => U.Id == UserId);
+            user.RoomId = null;
+            dataBase.SaveChanges();
             return true;
         }
 
-        public IEnumerable<Room> Rooms => rooms;
+        public Room FindRoom(Guid roomId)
+        {
+            var room = dataBase.Rooms
+                .Include(R => R.Users)
+                .Include(R => R.SecurityRule)
+                .FirstOrDefault(R => R.Id == roomId);
+            return room;
+        }
 
-        public IEnumerable<ApplicationUser> Users => _userToRoom.Select(P => P.Key).ToArray();
+        public IEnumerable<Room> Rooms => FindRooms(R => true);
     }
 }

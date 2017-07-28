@@ -30,7 +30,7 @@ namespace SituationCenterBackServer.Models.AccountViewModels
 
         
         [Required]
-        [StringLength(11, ErrorMessage = "Please enter phone number is format 89008007654")]
+        [StringLength(12, ErrorMessage = "Please enter phone number is format 89008007654", MinimumLength =11)]
         [DataType(DataType.PhoneNumber)]
         [Display(Name = "Phone number")]
         [JsonProperty("phone")]

@@ -4,8 +4,10 @@ using Common.ResponseObjects.Rooms;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using SituationCenterBackServer.Extensions;
 using SituationCenterBackServer.Filters;
 using SituationCenterBackServer.Models;
+using SituationCenterBackServer.Models.RoomSecurity;
 using SituationCenterBackServer.Models.VoiceChatModels;
 using System;
 using System.Collections.Generic;
@@ -22,12 +24,16 @@ namespace SituationCenterBackServer.Controllers.API.V1
     {
         private readonly IRoomManager roomsManager;
         private readonly UserManager<ApplicationUser> userManager;
+        private readonly IRoomSecurityManager roomSecyrityManager;
 
         public RoomsController(IRoomManager roomsManager,
-            UserManager<ApplicationUser> userManager)
+            UserManager<ApplicationUser> userManager,
+            IRoomSecurityManager roomSecyrityManager)
         {
             this.roomsManager = roomsManager;
             this.userManager = userManager;
+            this.roomSecyrityManager = roomSecyrityManager;
+            roomsManager.SaveState += (U) => userManager.UpdateAsync(U);
         }
         public ResponseBase List()
         {
@@ -39,10 +45,16 @@ namespace SituationCenterBackServer.Controllers.API.V1
         [HttpPost]
         public async Task<ResponseBase> Create([FromBody]CreateRoomRequest info)
         {
-            await Task.Delay(1000);
             var user = await userManager.FindByIdAsync(userManager.GetUserId(User));
             roomsManager.CreateNewRoom(user, info);
             return ResponseBase.GoodResponse();
+        }
+
+        public async Task<ResponseBase> Join(Guid roomId, string data = null)
+        {
+            var user = await userManager.FindUser(User);
+            roomsManager.JoinToRoom(user, roomId, data);
+            return ResponseBase.BadResponse(":(");
         }
     }
 }

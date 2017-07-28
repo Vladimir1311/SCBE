@@ -12,6 +12,7 @@ using Microsoft.Extensions.Options;
 using SituationCenterBackServer.Models;
 using SituationCenterBackServer.Models.AccountViewModels;
 using SituationCenterBackServer.Services;
+using Newtonsoft.Json;
 
 namespace SituationCenterBackServer.Controllers
 {
@@ -134,10 +135,16 @@ namespace SituationCenterBackServer.Controllers
                     _logger.LogInformation(3, "User created a new account with password.");
                     return RedirectToLocal(returnUrl);
                 }
+                _logger.LogWarning("Model valid but error");
+                _logger.LogWarning(JsonConvert.SerializeObject(ModelState, Formatting.Indented));
+                _logger.LogWarning(JsonConvert.SerializeObject(model, Formatting.Indented));
                 AddErrors(result);
             }
 
             // If we got this far, something failed, redisplay form
+            _logger.LogWarning("Model not valid");
+            _logger.LogWarning(JsonConvert.SerializeObject(ModelState));
+            _logger.LogWarning(JsonConvert.SerializeObject(model));
             return View(model);
         }
 

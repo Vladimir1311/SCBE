@@ -22,6 +22,7 @@ using SituationCenterBackServer.Models.StorageModels;
 using SituationCenterBackServer.Models.Options;
 using System.Text;
 using Common.Services;
+using SituationCenterBackServer.Models.RoomSecurity;
 
 namespace SituationCenterBackServer
 {
@@ -71,6 +72,7 @@ namespace SituationCenterBackServer
 
 
             services.AddSingleton<IRoomManager, RoomsManager>();
+            services.AddTransient<IRoomSecurityManager, RoomSecurityManager>();
             //services.AddSingleton<IConnector, UdpConnector>();
             //services.AddSingleton<IStableConnector, TCPConnector>();
             services.AddSingleton<IDocumentHandlerService, DocumentsHandler>();
@@ -96,6 +98,9 @@ namespace SituationCenterBackServer
             }
             else
             {
+                app.RegisterAsService(ServiceTypes.Core,
+                    Configuration.GetConnectionString("IPResolverHost"),
+                    loggerFactory.CreateLogger("Service registrator"));
                 app.UseExceptionHandler("/Home/Error");
             }
 
@@ -129,7 +134,6 @@ namespace SituationCenterBackServer
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
-            //app.RegisterAsService(ServiceTypes.Core, Configuration.GetConnectionString("IPResolverHost"));
             InitiUsers(app.ApplicationServices);
         }
 

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -11,7 +12,8 @@ namespace Common.Services
     {
         public static IApplicationBuilder RegisterAsService(this IApplicationBuilder app,
             ServiceTypes serviceType,
-            string IPResolverHost)
+            string IPResolverHost,
+            ILogger logger)
         {
             try
             {
@@ -22,8 +24,10 @@ namespace Common.Services
                         token = GlobalTokens.RegisterServiseToken,
                         serviceType = serviceType.ToString()
                     });
+                    logger.LogDebug($"Registration string is {jsonString}");
                     StringContent content = new StringContent(jsonString, Encoding.UTF8, "application/json");
                     var result = client.PostAsync($"http://{IPResolverHost}/ip/register", content).Result;
+                    logger.LogInformation($"result from registration {(int)result.StatusCode} {result.StatusCode}");
                     if (result.StatusCode != System.Net.HttpStatusCode.OK)
                         throw new Exception("Can't register service!!!");
                 }

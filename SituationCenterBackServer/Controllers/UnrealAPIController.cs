@@ -95,10 +95,10 @@ namespace SituationCenterBackServer.Controllers
             {
                 _logger.LogInformation("Request for creating room with name " + name);
                 var currentUser = await _userManager.GetUserAsync(User);
-                var (room, clientId) = _roomManager.CreateNewRoom(Guid.Empty, new Common.Requests.Room.CreateRoom.CreateRoomRequest { Name = name});
+                var room= _roomManager.CreateNewRoom(Guid.Empty, new Common.Requests.Room.CreateRoom.CreateRoomRequest { Name = name});
                 return new SignInRoomInfo()
                 {
-                    ClientId = clientId,
+                    ClientId = 2,
                     RoomId = room.Id
                 };
             }
@@ -116,15 +116,15 @@ namespace SituationCenterBackServer.Controllers
                 //Выбрать один тдентификатор комнаты
                 var currentUser = await _userManager.GetUserAsync(User);
                 _logger.LogDebug($"client {currentUser.Id} try join in room {roomId}");
-                (Room room, byte ClientId) returned;
+                Room returned;
                 if (roomId != null)
                     returned = _roomManager.JoinToRoom(Guid.Empty, roomId, "");
                 else throw new Exception("Передайте параметр для входа в комнату");
 
                 return new SignInRoomInfo
                 {
-                    ClientId = returned.ClientId,
-                    RoomId = returned.room.Id
+                    ClientId = 2,
+                    RoomId = Guid.Empty
                 };
             }
             catch (Exception ex)

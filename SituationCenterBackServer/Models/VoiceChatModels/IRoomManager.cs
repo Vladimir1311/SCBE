@@ -19,8 +19,6 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
         IEnumerable<Room> FindRooms(Predicate<Room> func);
         Room FindRoom(Guid roomId);
 
-        event Action<ApplicationUser> SaveState;
-
         void DeleteRoom(Guid userId, Guid roomId);
     }
 }

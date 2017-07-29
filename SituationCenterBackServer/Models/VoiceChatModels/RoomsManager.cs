@@ -22,8 +22,6 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
         private ApplicationDbContext dataBase;
         private readonly IRoomSecurityManager roomSecyrityManager;
 
-        public event Action<ApplicationUser> SaveState;
-
         public RoomsManager(IOptions<UnrealAPIConfiguration> configs,
             ILogger<RoomsManager> logger,
             UserManager<ApplicationUser> usermanager,
@@ -40,7 +38,8 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
         {
             var creater = dataBase.Users
                 .Include(U => U.Room)
-                .FirstOrDefault(U => U.Id == createrId.ToString());
+                .FirstOrDefault(U => U.Id == createrId.ToString())
+                ?? throw new Exception("Не существует запрашиваемого пользователя");
             if (creater.RoomId != null)
                 throw new Exception("Вы уже состоите в другой комнате!");
             //TODO Искать только в видимых для пользователя комнатах
@@ -78,7 +77,8 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
             return dataBase.Rooms
                 .Include(R => R.SecurityRule)
                 .Include(R => R.Users)
-                .Where(R => func(R));
+                .Where(R => func(R))
+                .ToList();
         }
         
 

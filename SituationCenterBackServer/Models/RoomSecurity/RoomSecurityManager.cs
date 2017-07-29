@@ -51,6 +51,10 @@ namespace SituationCenterBackServer.Models.RoomSecurity
         public void CreatePasswordRule(Room room, string password)
         {
             logger.LogDebug($"create password rule for room {room.Id} {room.Name}");
+
+            if (password?.Length != 8 || !int.TryParse(password, out _))
+                throw new Exception("Password length must be 8 numerals");
+            
             RoomSecurityRule rule = new RoomSecurityRule()
             {
                 PrivacyRule = Common.Models.Rooms.PrivacyRoomType.Password,
@@ -73,7 +77,6 @@ namespace SituationCenterBackServer.Models.RoomSecurity
                     break;
                 case Common.Models.Rooms.PrivacyRoomType.InvationPrivate:
                     throw new NotImplementedException();
-                    break;
                 default:
                     throw new Exception("Unknown privacy type");
             }

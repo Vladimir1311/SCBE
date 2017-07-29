@@ -25,12 +25,12 @@ namespace SituationCenterBackServer.Controllers
         private readonly UserManager<ApplicationUser> userManager;
 
         public AdministratorController(IRoomManager roomsManager,
-            ApplicationDbContext context,
+            ApplicationDbContext dataBase,
             UserManager<ApplicationUser> userManager,
             RoleManager<IdentityRole> roleManager)
         {
             this.roomsManager = roomsManager;
-            this.dataBase = context;
+            this.dataBase = dataBase;
             this.userManager = userManager;
             this.roleManager = roleManager;
         }
@@ -38,11 +38,11 @@ namespace SituationCenterBackServer.Controllers
         {
             var model = new IndexViewModel
             {
-                Users = userManager.Users
+                Users = dataBase.Users
                 .Include(U => U.Roles)
                 .Include(U => U.Room)
                 .ToList(),
-                Rooms = roomsManager.Rooms.ToList(),
+                Rooms = dataBase.Rooms.ToList(),
                 Roles = roleManager.Roles.ToList()
             };
             return View(model);

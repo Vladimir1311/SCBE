@@ -33,7 +33,6 @@ namespace SituationCenterBackServer.Controllers.API.V1
             this.roomsManager = roomsManager;
             this.userManager = userManager;
             this.roomSecyrityManager = roomSecyrityManager;
-            roomsManager.SaveState += (U) => userManager.UpdateAsync(U);
         }
         public ResponseBase List()
         {

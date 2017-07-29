@@ -42,7 +42,10 @@ namespace SituationCenterBackServer.Controllers
                 .Include(U => U.Roles)
                 .Include(U => U.Room)
                 .ToList(),
-                Rooms = dataBase.Rooms.ToList(),
+                Rooms = dataBase
+                .Rooms
+                .Include(R => R.SecurityRule)
+                .ToList(),
                 Roles = roleManager.Roles.ToList()
             };
             return View(model);

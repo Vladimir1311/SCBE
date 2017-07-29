@@ -52,8 +52,8 @@ namespace SituationCenterBackServer.Models.RoomSecurity
         {
             logger.LogDebug($"create password rule for room {room.Id} {room.Name}");
 
-            if (password?.Length != 8 || !int.TryParse(password, out _))
-                throw new Exception("Password length must be 8 numerals");
+            if (password?.Length != 6 || !int.TryParse(password, out _))
+                throw new Exception("Password length must be 6 numerals");
             
             RoomSecurityRule rule = new RoomSecurityRule()
             {

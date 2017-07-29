@@ -37,9 +37,9 @@ namespace SituationCenterBackServer.Controllers.API.V1
         }
         public ResponseBase List()
         {
-            var roomsTuples = roomsManager.Rooms
-                .Select(R => new RoomPresent(R.Id, R.Name));
-            return RoomsListResponse.Create(roomsTuples);
+            var roomsPresent = roomsManager.Rooms
+                .Select(R => new RoomPresent(R.Id, R.Name, R.Users.Count, R.SecurityRule.PrivacyRule));
+            return RoomsListResponse.Create(roomsPresent);
         }
 
         [HttpPost]

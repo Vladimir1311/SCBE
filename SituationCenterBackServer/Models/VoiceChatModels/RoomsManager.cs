@@ -75,7 +75,10 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
 
         public IEnumerable<Room> FindRooms(Predicate<Room> func)
         {
-            return dataBase.Rooms.Include(R => R.SecurityRule).Where(R => func(R));
+            return dataBase.Rooms
+                .Include(R => R.SecurityRule)
+                .Include(R => R.Users)
+                .Where(R => func(R));
         }
         
 
@@ -118,7 +121,7 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
         public void DeleteRoom(Guid userId, Guid roomId)
         {
             var room = FindRoom(roomId);
-            var user = room.Users.FirstOrDefault(U => U.Id  == userId.ToString())
+            var user = room.Users.FirstOrDefault(U => U.Id == userId.ToString())
                 ?? dataBase.Users.FirstOrDefault(U => U.Id == userId.ToString());
 
 
@@ -129,6 +132,7 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
 
             foreach (var person in room.Users)
                 person.RoomId = null;
+            //TODO Проанализировать EF, слишком много запросов SaveChanges
             dataBase.SaveChanges();
             roomSecyrityManager.ClearRoles(room);
             dataBase.Rooms.Remove(room);

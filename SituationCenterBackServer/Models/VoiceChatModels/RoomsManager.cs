@@ -82,24 +82,24 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
         }
         
 
-        public Room JoinToRoom(Guid userId, Guid roomId, string securityData)
+        public void JoinToRoom(Guid userId, Guid roomId, string securityData)
         {
             var user = dataBase.Users
                 .Include(U => U.Room)
-                .FirstOrDefault(U => U.Id == userId.ToString()) ?? throw new ArgumentException($"not user with id {userId}"); 
+                .FirstOrDefault(U => U.Id == userId.ToString())
+                ?? throw new ArgumentException($"not user with id {userId}"); 
             if (user.RoomId != null)
                 throw new Exception("Вы уже состоите в другой комнате!");
             var calledRoom = dataBase
                 .Rooms
                 .Include(R => R.Users)
-                .FirstOrDefault(R => R.Id == roomId);
-            if (calledRoom == null)
-                throw new Exception("Запрашиваемой комнаты не существует");
+                .FirstOrDefault(R => R.Id == roomId)
+                ?? throw new Exception("Запрашиваемой комнаты не существует");
             logger.LogDebug("Validate user");
             roomSecyrityManager.Validate(user, calledRoom, securityData);
             logger.LogDebug("Validated user");
-            calledRoom.AddUser(user);
-            return calledRoom;
+            user.RoomId = calledRoom.Id;
+            dataBase.SaveChanges();
         }
 
         public Room FindRoom(Guid roomId)

@@ -121,8 +121,9 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
         public void DeleteRoom(Guid userId, Guid roomId)
         {
             var room = FindRoom(roomId);
-            var user = room.Users.FirstOrDefault(U => U.Id == userId.ToString())
-                ?? dataBase.Users.FirstOrDefault(U => U.Id == userId.ToString());
+            var user = room.Users.FirstOrDefault(U => U.Id == userId.ToString());
+            if (user == null)
+                user = dataBase.Users.FirstOrDefault(U => U.Id == userId.ToString());
 
 
             if (user == null)

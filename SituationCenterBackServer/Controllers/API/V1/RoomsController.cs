@@ -62,7 +62,7 @@ namespace SituationCenterBackServer.Controllers.API.V1
             return ResponseBase.GoodResponse();
         }
 
-        public ResponseBase DeleteRoom(Guid roomId)
+        public ResponseBase Delete(Guid roomId)
         {
             var userId = userManager.GetUserGuid(User);
             roomsManager.DeleteRoom(userId, roomId);

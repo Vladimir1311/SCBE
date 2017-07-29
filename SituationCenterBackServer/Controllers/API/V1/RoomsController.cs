@@ -43,13 +43,13 @@ namespace SituationCenterBackServer.Controllers.API.V1
         }
 
         [HttpPost]
-        public async Task<ResponseBase> Create([FromBody]CreateRoomRequest info)
+        public ResponseBase Create([FromBody]CreateRoomRequest info)
         {
             roomsManager.CreateNewRoom(Guid.Parse(userManager.GetUserId(User)), info);
             return ResponseBase.GoodResponse();
         }
 
-        public async Task<ResponseBase> Join(Guid roomId, string data = null)
+        public ResponseBase Join(Guid roomId, string data = null)
         {
             roomsManager.JoinToRoom(userManager.GetUserGuid(User), roomId, data);
             return ResponseBase.GoodResponse();

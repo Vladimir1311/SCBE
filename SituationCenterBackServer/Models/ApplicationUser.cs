@@ -13,11 +13,6 @@ namespace SituationCenterBackServer.Models
     public class ApplicationUser : IdentityUser
     {
 
-        [NotMapped]
-        public IPEndPoint Adress { get; set; }
-        [NotMapped]
-        public byte InRoomId { get; set; }
-
         public Guid? RoomId { get; set; }
         public Room Room { get; set; }
 

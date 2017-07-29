@@ -16,14 +16,8 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
 
         public Guid RoomSecurityRuleId { get; set; }
         public RoomSecurityRule SecurityRule { get; set; }
-
-
-
-
-        private static byte _lastClientId;
         public List<ApplicationUser> Users { get; set; }
-
-
+        
         //TODO сделать умерщвтление комнаты после ухода пользователей
         [JsonIgnore]
         public DateTime TimeOut { get; set; }
@@ -34,11 +28,9 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
             Users = new List<ApplicationUser>();
         }
         
-
         internal void AddUser(ApplicationUser user)
         {
             Users.Add(user);
-            user.InRoomId = _lastClientId++;
         }
 
         internal void RemoveUser(ApplicationUser user)

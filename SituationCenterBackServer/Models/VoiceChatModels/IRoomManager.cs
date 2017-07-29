@@ -8,9 +8,9 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
 {
     public interface IRoomManager
     {
-        (Room room, byte clientId) CreateNewRoom(Guid createrId, CreateRoomRequest createRoomInfo);
+        Room CreateNewRoom(Guid createrId, CreateRoomRequest createRoomInfo);
 
-        (Room room, byte clientId) JoinToRoom(Guid userId, Guid roomId, string securityData);
+        Room JoinToRoom(Guid userId, Guid roomId, string securityData);
 
         void LeaveFromRoom(Guid UserId);
 

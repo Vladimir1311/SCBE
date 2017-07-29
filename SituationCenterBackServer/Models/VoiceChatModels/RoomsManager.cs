@@ -36,7 +36,7 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
             this.dataBase = dataBase;
             this.roomSecyrityManager = roomSecyrityManager;
         }
-        public (Room room, byte clientId) CreateNewRoom(Guid createrId, CreateRoomRequest createRoomInfo)
+        public Room CreateNewRoom(Guid createrId, CreateRoomRequest createRoomInfo)
         {
             var creater = dataBase.Users
                 .Include(U => U.Room)
@@ -69,7 +69,7 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
             roomSecyrityManager.AddAdminRole(creater, newRoom);
             creater.RoomId = newRoom.Id;
             dataBase.SaveChanges();
-            return (newRoom, creater.InRoomId);
+            return newRoom;
 
         }
 
@@ -82,7 +82,7 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
         }
         
 
-        public (Room room, byte clientId) JoinToRoom(Guid userId, Guid roomId, string securityData)
+        public Room JoinToRoom(Guid userId, Guid roomId, string securityData)
         {
             var user = dataBase.Users
                 .Include(U => U.Room)
@@ -99,7 +99,7 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
             roomSecyrityManager.Validate(user, calledRoom, securityData);
             logger.LogDebug("Validated user");
             calledRoom.AddUser(user);
-            return (calledRoom,user.InRoomId);
+            return calledRoom;
         }
 
         public Room FindRoom(Guid roomId)

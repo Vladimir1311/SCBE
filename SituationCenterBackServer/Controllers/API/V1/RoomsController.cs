@@ -44,8 +44,8 @@ namespace SituationCenterBackServer.Controllers.API.V1
         [HttpPost]
         public ResponseBase Create([FromBody]CreateRoomRequest info)
         {
-            roomsManager.CreateNewRoom(Guid.Parse(userManager.GetUserId(User)), info);
-            return ResponseBase.GoodResponse();
+            var room = roomsManager.CreateNewRoom(Guid.Parse(userManager.GetUserId(User)), info);
+            return RoomCreate.Create(room.Id);
         }
 
         public ResponseBase Join(Guid roomId, string data = null)

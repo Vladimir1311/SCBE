@@ -47,8 +47,22 @@
     <div class="form-group">
         <label asp-for="PhoneNumber" class="col-md-2 control-label"></label>
         <div class="col-md-10">
-            <input asp-for="PhoneNumber" class="form-control" />
+            <input asp-for="PhoneNumber" class="form-control"placeholder="+78005553535" />
             <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="form-group">
+        <label asp-for="Birthday" class="col-md-2 control-label"></label>
+        <div class="col-md-10">
+            <input asp-for="Birthday" class="form-control" placeholder="format: day/month/year"/>
+            <span asp-validation-for="Birthday" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="form-group">
+        <label asp-for="Sex" class="col-md-2 control-label"></label>
+        <div class="col-md-10">
+            <input asp-for="Sex" class="form-control" type="checkbox"/>
+            <span asp-validation-for="Sex" class="text-danger"></span>
         </div>
     </div>
     <div class="form-group">

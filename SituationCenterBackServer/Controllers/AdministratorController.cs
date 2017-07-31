@@ -93,5 +93,12 @@ namespace SituationCenterBackServer.Controllers
             roomsManager.DeleteRoom(userManager.GetUserGuid(User), roomId);
             return RedirectToAction("Index");
         }
+
+        public async Task<IActionResult> DeleteUser(Guid userId)
+        {
+            var user = await userManager.FindByIdAsync(userId.ToString());
+            await userManager.DeleteAsync(user);
+            return RedirectToAction("Index");
+        }
     }
 }

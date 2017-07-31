@@ -1,6 +1,7 @@
 ﻿
 @{
     ViewData["Title"] = "Index";
+    
 }
 @using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 @functions
@@ -10,7 +11,9 @@
         return Model.Roles.FirstOrDefault(R => R.Id == userRole.RoleId)?.Name ?? "UNKNOWN ROLE!!!";
     }
 
-    string Sex(bool sex) => sex ? "Man" : "Woman"; 
+    string Sex(bool sex) => sex ? "Man" : "Woman";
+    int userNum = 0;
+    int UserNum(bool need) => need ? userNum++ : userNum;
 
 }
 @model SituationCenterBackServer.Models.AdministratorViewModels.IndexViewModel
@@ -21,20 +24,16 @@
         <h1>Users table</h1>
         <table class="table-bordered table-condensed">
             <tr>
-                <td>email</td>
-                <td>phone number</td>
-                <td>sex</td>
-                <td>birthday</td>
-                <td>roles</td>
-                <td>In room</td>
+                <td>email<br />name</td>
+                <td>phone number<br />surname</td>
+                <td>roles<br />sex</td>
+                <td>In room<br />birthday</td>
             </tr>
             @foreach (var user in Model.Users)
             {
                 <tr>
                     <td>@user.Email</td>
                     <td>@user.PhoneNumber</td>
-                    <td>@Sex(user.Sex)</td>
-                    <td>@user.Birthday.Day / @user.Birthday.Month / @user.Birthday.Year</td>
                     <td>
                         <table class="table-bordered">
                             @foreach(var role in user.Roles)
@@ -55,6 +54,14 @@
                     {
                         <td>No room</td>
                     }
+                    <td><button class="bg-primary" onclick="ShowHide('user @UserNum(false)')">...</button></td>
+                </tr>
+                <tr id="user @UserNum(true)" hidden>
+                    <td>@user.Name</td>
+                    <td>@user.Surname</td>
+                    <td>@Sex(user.Sex)</td>
+                    <td>@user.Birthday.Day / @user.Birthday.Month / @user.Birthday.Year</td>
+                    <td><a href="/administrator/deleteuser?userid=@user.Id"><input type="button" class="btn-danger" value="X" /></a></td>
                 </tr>
             }
         </table>
@@ -89,3 +96,12 @@
         </ol>
     </div>
 </div>
+<script>
+    function ShowHide(id) {
+        var el = document.getElementById(id);
+        if (el.hasAttribute("hidden"))
+            el.removeAttribute("hidden")
+        else
+            el.setAttribute("hidden", "hidden")
+    }
+</script>

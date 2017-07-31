@@ -57,7 +57,7 @@ namespace SituationCenterBackServer.Models.AccountViewModels
 
         [Required]
         [DataType(DataType.Text)]
-        [Display(Name = "Sex")]
+        [Display(Name = "Are you man?")]
         [JsonProperty("isMan")]
         public bool Sex { get; set; }
 

@@ -119,7 +119,9 @@ namespace SituationCenterBackServer.Controllers
                     Email = model.Email,
                     Name = model.Name,
                     Surname = model.Surname,
-                    PhoneNumber = model.PhoneNumber
+                    PhoneNumber = model.PhoneNumber,
+                    Sex = model.Sex,
+                    Birthday = model.ParsedBirthday()
                 };
 
                 var result = await _userManager.CreateAsync(user, model.Password);

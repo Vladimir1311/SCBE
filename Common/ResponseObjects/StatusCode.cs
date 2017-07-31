@@ -13,7 +13,7 @@ namespace Common.ResponseObjects
         [StatusCodeDescription("Произошло несколько ошибок")]
         ComplexError,
         [StatusCodeDescription("Неизвестная ошибка")]
-        UknownError,
+        UnknownError,
         [StatusCodeDescription("Слишком много запросов (Не ддось, плз)")]
         TooManyRequests,
         [StatusCodeDescription("Профилактические работы на сервере, сорри")]
@@ -45,7 +45,9 @@ namespace Common.ResponseObjects
         [StatusCodeDescription("Такой комнаты не существует")]
         DontExistRoom,
         [StatusCodeDescription("Комната заполнена")]
-        RoomFilled
+        RoomFilled,
+        [StatusCodeDescription("Фунция не реализована")]
+        NotImplementFunction
     }
 
 

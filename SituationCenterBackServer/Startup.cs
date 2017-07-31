@@ -72,8 +72,7 @@ namespace SituationCenterBackServer
 
             services.AddSingleton<IRoomManager, RoomsManager>();
             services.AddTransient<IRoomSecurityManager, RoomSecurityManager>();
-            //services.AddSingleton<IConnector, UdpConnector>();
-            //services.AddSingleton<IStableConnector, TCPConnector>();
+
             services.AddSingleton<IDocumentHandlerService, DocumentsHandler>();
             services.AddSingleton<IBuffer, ASPNETBufferService>();
 
@@ -102,7 +101,6 @@ namespace SituationCenterBackServer
                     loggerFactory.CreateLogger("Service registrator"));
                 app.UseExceptionHandler("/Home/Error");
             }
-
 
 
             app.UseStaticFiles();

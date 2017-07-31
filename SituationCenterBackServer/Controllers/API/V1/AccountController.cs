@@ -46,12 +46,12 @@ namespace SituationCenterBackServer.Controllers.API.V1
         public async Task<ResponseBase> Authorize([FromBody]LoginViewModel model)
         {
             if (!ModelState.IsValid)
-                return ResponseBase.BadResponse("not correct email or password", logger);
+                return ResponseBase.BadResponse("not correct email or password");
             var user = await userManager.FindByEmailAsync(model.Email);
             if (user == null)
-                return ResponseBase.BadResponse("not correct email", logger);
+                return ResponseBase.BadResponse("not correct email");
             if (!await userManager.CheckPasswordAsync(user, model.Password))
-                return ResponseBase.BadResponse("not correct passeord", logger);
+                return ResponseBase.BadResponse("not correct password");
             var claims = new Claim[]
             {
                 new Claim(ClaimsIdentity.DefaultNameClaimType, user.Email),

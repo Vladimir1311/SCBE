@@ -12,6 +12,8 @@ using SituationCenterBackServer.Models.RoomSecurity;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Microsoft.EntityFrameworkCore;
+using Common.Exceptions;
+using Common.ResponseObjects;
 
 namespace SituationCenterBackServer.Models.VoiceChatModels
 {
@@ -40,16 +42,13 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
                 .Include(U => U.Room)
                 .FirstOrDefault(U => U.Id == createrId.ToString())
                 ?? throw new Exception("Не существует запрашиваемого пользователя");
-            if (creater.RoomId != null)
-                throw new Exception("Вы уже состоите в другой комнате!");
-            //TODO Искать только в видимых для пользователя комнатах
-            if (dataBase.Rooms.Any(R => R.Name == createRoomInfo.Name))
-                throw new Exception("Комната с таким именем уже существует!");
 
+            CheckCreatingRoomParams(createRoomInfo, creater);
 
             Room newRoom = new Room()
             {
-                Name = createRoomInfo.Name
+                Name = createRoomInfo.Name,
+                PeopleCountLimit = createRoomInfo.UsersCountMax
             };
             switch (createRoomInfo.PrivacyType)
             {
@@ -149,6 +148,40 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
         private ApplicationUser FindUser(Guid userId)
         {
             return dataBase.Users.FirstOrDefault(U => U.Id == userId.ToString());
+        }
+
+        private void CheckCreatingRoomParams(CreateRoomRequest createRoomInfo, ApplicationUser creater)
+        {
+            var errorcodes = new List<StatusCode>();
+            
+            //TODO Искать только в видимых для пользователя комнатах
+            if (dataBase.Rooms.Any(R => R.Name == createRoomInfo.Name))
+                errorcodes.Add(StatusCode.RoomNameBusy);
+
+            if (creater.RoomId != null)
+                errorcodes.Add(StatusCode.PersonInRoomAtAWrongTime);
+
+            try { createRoomInfo.UsersCountMax = PeopleCount(createRoomInfo.UsersCountMax); }
+            catch (StatusCodeException ex) { errorcodes.Add(ex.StatusCode); }
+            catch { throw; }
+
+            switch (errorcodes.Count)
+            {
+                case 0: return;
+                case 1: throw new StatusCodeException(errorcodes[0]);
+                default:
+                    throw new MultiStatusCodeException(errorcodes);
+            }
+
+        }
+
+
+        private int PeopleCount(int peopleCount)
+        {
+            if (peopleCount <= 0) return 8;
+            if (peopleCount > 8 || peopleCount == 1)
+                throw new StatusCodeException(StatusCode.MaxPeopleCountInRoomIncorrect);
+            return peopleCount;
         }
     }
 }

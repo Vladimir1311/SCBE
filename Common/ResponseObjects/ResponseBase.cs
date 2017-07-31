@@ -46,9 +46,9 @@ namespace Common.ResponseObjects
         public static ResponseBase BadResponse(string message, params StatusCode[] statusCodes) =>
             new ResponseBase(statusCodes, message);
 
-        public static ResponseBase BadResponse(StatusCode statusCode, params StatusCode[] statusCodes)
+        public static ResponseBase BadResponse(params StatusCode[] statusCodes)
         {
-            return new ResponseBase(new StatusCode[] { statusCode}.Concat(statusCodes).ToArray());
+            return new ResponseBase(statusCodes);
         }
         public static ResponseBase GoodResponse() => new ResponseBase();
     }

@@ -12,6 +12,7 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
 
         public Guid Id { get; set; }
         public string Name { get; set; }
+        public int PeopleCountLimit { get; set; }
 
 
         public Guid RoomSecurityRuleId { get; set; }

@@ -24,7 +24,7 @@ namespace Common.ResponseObjects
         EmailBusy,
         [StatusCodeDescription("Некорректный формат email")]
         IncorrectEmail,
-        [StatusCodeDescription("Неправильный формат пароля при авторизации/регистрации")]
+        [StatusCodeDescription("Неправильный формат пароля при регистрации")]
         IncorrectPassword,
         [StatusCodeDescription("На данный телефон уже зарегистрирован аккаунт")]
         PhoneBusy,
@@ -34,8 +34,8 @@ namespace Common.ResponseObjects
         IncorrectFullName,
         [StatusCodeDescription("Пароли не совпадают")]
         IncorrectConfirmPassword,
-        [StatusCodeDescription("Неизвестная ошибка при создании компаты")]
-        CreateRoomError,
+        [StatusCodeDescription("Неправильный логин/пароль")]
+        AuthorizeError,
         [StatusCodeDescription("Название комнаты уже занято")]
         RoomNameBusy,
         [StatusCodeDescription("Неерный формат имени комнаты")]
@@ -46,8 +46,13 @@ namespace Common.ResponseObjects
         DontExistRoom,
         [StatusCodeDescription("Комната заполнена")]
         RoomFilled,
-        [StatusCodeDescription("Фунция не реализована")]
-        NotImplementFunction
+        [StatusCodeDescription("Функция не реализована")]
+        NotImplementFunction,
+        [StatusCodeDescription("Неверное указание максимального количества членов комнаты")]
+        MaxPeopleCountInRoomIncorrect,
+        [StatusCodeDescription("Вы находитесь в комнате")]
+        PersonInRoomAtAWrongTime
+
     }
 
 

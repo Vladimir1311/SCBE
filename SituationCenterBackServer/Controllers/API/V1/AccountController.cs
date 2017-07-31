@@ -18,11 +18,14 @@ using Common.ResponseObjects.Account;
 using Microsoft.Extensions.Options;
 using SituationCenterBackServer.Data;
 using Newtonsoft.Json;
+using Common.Exceptions;
+using SituationCenterBackServer.Filters;
 
 namespace SituationCenterBackServer.Controllers.API.V1
 {
     [Produces("application/json")]
     [Route("api/v1/[controller]/[action]/{*pathToFolder}")]
+    [TypeFilter(typeof(JsonExceptionsFilterAttribute))]
     [Authorize]
     public class AccountController : Controller
     {
@@ -48,10 +51,14 @@ namespace SituationCenterBackServer.Controllers.API.V1
             if (!ModelState.IsValid)
                 return ResponseBase.BadResponse("not correct email or password");
             var user = await userManager.FindByEmailAsync(model.Email);
+
+
             if (user == null)
                 return ResponseBase.BadResponse("not correct email");
+
             if (!await userManager.CheckPasswordAsync(user, model.Password))
                 return ResponseBase.BadResponse("not correct password");
+
             var claims = new Claim[]
             {
                 new Claim(ClaimsIdentity.DefaultNameClaimType, user.Email),
@@ -77,6 +84,9 @@ namespace SituationCenterBackServer.Controllers.API.V1
         {
             if (ModelState.IsValid)
             {
+
+                CheckRegistrationsArgs(model);
+
                 var user = new ApplicationUser
                 {
                     UserName = model.Email,
@@ -118,7 +128,22 @@ namespace SituationCenterBackServer.Controllers.API.V1
             var users = database.Users.Where(U => U.PhoneNumber.Contains(phone));
             return Common.ResponseObjects.Account.Search.Create(users.Select(U => new UserPresent { Phone = U.PhoneNumber }));
         }
+        private void CheckRegistrationsArgs(RegisterViewModel model)
+        {
+            var codes = new List<StatusCode>();
 
+            if (userManager.Users.Any(U => U.PhoneNumber == model.PhoneNumber))
+                codes.Add(Common.ResponseObjects.StatusCode.PhoneBusy);
+            if (userManager.Users.Any(U => U.Email == model.Email))
+                codes.Add(Common.ResponseObjects.StatusCode.EmailBusy);
+
+            switch(codes.Count)
+            {
+                case 0: return;
+                case 1: throw new StatusCodeException(codes[0]);
+                default: throw new MultiStatusCodeException(codes);
+            }
+        }
 
     }
 }

@@ -13,31 +13,9 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
         public Guid Id { get; set; }
         public string Name { get; set; }
         public int PeopleCountLimit { get; set; }
-
-
         public Guid RoomSecurityRuleId { get; set; }
         public RoomSecurityRule SecurityRule { get; set; }
-        public List<ApplicationUser> Users { get; set; }
-        
-        //TODO сделать умерщвтление комнаты после ухода пользователей
-        [JsonIgnore]
+        public List<ApplicationUser> Users { get; set; } = new List<ApplicationUser>();
         public DateTime TimeOut { get; set; }
-
-
-        public Room()
-        {
-            Users = new List<ApplicationUser>();
-        }
-        
-        internal void AddUser(ApplicationUser user)
-        {
-            Users.Add(user);
-        }
-
-        internal void RemoveUser(ApplicationUser user)
-        {
-            Users.Remove(user);
-            //TODO Усли пользователей нет - начать отсчет до сметри 
-        }
     }
 }

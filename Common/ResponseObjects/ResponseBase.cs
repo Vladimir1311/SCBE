@@ -1,9 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Linq;
+﻿using Newtonsoft.Json;
 
 namespace Common.ResponseObjects
 {
@@ -11,21 +6,27 @@ namespace Common.ResponseObjects
     {
         [JsonProperty("success")]
         public bool Success { get; set; }
+
         [JsonProperty("message", NullValueHandling = NullValueHandling.Ignore)]
         public string Message { get; set; }
+
         [JsonProperty("status")]
         public StatusCode StatusCode { get; set; }
+
         [JsonProperty("errors", NullValueHandling = NullValueHandling.Ignore)]
         public StatusCode[] Errors { get; set; }
 
-
-        protected ResponseBase() { Success = true; StatusCode = StatusCode.OK; }
+        protected ResponseBase()
+        {
+            Success = true; StatusCode = StatusCode.OK;
+        }
 
         protected ResponseBase(string message)
         {
             Success = false;
             Message = message;
         }
+
         protected ResponseBase(StatusCode[] statusCodes, string message = null)
         {
             switch (statusCodes.Length)
@@ -33,9 +34,11 @@ namespace Common.ResponseObjects
                 case 0:
                     StatusCode = StatusCode.UnknownError;
                     break;
+
                 case 1:
                     StatusCode = statusCodes[0];
                     break;
+
                 default:
                     StatusCode = StatusCode.ComplexError;
                     Errors = statusCodes;
@@ -50,6 +53,7 @@ namespace Common.ResponseObjects
         {
             return new ResponseBase(statusCodes);
         }
+
         public static ResponseBase GoodResponse() => new ResponseBase();
     }
 }

@@ -1,25 +1,20 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Common.Exceptions;
+using Common.Requests.Room.CreateRoom;
+using Common.ResponseObjects;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using SituationCenterBackServer.Data;
+using SituationCenterBackServer.Models.RoomSecurity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Identity;
-using SituationCenterBackServer.Models.VoiceChatModels.Connectors;
-using Common.Requests.Room.CreateRoom;
-using SituationCenterBackServer.Data;
-using SituationCenterBackServer.Models.RoomSecurity;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using Microsoft.EntityFrameworkCore;
-using Common.Exceptions;
-using Common.ResponseObjects;
 
 namespace SituationCenterBackServer.Models.VoiceChatModels
 {
     public class RoomsManager : IRoomManager
     {
-        
         private ILogger<RoomsManager> logger;
         private ApplicationDbContext dataBase;
         private readonly IRoomSecurityManager roomSecyrityManager;
@@ -31,11 +26,11 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
             IRoomSecurityManager roomSecyrityManager)
 
         {
-
             this.logger = logger;
             this.dataBase = dataBase;
             this.roomSecyrityManager = roomSecyrityManager;
         }
+
         public Room CreateNewRoom(Guid createrId, CreateRoomRequest createRoomInfo)
         {
             var creater = dataBase.Users
@@ -55,10 +50,12 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
                 case Common.Models.Rooms.PrivacyRoomType.Public:
                     roomSecyrityManager.CreatePublicRule(newRoom);
                     break;
+
                 case Common.Models.Rooms.PrivacyRoomType.Password:
                     var password = createRoomInfo.Args["password"].ToString();
                     roomSecyrityManager.CreatePasswordRule(newRoom, password);
                     break;
+
                 case Common.Models.Rooms.PrivacyRoomType.InvationPrivate:
                 default:
                     throw new NotImplementedException("Данный функционал еще не готов");
@@ -68,7 +65,6 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
             creater.RoomId = newRoom.Id;
             dataBase.SaveChanges();
             return newRoom;
-
         }
 
         public IEnumerable<Room> FindRooms(Predicate<Room> func)
@@ -79,7 +75,6 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
                 .Where(R => func(R))
                 .ToList();
         }
-        
 
         public void JoinToRoom(Guid userId, Guid roomId, string securityData)
         {
@@ -88,10 +83,8 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
                 .FirstOrDefault(U => U.Id == userId.ToString())
                 ?? throw new ArgumentException($"not user with id {userId}");
 
-
             if (user.RoomId != null)
                 throw new StatusCodeException(StatusCode.PersonInRoomAtAWrongTime);
-
 
             var calledRoom = dataBase
                 .Rooms
@@ -132,7 +125,6 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
             if (user == null)
                 user = dataBase.Users.FirstOrDefault(U => U.Id == userId.ToString());
 
-
             if (user == null)
                 throw new Exception("Нет пользователя с указанным Id");
             if (!roomSecyrityManager.CanDelete(user, room))
@@ -151,8 +143,6 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
 
         public IEnumerable<Room> Rooms => FindRooms(R => true);
 
-
-
         private ApplicationUser FindUser(Guid userId)
         {
             return dataBase.Users.FirstOrDefault(U => U.Id == userId.ToString());
@@ -161,7 +151,7 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
         private void CheckCreatingRoomParams(CreateRoomRequest createRoomInfo, ApplicationUser creater)
         {
             var errorcodes = new List<StatusCode>();
-            
+
             //TODO Искать только в видимых для пользователя комнатах
             if (dataBase.Rooms.Any(R => R.Name == createRoomInfo.Name))
                 errorcodes.Add(StatusCode.RoomNameBusy);
@@ -180,9 +170,7 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
                 default:
                     throw new MultiStatusCodeException(errorcodes);
             }
-
         }
-
 
         private int PeopleCount(int peopleCount)
         {

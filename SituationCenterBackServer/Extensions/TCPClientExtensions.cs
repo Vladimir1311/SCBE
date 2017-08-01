@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Sockets;
+﻿using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -27,6 +24,7 @@ namespace SituationCenterBackServer.Extensions
                 return 0;
             }
         }
+
         private static int ParseHeader(byte first, byte second)
         {
             return ((first << 8) | second);

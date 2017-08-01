@@ -1,18 +1,17 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using SituationCenterBackServer.Logging;
-using SituationCenterBackServer.Models.VoiceChatModels;
-using SituationCenterBackServer.Data;
-using SituationCenterBackServer.Models.AdministratorViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using SituationCenterBackServer.Models;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using SituationCenterBackServer.Data;
 using SituationCenterBackServer.Extensions;
+using SituationCenterBackServer.Logging;
+using SituationCenterBackServer.Models;
+using SituationCenterBackServer.Models.AdministratorViewModels;
+using SituationCenterBackServer.Models.VoiceChatModels;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace SituationCenterBackServer.Controllers
 {
@@ -34,6 +33,7 @@ namespace SituationCenterBackServer.Controllers
             this.userManager = userManager;
             this.roleManager = roleManager;
         }
+
         public IActionResult Index()
         {
             var model = new IndexViewModel
@@ -49,8 +49,8 @@ namespace SituationCenterBackServer.Controllers
                 Roles = roleManager.Roles.ToList()
             };
             return View(model);
-            
         }
+
         public IActionResult Room(Guid roomId)
         {
             var room = roomsManager.FindRoom(roomId);

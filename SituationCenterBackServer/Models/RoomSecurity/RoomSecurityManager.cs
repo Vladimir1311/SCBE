@@ -1,15 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using SituationCenterBackServer.Models.VoiceChatModels;
-using SituationCenterBackServer.Data;
+﻿using Common.Exceptions;
+using Common.ResponseObjects;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Newtonsoft.Json;
 using Microsoft.Extensions.Logging;
-using Common.Exceptions;
-using Common.ResponseObjects;
+using SituationCenterBackServer.Data;
+using SituationCenterBackServer.Models.VoiceChatModels;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace SituationCenterBackServer.Models.RoomSecurity
 {
@@ -22,7 +20,6 @@ namespace SituationCenterBackServer.Models.RoomSecurity
 
         //TODO Add rules generator in DI
         private RoomRolesGenerator roomRolesGenerator = new RoomRolesGenerator();
-
 
         public RoomSecurityManager(ApplicationDbContext dataBase,
             RoleManager<IdentityRole> roleManager,
@@ -40,14 +37,12 @@ namespace SituationCenterBackServer.Models.RoomSecurity
             throw new NotImplementedException();
         }
 
-
         public void CreatePublicRule(Room room)
         {
             logger.LogDebug($"create public rule for room {room.Id} {room.Name}");
 
             var publicRule = new RoomSecurityRule() { PrivacyRule = Common.Models.Rooms.PrivacyRoomType.Public };
             room.SecurityRule = publicRule;
-            
         }
 
         public void CreatePasswordRule(Room room, string password)
@@ -56,7 +51,7 @@ namespace SituationCenterBackServer.Models.RoomSecurity
 
             if (password?.Length != 6 || !int.TryParse(password, out _))
                 throw new Exception("Password length must be 6 numerals");
-            
+
             RoomSecurityRule rule = new RoomSecurityRule()
             {
                 PrivacyRule = Common.Models.Rooms.PrivacyRoomType.Password,
@@ -74,9 +69,11 @@ namespace SituationCenterBackServer.Models.RoomSecurity
             {
                 case Common.Models.Rooms.PrivacyRoomType.Public:
                     break;
+
                 case Common.Models.Rooms.PrivacyRoomType.Password:
                     ValidatePassword(rule, data);
                     break;
+
                 case Common.Models.Rooms.PrivacyRoomType.InvationPrivate:
                     throw new NotImplementedException();
                 default:
@@ -90,7 +87,6 @@ namespace SituationCenterBackServer.Models.RoomSecurity
             if (securityRule.Data != password)
                 throw new StatusCodeException(StatusCode.IncorrectRoomPassword);
         }
-
 
         public void AddAdminRole(ApplicationUser user, Room room)
         {

@@ -1,8 +1,6 @@
 ﻿using Common.Requests.Room.CreateRoom;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace SituationCenterBackServer.Models.VoiceChatModels
 {
@@ -17,6 +15,7 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
         IEnumerable<Room> Rooms { get; }
 
         IEnumerable<Room> FindRooms(Predicate<Room> func);
+
         Room FindRoom(Guid roomId);
 
         void DeleteRoom(Guid userId, Guid roomId);

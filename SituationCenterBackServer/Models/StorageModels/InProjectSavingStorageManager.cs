@@ -1,9 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using SituationCenterBackServer.Services;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -20,10 +17,12 @@ namespace SituationCenterBackServer.Models.StorageModels
         {
             storageRoot = IO.Path.Combine(IO.Directory.GetCurrentDirectory(), "AppData", "ForStorageFolder");
         }
+
         public InProjectSavingStorageManager(ILogger<InProjectSavingStorageManager> logger)
         {
             this.logger = logger;
         }
+
         public DirectoryContent GetContentInFolder(string ownerId, string pathToFolder)
         {
             var wantedPath = GetDirectoryPathIfCorrect(ownerId, pathToFolder);
@@ -34,11 +33,10 @@ namespace SituationCenterBackServer.Models.StorageModels
         {
             var content = GetContentInFolder(ownerId, pathToFolder);
             foreach (var file in content.Files)
-               ConvertToPublic(file);
+                ConvertToPublic(file);
             foreach (var dir in content.Directories)
                 dir.Path = PublicPath(dir.Path);
             return content;
-
         }
 
         public File Save(string userId, string pathToFolder, IFormFile file)
@@ -52,6 +50,7 @@ namespace SituationCenterBackServer.Models.StorageModels
             }
             return GetFileInfo(filePath);
         }
+
         public File SaveDocument(string userId, string pathToFolder, IFormFile file)
         {
             var folderPath = GetDirectoryPathIfCorrect(userId, pathToFolder);
@@ -65,6 +64,7 @@ namespace SituationCenterBackServer.Models.StorageModels
             }
             return GetDocumentInfo(filePath.Substring(0, filePath.LastIndexOf("\\")));
         }
+
         public IO.Stream GetFileStream(string localPath)
         {
             var targetPath = IO.Path.Combine(storageRoot, localPath);
@@ -73,11 +73,11 @@ namespace SituationCenterBackServer.Models.StorageModels
                 var docName = NameFromPath(localPath);
                 return IO.File.OpenRead(
                     IO.Path.Combine(targetPath, docName));
-
             }
             else
                 return IO.File.OpenRead(targetPath);
         }
+
         public async Task SavePictureAsync(File file, Picture pic, IO.Stream stream)
         {
             using (var fileStream = IO.File.Create(IO.Path.Combine(storageRoot, file.Path, pic.Name)))
@@ -86,7 +86,6 @@ namespace SituationCenterBackServer.Models.StorageModels
                 await stream.CopyToAsync(fileStream);
                 pic.State = PictureState.Ready;
             }
-
         }
 
         public IO.Stream GetFileStream(string ownerId, string pathToFile)
@@ -99,7 +98,6 @@ namespace SituationCenterBackServer.Models.StorageModels
                 return IO.File.OpenRead(IO.Path.Combine(wantedPath, NameFromPath(wantedPath)));
             throw new Exception();
         }
-
 
         public File GetPublicFileInfo(string ownerId, string pathToFile)
         {

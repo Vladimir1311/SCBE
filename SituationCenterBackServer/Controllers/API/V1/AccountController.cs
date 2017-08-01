@@ -1,25 +1,24 @@
+using Common.Exceptions;
+using Common.ResponseObjects;
+using Common.ResponseObjects.Account;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
+using SituationCenterBackServer.Data;
+using SituationCenterBackServer.Filters;
+using SituationCenterBackServer.Models;
+using SituationCenterBackServer.Models.AccountViewModels;
+using SituationCenterBackServer.Models.TokenAuthModels;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.Extensions.Logging;
-using SituationCenterBackServer.Models.AccountViewModels;
-using Common.ResponseObjects;
-using SituationCenterBackServer.Models;
-using Microsoft.AspNetCore.Identity;
-using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
-using SituationCenterBackServer.Models.TokenAuthModels;
-using Microsoft.IdentityModel.Tokens;
-using Common.ResponseObjects.Account;
-using Microsoft.Extensions.Options;
-using SituationCenterBackServer.Data;
-using Newtonsoft.Json;
-using Common.Exceptions;
-using SituationCenterBackServer.Filters;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace SituationCenterBackServer.Controllers.API.V1
 {
@@ -44,6 +43,7 @@ namespace SituationCenterBackServer.Controllers.API.V1
             this.authOptions = option.Value;
             this.database = database;
         }
+
         [HttpPost]
         [AllowAnonymous]
         public async Task<ResponseBase> Authorize([FromBody]LoginViewModel model)
@@ -51,7 +51,6 @@ namespace SituationCenterBackServer.Controllers.API.V1
             if (!ModelState.IsValid)
                 return ResponseBase.BadResponse("not correct email or password");
             var user = await userManager.FindByEmailAsync(model.Email);
-
 
             if (user == null)
                 return ResponseBase.BadResponse("not correct email");
@@ -78,13 +77,13 @@ namespace SituationCenterBackServer.Controllers.API.V1
             logger.LogDebug($"Send token for {user.Email}");
             return AuthorizeResponse.Create(encodetJwt);
         }
+
         [HttpPost]
         [AllowAnonymous]
         public async Task<ResponseBase> Registration([FromBody]RegisterViewModel model)
         {
             if (ModelState.IsValid)
             {
-
                 CheckRegistrationsArgs(model);
 
                 var user = new ApplicationUser
@@ -128,6 +127,7 @@ namespace SituationCenterBackServer.Controllers.API.V1
             var users = database.Users.Where(U => U.PhoneNumber.Contains(phone));
             return Common.ResponseObjects.Account.Search.Create(users.Select(U => new UserPresent { Phone = U.PhoneNumber }));
         }
+
         private void CheckRegistrationsArgs(RegisterViewModel model)
         {
             var codes = new List<StatusCode>();
@@ -137,13 +137,12 @@ namespace SituationCenterBackServer.Controllers.API.V1
             if (userManager.Users.Any(U => U.Email == model.Email))
                 codes.Add(Common.ResponseObjects.StatusCode.EmailBusy);
 
-            switch(codes.Count)
+            switch (codes.Count)
             {
                 case 0: return;
                 case 1: throw new StatusCodeException(codes[0]);
                 default: throw new MultiStatusCodeException(codes);
             }
         }
-
     }
 }

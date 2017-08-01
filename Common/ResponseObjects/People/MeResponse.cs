@@ -1,7 +1,5 @@
 ﻿using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Common.ResponseObjects.People
 {
@@ -9,7 +7,6 @@ namespace Common.ResponseObjects.People
     {
         [JsonProperty("roomId", NullValueHandling = NullValueHandling.Ignore)]
         public Guid? RoomId { get; set; }
-
 
         protected MeResponse(Guid? roomId)
         {

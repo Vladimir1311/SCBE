@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Common.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -10,19 +7,18 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using SituationCenterBackServer.Data;
-using SituationCenterBackServer.Models;
-using SituationCenterBackServer.Services;
 using Microsoft.IdentityModel.Tokens;
+using SituationCenterBackServer.Data;
+using SituationCenterBackServer.Logging;
+using SituationCenterBackServer.Models;
+using SituationCenterBackServer.Models.Options;
+using SituationCenterBackServer.Models.RoomSecurity;
+using SituationCenterBackServer.Models.StorageModels;
 using SituationCenterBackServer.Models.TokenAuthModels;
 using SituationCenterBackServer.Models.VoiceChatModels;
-using SituationCenterBackServer.Logging;
-using SituationCenterBackServer.Models.VoiceChatModels.Connectors;
-using SituationCenterBackServer.Models.StorageModels;
-using SituationCenterBackServer.Models.Options;
+using SituationCenterBackServer.Services;
+using System;
 using System.Text;
-using Common.Services;
-using SituationCenterBackServer.Models.RoomSecurity;
 
 namespace SituationCenterBackServer
 {
@@ -57,18 +53,15 @@ namespace SituationCenterBackServer
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
-
             services.AddMvc();
 
             // Add application services.
             services.AddTransient<IEmailSender, AuthMessageSender>();
             services.AddTransient<ISmsSender, AuthMessageSender>();
 
-
             services.Configure<UnrealAPIConfiguration>(Configuration.GetSection("UnrealAPI"));
             services.Configure<DocumentsHandlerConfiguration>(Configuration.GetSection("DocumentsHandler"));
             services.Configure<AuthOptions>(Configuration.GetSection("TokenAuthentication"));
-
 
             services.AddSingleton<IRoomManager, RoomsManager>();
             services.AddTransient<IRoomSecurityManager, RoomSecurityManager>();
@@ -101,7 +94,6 @@ namespace SituationCenterBackServer
                     loggerFactory.CreateLogger("Service registrator"));
                 app.UseExceptionHandler("/Home/Error");
             }
-
 
             app.UseStaticFiles();
             app.UseWebSockets();
@@ -138,7 +130,7 @@ namespace SituationCenterBackServer
         {
             var userManager = serviceProvider.GetService<UserManager<ApplicationUser>>();
             var roleManager = serviceProvider.GetService<RoleManager<IdentityRole>>();
-            if(roleManager.FindByNameAsync("Administrator").Result == null)
+            if (roleManager.FindByNameAsync("Administrator").Result == null)
                 roleManager.CreateAsync(new IdentityRole("Administrator")).Wait();
             IdentityResult identity = null;
             ApplicationUser administrator = new ApplicationUser()

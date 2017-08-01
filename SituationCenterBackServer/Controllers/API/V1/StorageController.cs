@@ -1,17 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using SituationCenterBackServer.Models.StorageModels;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
-using SituationCenterBackServer.Models;
-using System.Net.Http;
-using Microsoft.AspNetCore.Http.Features;
-using System.IO;
-using System.Text;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using SituationCenterBackServer.Models;
+using SituationCenterBackServer.Models.StorageModels;
 using SituationCenterBackServer.Services;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -36,6 +28,7 @@ namespace SituationCenterBackServer.Controllers.API.V1
             this.logger = logger;
             this.fileBuffer = fileBuffer;
         }
+
         [HttpGet]
         public IActionResult DirectoryContent(string pathToFolder)
         {
@@ -87,7 +80,6 @@ namespace SituationCenterBackServer.Controllers.API.V1
             }
         }
 
-
         [HttpGet]
         public IActionResult GetLinkToFile(string pathToFolder)
         {
@@ -106,11 +98,9 @@ namespace SituationCenterBackServer.Controllers.API.V1
 
         private string LinkToFile(string userId, string pathToFile)
         {
-
             return ("http://192.168.137.73/api/v1/storage/download/" + pathToFile).Replace(@"\", "/");
             //var file = storageManager.GetFileInfo(userId, pathToFile ?? "");
             //return fileBuffer.ServLink + fileBuffer.GetLinkFor(file);
         }
-
     }
 }

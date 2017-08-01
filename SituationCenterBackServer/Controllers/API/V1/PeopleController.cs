@@ -1,17 +1,15 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+using Common.Requests.People;
 using Common.ResponseObjects;
+using Common.ResponseObjects.People;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using SituationCenterBackServer.Extensions;
 using SituationCenterBackServer.Filters;
 using SituationCenterBackServer.Models;
-using Microsoft.AspNetCore.Identity;
-using SituationCenterBackServer.Extensions;
-using Common.ResponseObjects.People;
-using Common.Requests.People;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace SituationCenterBackServer.Controllers.API.V1
 {
@@ -27,6 +25,7 @@ namespace SituationCenterBackServer.Controllers.API.V1
         {
             this.userManager = userManager;
         }
+
         public async Task<ResponseBase> Me()
         {
             var user = await userManager.FindUser(User) ?? throw new ArgumentException();

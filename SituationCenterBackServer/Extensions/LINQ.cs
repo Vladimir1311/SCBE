@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace System.Linq
 {
@@ -40,7 +37,6 @@ namespace System.Linq
 
         public static void AnySet<T>(this List<T> list, int index, T item)
         {
-
             while (list.Count - 1 < index)
                 list.Add(default(T));
             list[index] = item;

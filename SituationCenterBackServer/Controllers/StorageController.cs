@@ -1,16 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using SituationCenterBackServer.Models.StorageModels;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
-using SituationCenterBackServer.Models;
 using Microsoft.AspNetCore.Http;
-using System.Net.Http;
-using IO = System.IO;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using SituationCenterBackServer.Models;
+using SituationCenterBackServer.Models.StorageModels;
 using SituationCenterBackServer.Services;
+using IO = System.IO;
 
 namespace SituationCenterBackServer.Controllers
 {
@@ -43,7 +38,6 @@ namespace SituationCenterBackServer.Controllers
 
         public IActionResult Index(string pathToFolder)
         {
-
             pathToFolder = pathToFolder ?? "";
             string userId = GetUserId();
             var content = storageManager.GetContentInFolder(userId, pathToFolder);
@@ -69,7 +63,6 @@ namespace SituationCenterBackServer.Controllers
             docHandler.FillState(savedFile);
             return RedirectToAction("index");
         }
-
 
         private string GetUserId()
         {

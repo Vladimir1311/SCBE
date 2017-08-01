@@ -1,9 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace SituationCenterBackServer.Models.AccountViewModels
 {
@@ -28,9 +26,8 @@ namespace SituationCenterBackServer.Models.AccountViewModels
         [JsonProperty("confirm")]
         public string ConfirmPassword { get; set; }
 
-        
         [Required]
-        [StringLength(14, ErrorMessage = "Please enter phone number is format 89008007654", MinimumLength =12)]
+        [StringLength(14, ErrorMessage = "Please enter phone number is format 89008007654", MinimumLength = 12)]
         [DataType(DataType.PhoneNumber)]
         [Display(Name = "Phone number")]
         [JsonProperty("phone")]
@@ -60,7 +57,6 @@ namespace SituationCenterBackServer.Models.AccountViewModels
         [Display(Name = "Are you man?")]
         [JsonProperty("isMan")]
         public bool Sex { get; set; }
-
 
         public DateTime ParsedBirthday()
         {

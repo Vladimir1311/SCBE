@@ -1,18 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 using SituationCenterBackServer.Models;
 using SituationCenterBackServer.Models.AccountViewModels;
 using SituationCenterBackServer.Services;
-using Newtonsoft.Json;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace SituationCenterBackServer.Controllers
 {
@@ -41,7 +39,7 @@ namespace SituationCenterBackServer.Controllers
             _smsSender = smsSender;
             _logger = loggerFactory.CreateLogger<AccountController>();
         }
-        
+
         //
         // GET: /Account/Login
         [HttpGet]
@@ -490,6 +488,6 @@ namespace SituationCenterBackServer.Controllers
             }
         }
 
-        #endregion
+        #endregion Helpers
     }
 }

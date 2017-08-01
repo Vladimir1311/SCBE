@@ -1,17 +1,13 @@
 ﻿using Common.ResponseObjects;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
 
 namespace SituationCenterBackServer.Models.DocsModels
 {
     public class IndexViewModel
     {
         public List<StatusCodeViewModel> StatusCodes { get; set; }
-
-
 
         public static IndexViewModel Create()
         {
@@ -28,7 +24,6 @@ namespace SituationCenterBackServer.Models.DocsModels
                 });
             }
             return new IndexViewModel() { StatusCodes = codes };
-
         }
     }
 }

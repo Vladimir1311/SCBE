@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using SituationCenterBackServer.Models.VoiceChatModels.Connectors;
 
@@ -17,6 +13,7 @@ namespace SituationCenterBackServer.Controllers
             _connector = connector;
             _stableConnector = stableConnector;
         }
+
         public IActionResult Index()
         {
             return Json(new
@@ -24,7 +21,6 @@ namespace SituationCenterBackServer.Controllers
                 Connector = _connector.GetType().FullName,
                 StableConnector = _stableConnector.GetType().FullName
             });
-
         }
     }
 }

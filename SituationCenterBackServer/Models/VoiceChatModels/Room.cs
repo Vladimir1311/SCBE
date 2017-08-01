@@ -1,15 +1,11 @@
-﻿using Newtonsoft.Json;
-using SituationCenterBackServer.Models.RoomSecurity;
-using SituationCenterBackServer.Models.VoiceChatModels.Connectors;
+﻿using SituationCenterBackServer.Models.RoomSecurity;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace SituationCenterBackServer.Models.VoiceChatModels
 {
     public class Room
     {
-
         public Guid Id { get; set; }
         public string Name { get; set; }
         public int PeopleCountLimit { get; set; }

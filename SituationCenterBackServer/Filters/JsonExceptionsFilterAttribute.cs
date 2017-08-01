@@ -42,6 +42,9 @@ namespace SituationCenterBackServer.Filters
                 case MultiStatusCodeException mscException:
                     responseObj = ResponseBase.BadResponse(mscException.Codes);
                     break;
+                case ArgumentException argException:
+                    responseObj = ResponseBase.BadResponse(StatusCode.ArgumentsIncorrect);
+                    break;
                 case NotImplementedException niException:
                     responseObj = ResponseBase.BadResponse(StatusCode.NotImplementFunction);
                     break;

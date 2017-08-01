@@ -1,4 +1,5 @@
-﻿using Common.Requests.Room.CreateRoom;
+﻿using Common.Exceptions;
+using Common.Requests.Room.CreateRoom;
 using Common.ResponseObjects;
 using Common.ResponseObjects.Rooms;
 using Microsoft.AspNetCore.Authorization;
@@ -37,7 +38,7 @@ namespace SituationCenterBackServer.Controllers.API.V1
         public ResponseBase List()
         {
             var roomsPresent = roomsManager.Rooms
-                .Select(R => new RoomPresent(R.Id, R.Name, R.Users.Count, R.SecurityRule.PrivacyRule));
+                .Select(R => R.ToRoomPresent());
             return RoomsListResponse.Create(roomsPresent);
         }
 
@@ -66,6 +67,12 @@ namespace SituationCenterBackServer.Controllers.API.V1
             var userId = userManager.GetUserGuid(User);
             roomsManager.DeleteRoom(userId, roomId);
             return ResponseBase.GoodResponse();
+        }
+
+        public ResponseBase Info(Guid roomId)
+        {
+            var room = roomsManager.FindRoom(roomId) ?? throw new StatusCodeException(Common.ResponseObjects.StatusCode.DontExistRoom);
+            return RoomInfoResponse.Create(room.ToRoomPresent());
         }
     }
 }

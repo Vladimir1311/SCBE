@@ -51,7 +51,9 @@ namespace Common.ResponseObjects
         [StatusCodeDescription("Неверное указание максимального количества членов комнаты")]
         MaxPeopleCountInRoomIncorrect,
         [StatusCodeDescription("Вы находитесь в комнате")]
-        PersonInRoomAtAWrongTime
+        PersonInRoomAtAWrongTime,
+        [StatusCodeDescription("Неправильные переданные параметры")]
+        ArgumentsIncorrect
 
     }
 

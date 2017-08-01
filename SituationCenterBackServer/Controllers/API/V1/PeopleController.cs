@@ -29,8 +29,8 @@ namespace SituationCenterBackServer.Controllers.API.V1
         }
         public async Task<ResponseBase> Me()
         {
-            var roomId = (await userManager.FindUser(User))?.RoomId ?? throw new ArgumentException();
-            return MeResponse.Create(roomId);
+            var user = await userManager.FindUser(User) ?? throw new ArgumentException();
+            return MeResponse.Create(user.RoomId);
         }
 
         [HttpPost]

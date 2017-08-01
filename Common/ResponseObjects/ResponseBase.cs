@@ -15,7 +15,7 @@ namespace Common.ResponseObjects
         public string Message { get; set; }
         [JsonProperty("status")]
         public StatusCode StatusCode { get; set; }
-        [JsonProperty("errors")]
+        [JsonProperty("errors", NullValueHandling = NullValueHandling.Ignore)]
         public StatusCode[] Errors { get; set; }
 
 

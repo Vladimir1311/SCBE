@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Microsoft.Extensions.Logging;
+using Common.Exceptions;
+using Common.ResponseObjects;
 
 namespace SituationCenterBackServer.Models.RoomSecurity
 {
@@ -78,7 +80,7 @@ namespace SituationCenterBackServer.Models.RoomSecurity
                 case Common.Models.Rooms.PrivacyRoomType.InvationPrivate:
                     throw new NotImplementedException();
                 default:
-                    throw new Exception("Unknown privacy type");
+                    throw new ArgumentException(nameof(rule));
             }
         }
 
@@ -86,7 +88,7 @@ namespace SituationCenterBackServer.Models.RoomSecurity
         {
             logger.LogDebug($"validate password");
             if (securityRule.Data != password)
-                throw new Exception("Password not correct");
+                throw new StatusCodeException(StatusCode.IncorrectRoomPassword);
         }
 
 

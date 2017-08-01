@@ -86,14 +86,22 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
             var user = dataBase.Users
                 .Include(U => U.Room)
                 .FirstOrDefault(U => U.Id == userId.ToString())
-                ?? throw new ArgumentException($"not user with id {userId}"); 
+                ?? throw new ArgumentException($"not user with id {userId}");
+
+
             if (user.RoomId != null)
-                throw new Exception("Вы уже состоите в другой комнате!");
+                throw new StatusCodeException(StatusCode.PersonInRoomAtAWrongTime);
+
+
             var calledRoom = dataBase
                 .Rooms
                 .Include(R => R.Users)
                 .FirstOrDefault(R => R.Id == roomId)
-                ?? throw new Exception("Запрашиваемой комнаты не существует");
+                ?? throw new StatusCodeException(StatusCode.DontExistRoom);
+
+            if (calledRoom.Users.Count == calledRoom.PeopleCountLimit)
+                throw new StatusCodeException(StatusCode.RoomFilled);
+
             logger.LogDebug("Validate user");
             roomSecyrityManager.Validate(user, calledRoom, securityData);
             logger.LogDebug("Validated user");

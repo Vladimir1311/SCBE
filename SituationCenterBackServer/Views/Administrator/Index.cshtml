@@ -72,12 +72,14 @@
             <tr>
                 <td>Name</td>
                 <td>Privacy rule</td>
+                <td>Fullness</td>
             </tr>
             @foreach (var room in Model.Rooms)
             {
                 <tr>
                     <td>@Html.ActionLink(room.Name, "room", new { roomid = room.Id })</td>
                     <td>@room.SecurityRule.PrivacyRule</td>
+                    <td>@Model.Users.Count(U => U.RoomId == room.Id) / @room.PeopleCountLimit</td>
                     <td>@Html.ActionLink("delete", "DeleteRoom", new { roomid = room.Id})</td>
                 </tr>
 

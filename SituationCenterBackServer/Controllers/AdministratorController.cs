@@ -100,5 +100,13 @@ namespace SituationCenterBackServer.Controllers
             await userManager.DeleteAsync(user);
             return RedirectToAction("Index");
         }
+
+        public IActionResult Find()
+        {
+            var phones = new string[] { "+79161853166", "+78005553535" };
+            var users = dataBase.Users.Where(U => phones.Contains(U.PhoneNumber)).ToArray();
+
+            return Json(users);
+        }
     }
 }

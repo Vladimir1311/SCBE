@@ -1,4 +1,5 @@
 ﻿using SituationCenterBackServer.Models.VoiceChatModels;
+using System;
 using System.Collections.Generic;
 
 namespace SituationCenterBackServer.Models.RoomSecurity
@@ -11,7 +12,7 @@ namespace SituationCenterBackServer.Models.RoomSecurity
 
         void CreatePasswordRule(Room room, string pasword);
 
-        void CreateInvationRule(Room room, IEnumerable<ApplicationUser> users);
+        void CreateInvationRule(Room room, Guid[] userIds);
 
         void AddAdminRole(ApplicationUser user, Room room);
 

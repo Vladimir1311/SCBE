@@ -5,9 +5,9 @@ using System.Text;
 
 namespace Common.Requests.Room.CreateRoom
 {
-    public class PasswordArgs
+    public class InvationArgs
     {
-        [JsonProperty("password")]
-        public string Password { get; set; }
+        [JsonProperty("users")]
+        public string[] Phones { get; set; }
     }
 }

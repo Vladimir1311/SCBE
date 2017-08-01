@@ -53,7 +53,9 @@ namespace Common.ResponseObjects
         [StatusCodeDescription("Вы находитесь в комнате")]
         PersonInRoomAtAWrongTime,
         [StatusCodeDescription("Неправильные переданные параметры")]
-        ArgumentsIncorrect
+        ArgumentsIncorrect,
+        [StatusCodeDescription("Нет доступа к чему либо. Например попытка присоединения к комнате без приглашения")]
+        AccessDenied
 
     }
 

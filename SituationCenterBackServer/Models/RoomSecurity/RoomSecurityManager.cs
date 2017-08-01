@@ -1,4 +1,5 @@
 ﻿using Common.Exceptions;
+using Common.Models.Rooms;
 using Common.ResponseObjects;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -32,30 +33,36 @@ namespace SituationCenterBackServer.Models.RoomSecurity
             this.logger = logger;
         }
 
-        public void CreateInvationRule(Room room, IEnumerable<ApplicationUser> users)
+        public void CreateInvationRule(Room room, Guid[] usersIds)
         {
-            throw new NotImplementedException();
+            logger.LogDebug($"creating invation rule");
+            var inviteRule = new RoomSecurityRule() { PrivacyRule = PrivacyRoomType.InvationPrivate };
+
+            var userIdsString = string.Join("\n", usersIds.Select(I => I.ToString()));
+            inviteRule.Data = userIdsString;
+
+            room.SecurityRule = inviteRule;
         }
 
         public void CreatePublicRule(Room room)
         {
             logger.LogDebug($"create public rule for room {room.Id} {room.Name}");
 
-            var publicRule = new RoomSecurityRule() { PrivacyRule = Common.Models.Rooms.PrivacyRoomType.Public };
+            var publicRule = new RoomSecurityRule() { PrivacyRule = PrivacyRoomType.Public };
             room.SecurityRule = publicRule;
         }
 
         public void CreatePasswordRule(Room room, string password)
         {
-            logger.LogDebug($"create password rule for room {room.Id} {room.Name}");
+            logger.LogDebug($"create password rule for room {room.Name}");
 
             if (password?.Length != 6 || !int.TryParse(password, out _))
-                throw new Exception("Password length must be 6 numerals");
-
+                throw new StatusCodeException(StatusCode.IncorrectRoomPassword);
+            
             RoomSecurityRule rule = new RoomSecurityRule()
             {
-                PrivacyRule = Common.Models.Rooms.PrivacyRoomType.Password,
-                Data = password
+                PrivacyRule = PrivacyRoomType.Password,
+                Data = password //Использовать хеш!!!
             };
             room.SecurityRule = rule;
         }
@@ -67,15 +74,17 @@ namespace SituationCenterBackServer.Models.RoomSecurity
             logger.LogDebug($"room {room.Id} have privacy rule {rule.PrivacyRule}");
             switch (rule.PrivacyRule)
             {
-                case Common.Models.Rooms.PrivacyRoomType.Public:
+                case PrivacyRoomType.Public:
                     break;
 
-                case Common.Models.Rooms.PrivacyRoomType.Password:
+                case PrivacyRoomType.Password:
                     ValidatePassword(rule, data);
                     break;
 
-                case Common.Models.Rooms.PrivacyRoomType.InvationPrivate:
-                    throw new NotImplementedException();
+                case PrivacyRoomType.InvationPrivate:
+                    ValidateInvation(rule, user);
+                    break;
+
                 default:
                     throw new ArgumentException(nameof(rule));
             }
@@ -83,9 +92,19 @@ namespace SituationCenterBackServer.Models.RoomSecurity
 
         private void ValidatePassword(RoomSecurityRule securityRule, string password)
         {
-            logger.LogDebug($"validate password");
+            //TODO Использовать хэши!!!
+            logger.LogDebug($"validating password");
             if (securityRule.Data != password)
                 throw new StatusCodeException(StatusCode.IncorrectRoomPassword);
+            logger.LogDebug($"success validated password");
+        }
+
+        private void ValidateInvation(RoomSecurityRule rule, ApplicationUser user)
+        {
+            logger.LogDebug("validating invite rule");
+            if (!rule.Data.Split('\n').Contains(user.Id))
+                throw new StatusCodeException(StatusCode.AccessDenied);
+            logger.LogDebug("success validated invite rule");
         }
 
         public void AddAdminRole(ApplicationUser user, Room room)

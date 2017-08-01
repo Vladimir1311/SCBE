@@ -21,7 +21,6 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
 
         public RoomsManager(IOptions<UnrealAPIConfiguration> configs,
             ILogger<RoomsManager> logger,
-            UserManager<ApplicationUser> usermanager,
             ApplicationDbContext dataBase,
             IRoomSecurityManager roomSecyrityManager)
 
@@ -52,13 +51,26 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
                     break;
 
                 case Common.Models.Rooms.PrivacyRoomType.Password:
-                    var password = createRoomInfo.Args["password"].ToString();
+                    var password = createRoomInfo.Args.ToObject<PasswordArgs>().Password;
                     roomSecyrityManager.CreatePasswordRule(newRoom, password);
                     break;
 
                 case Common.Models.Rooms.PrivacyRoomType.InvationPrivate:
+                    var phoneNumbers = createRoomInfo.Args.ToObject<InvationArgs>()
+                        .Phones
+                        .Append(creater.PhoneNumber)
+                        .Distinct()
+                        .ToArray();
+                    var userIds = dataBase
+                        .Users
+                        .Where(U => phoneNumbers.Contains(U.PhoneNumber))
+                        .Select(U => U.Id)
+                        .Select(I => Guid.Parse(I))
+                        .ToArray();
+                    roomSecyrityManager.CreateInvationRule(newRoom, userIds);
+                    break;
                 default:
-                    throw new NotImplementedException("Данный функционал еще не готов");
+                    throw new NotImplementedException();
             }
             dataBase.Add(newRoom);
             roomSecyrityManager.AddAdminRole(creater, newRoom);
@@ -179,5 +191,6 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
                 throw new StatusCodeException(StatusCode.MaxPeopleCountInRoomIncorrect);
             return peopleCount;
         }
+
     }
 }

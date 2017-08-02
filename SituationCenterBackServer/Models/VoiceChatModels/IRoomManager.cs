@@ -12,7 +12,7 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
 
         void LeaveFromRoom(Guid UserId);
 
-        IEnumerable<Room> Rooms { get; }
+        IEnumerable<Room> Rooms(Guid userId);
 
         IEnumerable<Room> FindRooms(Predicate<Room> func);
 

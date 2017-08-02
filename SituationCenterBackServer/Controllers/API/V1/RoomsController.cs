@@ -35,7 +35,9 @@ namespace SituationCenterBackServer.Controllers.API.V1
 
         public ResponseBase List()
         {
-            var roomsPresent = roomsManager.Rooms
+            var userId = userManager.GetUserGuid(User);
+            var roomsPresent = roomsManager
+                .Rooms(userId)
                 .Select(R => R.ToRoomPresent());
             return RoomsListResponse.Create(roomsPresent);
         }

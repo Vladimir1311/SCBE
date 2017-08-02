@@ -133,5 +133,20 @@ namespace SituationCenterBackServer.Models.RoomSecurity
             if (adminRole != null)
                 roleManager.DeleteAsync(adminRole).Wait();
         }
+
+        public bool CanJoin(ApplicationUser user, Room room)
+        {
+            if (room.SecurityRule.PrivacyRule != PrivacyRoomType.InvationPrivate)
+                return true;
+            try
+            {
+                ValidateInvation(room.SecurityRule, user);
+            }
+            catch
+            {
+                return false;
+            }
+            return true;
+        }
     }
 }

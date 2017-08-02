@@ -18,6 +18,8 @@ namespace SituationCenterBackServer.Models.RoomSecurity
 
         bool CanDelete(ApplicationUser user, Room room);
 
+        bool CanJoin(ApplicationUser user, Room room);
+
         void ClearRoles(Room room);
     }
 }

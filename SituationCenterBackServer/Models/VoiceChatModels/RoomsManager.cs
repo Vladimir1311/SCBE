@@ -153,7 +153,17 @@ namespace SituationCenterBackServer.Models.VoiceChatModels
             dataBase.SaveChanges();
         }
 
-        public IEnumerable<Room> Rooms => FindRooms(R => true);
+        public IEnumerable<Room> Rooms(Guid userId)
+        {
+            var user = dataBase.Users.FirstOrDefault(U => U.Id == userId.ToString())
+                ?? throw new ArgumentException();
+
+            return dataBase
+                .Rooms
+                .Include(R => R.SecurityRule)
+                .Where(R => roomSecyrityManager.CanJoin(user, R))
+                .ToArray();
+        }
 
         private ApplicationUser FindUser(Guid userId)
         {

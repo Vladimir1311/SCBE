@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 using CCF;
 using System.IO;
 using System.Net.Http;
+//using Microsoft.Owin;
+
 
 namespace UDPServerTester.Controllers
 {
@@ -32,7 +34,7 @@ namespace UDPServerTester.Controllers
                 message = reader.ReadToEnd();
 
             var service = new ServiceCode<IWorkInterface>(new Worker());
-            var response = service.Handle(message);
+            var response = service.Handle(form);
             return Content(response);
         }
 

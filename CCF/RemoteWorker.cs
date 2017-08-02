@@ -76,7 +76,11 @@ namespace CCF
             MultipartFormDataContent multiContent = new MultipartFormDataContent();
 
             StringContent content = new StringContent(data);
+            ByteArrayContent bytes = new ByteArrayContent(new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 0 });
+            
+
             multiContent.Add(content, "simpleargs");
+            multiContent.Add(bytes, "it is file?");
             var res = httpClient.PostAsync("CCF/Recieve", multiContent).Result.Content.ReadAsStringAsync().Result;
             invocation.ReturnValue = int.Parse(res);
         }

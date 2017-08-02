@@ -24,7 +24,8 @@ namespace CCF
 
         public string Handle(IFormCollection request)
         {
-            var message = JsonConvert.DeserializeObject<InvokeMessage>(request);
+            var jsonValue = request["simpleargs"].ToString();
+            var message = JsonConvert.DeserializeObject<InvokeMessage>(jsonValue );
             var targetMethod = workerType.GetMethod(message.MethodName, ArgTypes(message.Args));
             var result = targetMethod.Invoke(worker, message.Args.ToObject<object[]>());
             return result.ToString();

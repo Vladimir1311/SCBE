@@ -36,14 +36,6 @@ namespace CCF
                 typeof(T),
                 new RemoteWorker<T>(endPoint));
         }
-        private static Type[] acceptedTypes = new Type[]
-        {
-            typeof(int),
-            typeof(double),
-            typeof(long),
-            typeof(string),
-            typeof(Guid)
-        };
         private static void CheckType(Type type)
         {
             if (type.GetMembers().Count() != type.GetMethods().Count())
@@ -53,10 +45,6 @@ namespace CCF
             foreach (var method in methods)
             {
                 if (method.ContainsGenericParameters)
-                    throw new NotSupportedException($"Type {type.FullName} is not supported");
-                if (method.GetParameters().Any(I => !acceptedTypes.Contains(I.ParameterType)))
-                    throw new NotSupportedException($"Type {type.FullName} is not supported");
-                if (!acceptedTypes.Contains(method.ReturnType))
                     throw new NotSupportedException($"Type {type.FullName} is not supported");
             }
         }
@@ -76,12 +64,9 @@ namespace CCF
             MultipartFormDataContent multiContent = new MultipartFormDataContent();
 
             StringContent content = new StringContent(data);
-            ByteArrayContent bytes = new ByteArrayContent(new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 0 });
-            
 
             multiContent.Add(content, "simpleargs");
-            multiContent.Add(bytes, "it is file?");
-            var res = httpClient.PostAsync("CCF/Recieve", multiContent).Result.Content.ReadAsStringAsync().Result;
+            var res = httpClient.PostAsync("api/CCFEndPoint", multiContent).Result.Content.ReadAsStringAsync().Result;
             invocation.ReturnValue = int.Parse(res);
         }
     }

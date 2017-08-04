@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Http;
 namespace CCF
 {
     public class ServiceCode<T>
-    
+
     {
         private T worker;
         private Type workerType;
@@ -21,14 +21,14 @@ namespace CCF
             worker = targetObject;
             workerType = targetObject.GetType();
         }
-
+        
         public string Handle(IFormCollection request)
         {
             var jsonValue = request["simpleargs"].ToString();
-            var message = JsonConvert.DeserializeObject<InvokeMessage>(jsonValue );
+            var message = JsonConvert.DeserializeObject<InvokeMessage>(jsonValue);
             var targetMethod = workerType.GetMethod(message.MethodName, ArgTypes(message.Args));
             var result = targetMethod.Invoke(worker, message.Args.ToObject<object[]>());
-            return result.ToString();
+            return JsonConvert.SerializeObject(result);
         }
 
 

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using CCF;
 using System.IO;
 using System.Net.Http;
+using UEServersManager.Interfaces;
 //using Microsoft.Owin;
 
 
@@ -20,8 +21,10 @@ namespace UDPServerTester.Controllers
 
         public IActionResult Send()
         {
-            var work = RemoteWorker<IWorkInterface>.Create("http://localhost:55279");
-            return Content(work.StrLength("12345678").ToString());
+            IRoomServerManager serverManager 
+                = RemoteWorker<IRoomServerManager>.Create("http://localhost:51619");
+            var result = serverManager.CreateServer();
+            return Content(result.ToString());
         }
 
 

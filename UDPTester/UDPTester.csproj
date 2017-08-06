@@ -8,12 +8,10 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugOffline|AnyCPU'" />
 
   <ItemGroup>
-    <PackageReference Include="Castle.Core" Version="4.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.2" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\CCF\CCF.csproj" />
     <ProjectReference Include="..\Common\Common.csproj" />
   </ItemGroup>
 

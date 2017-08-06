@@ -1,18 +1,12 @@
-﻿using Castle.DynamicProxy;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace UDPTester
 {
-    class ProxyClass : IInterceptor
+    class ProxyClass
     {
-        public void Intercept(IInvocation invocation)
-        {
-            
-            Console.WriteLine($"Try to Call {invocation.Method.Name}");            
-            invocation.ReturnValue = 4;
-        }
+        
     }
 }

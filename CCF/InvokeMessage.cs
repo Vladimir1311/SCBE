@@ -7,8 +7,8 @@ namespace CCF
 {
     class InvokeMessage
     {
-        public Guid MessageId { get; set; }
         public string MethodName { get; set; }
-        public JToken Args { get; set; }
+        public Dictionary<string, JToken> Args { get; set; }
+        public int SubObjectId { get; set; } = -1;
     }
 }

@@ -3,14 +3,19 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp1.1</TargetFramework>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
+    <Authors>Maksim Makushchenko</Authors>
+    <Company>Reality Shift</Company>
+    <Description>Core Comunication Foundation - tool for work with .net Core applications via only interfaces</Description>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugOffline|AnyCPU'" />
 
   <ItemGroup>
-    <PackageReference Include="Castle.Core" Version="4.0.0" />
+    <PackageReference Include="Castle.Core" Version="4.1.1" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="1.1.2" />
+    <PackageReference Include="System.Reflection.Extensions" Version="4.3.0" />
+    <PackageReference Include="System.Reflection.TypeExtensions" Version="4.3.0" />
   </ItemGroup>
 
   <ItemGroup>

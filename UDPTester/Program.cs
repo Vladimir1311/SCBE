@@ -23,37 +23,17 @@ namespace UDPTester
     {
         static void Main(string[] args)
         {
-            var o = new object[] { "Aha", 123, 123.5 };
-            var serialized = o.Select(O => JToken.FromObject(O)).ToArray();
-            var arrTok = JToken.FromObject(o);
-            var arrReader = new JTokenReader(arrTok);
-            while (arrReader.Read())
-            {
-                Console.WriteLine("---");
-                Console.WriteLine(arrReader.ValueType);
-            }
-            foreach (var item in serialized)
-            {
-                JsonReader reader = new JTokenReader(item);
-                Console.WriteLine(reader.Read());
-                Console.WriteLine(reader.ValueType.Name);
-            }
-
-
-            IMyService service = RemoteWorker<IMyService>.Create("http://127.0.0.1");
-            Console.WriteLine("created");
-            var l = service.GetStringLength("ahahahaha", 54, 12.54);
-            Console.WriteLine("Executed "+ l);
-            Console.ReadKey();
-            
+            ProxyGenerator generator = new ProxyGenerator();
+            var array = generator.CreateClassProxy<int[]>(new Worker());
         }
-
-
-
     }
 
-    public interface IMyService
+
+    class Worker : IInterceptor
     {
-        int GetStringLength(string str, int value, double lol);
+        public void Intercept(IInvocation invocation)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

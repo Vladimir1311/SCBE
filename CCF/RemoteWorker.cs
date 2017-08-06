@@ -11,30 +11,57 @@ using System.Threading;
 
 namespace CCF
 {
-    public class RemoteWorker<T> : IInterceptor
+    public class RemoteWorker : IInterceptor
     {
         private static IProxyGenerator proxyGenerator = new ProxyGenerator();
+
+        private static Type[] PrimitiveTypes =
+            typeof(JToken)
+            .GetMethods()
+            .Where(M => M.Name == "op_Implicit")
+            .Select(M => M.GetParameters()[0].ParameterType)
+            .ToArray();
 
 
         private string endPoint;
         private HttpClient httpClient;
+        private int objectId;
 
 
-        private RemoteWorker(string endPoint)
+        private RemoteWorker(string endPoint, int objectId)
         {
             this.endPoint = endPoint;
             httpClient = new HttpClient()
             {
-                BaseAddress = new Uri(endPoint)
+                BaseAddress = new Uri(endPoint),
+                Timeout = TimeSpan.FromHours(5)
             };
+            this.objectId = objectId;
         }
 
-        public static T Create(string endPoint)
+        public static T Create<T>(string endPoint)
         {
             CheckType(typeof(T));
             return (T)proxyGenerator.CreateInterfaceProxyWithoutTarget(
                 typeof(T),
-                new RemoteWorker<T>(endPoint));
+                new RemoteWorker(endPoint, -1));
+        }
+
+        private static object Create(Type targetType, RemoteWorker worker)
+        {
+            try
+            {
+
+                return proxyGenerator.CreateInterfaceProxyWithoutTarget(
+                    targetType,
+                    worker);
+            }
+            catch
+            {
+                return proxyGenerator.CreateClassProxy(
+                    targetType,
+                    worker);
+            }
         }
         private static void CheckType(Type type)
         {
@@ -53,21 +80,34 @@ namespace CCF
         {
             InvokeMessage message = new InvokeMessage
             {
-                MessageId = Guid.NewGuid(),
-                Args = JToken.FromObject(
-                    invocation.Arguments.ToArray()),
-                MethodName = invocation.Method.Name
+                MethodName = invocation.Method.Name,
+                SubObjectId = objectId
             };
-            var data = JsonConvert.SerializeObject(message);
+
+            Dictionary<string, JToken> args = new Dictionary<string, JToken>();
+            int i = 0;
+            foreach (var param in invocation.Method.GetParameters())
+            {
+                args.Add(param.Name, JToken.FromObject(invocation.Arguments[i++]));
+            }
+            message.Args = args;
+            var data = JsonConvert.SerializeObject(message, Formatting.Indented);
             Console.WriteLine(data);
 
             MultipartFormDataContent multiContent = new MultipartFormDataContent();
-
             StringContent content = new StringContent(data);
-
             multiContent.Add(content, "simpleargs");
-            var res = httpClient.PostAsync("api/CCFEndPoint", multiContent).Result.Content.ReadAsStringAsync().Result;
-            invocation.ReturnValue = int.Parse(res);
+            var result = httpClient.PostAsync("CCF/Recieve", multiContent).Result;
+            var invokeResult = JsonConvert.DeserializeObject<InvokeResult>(result.Content.ReadAsStringAsync().Result);
+            if (invocation.Method.ReturnType == typeof(void))
+                return;
+            if (invokeResult.IsPrimitive)
+            {
+                invocation.ReturnValue = invokeResult.Value.ToObject(invocation.Method.ReturnType);
+                return;
+            }
+            var worker = new RemoteWorker(endPoint, invokeResult.SubObjectId);
+            invocation.ReturnValue = Create(invocation.Method.ReturnType, worker);
         }
     }
 }

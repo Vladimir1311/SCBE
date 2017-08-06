@@ -1,4 +1,5 @@
-﻿using Common;
+﻿using Castle.DynamicProxy;
+using Common;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -19,6 +20,23 @@ namespace UDPTester
     {
         static void Main(string[] args)
         {
+            ProxyGenerator generator = new ProxyGenerator();
+            ILOL t = (ILOL)generator.CreateInterfaceProxyWithoutTarget(typeof(ILOL), new Worker());
+            t.StrLength("sdfsdfsgsrg");
         }
+    }
+
+    class Worker : IInterceptor
+    {
+        public void Intercept(IInvocation invocation)
+        {
+            invocation.ReturnValue = "sdfsfe";
+        }
+    }
+
+
+    public interface ILOL
+    {
+        int StrLength(string str);
     }
 }

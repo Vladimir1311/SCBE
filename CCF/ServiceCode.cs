@@ -84,7 +84,7 @@ namespace CCF
         {
             Queue<Type> allTypes = new Queue<Type>();
             allTypes.Enqueue(workerType);
-            while(allTypes.Count != 0)
+            while (allTypes.Count != 0)
             {
                 var type = allTypes.Dequeue();
                 var method = type.GetMethod(methodName);

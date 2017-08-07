@@ -19,6 +19,7 @@ namespace UDPServerTester.Logging
             _filter = filter;
             _toDo = toDo;
         }
+
         public IDisposable BeginScope<TState>(TState state)
         {
             return new NoopDisposable();
@@ -48,6 +49,7 @@ namespace UDPServerTester.Logging
                     CategoryName = _categoryName
                 }));
         }
+
         private class NoopDisposable : IDisposable
         {
             public void Dispose()

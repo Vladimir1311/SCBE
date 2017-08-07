@@ -2,7 +2,7 @@
 
 namespace CCF
 {
-    class InvokeResult
+    internal class InvokeResult
     {
         public bool IsPrimitive { get; set; }
         public JToken Value { get; set; }

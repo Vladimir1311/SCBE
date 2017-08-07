@@ -34,7 +34,7 @@ namespace DocsToPictures.Models
                     neededDoc.PagesPaths = new string[pdfFile.Pages.Count + 1];
                     for (var i = 0; i < pdfFile.Pages.Count; i++)
                     {
-                        var image = pdfFile.SaveAsImage(i);
+                        var image = pdfFile.SaveAsImage(i); 
                         string imagePath = Path.Combine(neededDoc.Folder, $"{i}.png");
                         image.Save(imagePath, ImageFormat.Png);
                         image.Dispose();

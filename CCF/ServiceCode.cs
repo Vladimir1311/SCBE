@@ -8,6 +8,7 @@ using System.Linq;
 using Newtonsoft.Json;
 using Microsoft.AspNetCore.Http;
 using System.Collections.Concurrent;
+using System.IO;
 
 namespace CCF
 {
@@ -23,11 +24,10 @@ namespace CCF
         private object worker;
         private Type workerType;
 
-
         private static int lastSubWorkerId;
+
         private static ConcurrentDictionary<int, ServiceCode> subWorkers
             = new ConcurrentDictionary<int, ServiceCode>();
-
 
         public static ServiceCode Create<T>(T targetObject)
         {
@@ -41,35 +41,46 @@ namespace CCF
         }
 
 
-        public string Handle(IFormCollection request)
+        public object Handle(string request, IEnumerable<StreamValue> streams)
         {
-            var jsonValue = request["simpleargs"].ToString();
-            var message = JsonConvert.DeserializeObject<InvokeMessage>(jsonValue);
+            var message = JsonConvert.DeserializeObject<InvokeMessage>(request);
 
             if (subWorkers.TryGetValue(message.SubObjectId, out var handler))
             {
-                return handler.HardWork(request, message);
+                return handler.HardWork(message, streams);
             }
-            return HardWork(request, message);
+            return HardWork(message, streams);
         }
 
-        private string HardWork(IFormCollection request, InvokeMessage message)
+        private object HardWork(InvokeMessage message, IEnumerable<StreamValue> streams)
         {
             var targetMethod = GetTargetMethod(message.MethodName);
             var parameters = new List<object>();
             foreach (var param in targetMethod.GetParameters())
             {
-                var arg = message.Args[param.Name];
-                parameters.Add(arg.ToObject(param.ParameterType));
+                if (message.Args.TryGetValue(param.Name, out var token))
+                {
+                    parameters.Add(token.ToObject(param.ParameterType));
+                }
+                else
+                {
+                    var stream = streams.FirstOrDefault(P => P.Name == param.Name).Value;
+                    parameters.Add(stream);
+                }
             }
             var result = targetMethod.Invoke(worker, parameters.ToArray());
-            if (PrimitiveTypes.Contains(targetMethod.ReturnType) || result == null)
+            if (result == null)
+            {
+                return null;
+            }
+            if (PrimitiveTypes.Contains(targetMethod.ReturnType))
                 return JsonConvert.SerializeObject(
                     new InvokeResult
                     {
                         IsPrimitive = true,
                         Value = JToken.FromObject(result ?? "Void")
                     });
+            if (result is Stream streamResult) return streamResult;
             var subWorkerKey = lastSubWorkerId++;
             subWorkers[subWorkerKey] = new ServiceCode(result, targetMethod.ReturnType);
             return JsonConvert.SerializeObject(
@@ -96,7 +107,6 @@ namespace CCF
                 }
             }
             return null;
-
         }
     }
 }

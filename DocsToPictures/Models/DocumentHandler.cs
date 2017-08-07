@@ -6,6 +6,7 @@ using System.Web;
 using System.Reflection;
 using System.IO;
 using System.Threading;
+using DocsToPictures.Interfaces;
 
 namespace DocsToPictures.Models
 {
@@ -21,7 +22,7 @@ namespace DocsToPictures.Models
                 .ToList();
         }
 
-        public bool CanConvert(Document doc)=>
+        public bool CanConvert(IDocument doc)=>
             supportedFormats.Contains(Path.GetExtension(doc.Name));
 
         protected ConcurrentQueue<Document> documentsStream = new ConcurrentQueue<Document>();

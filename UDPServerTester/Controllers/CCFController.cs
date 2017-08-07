@@ -7,7 +7,10 @@ using Microsoft.AspNetCore.Mvc;
 using CCF;
 using System.IO;
 using System.Net.Http;
-
+using DocsToPictures.Interfaces;
+using System.Text;
+using Microsoft.Net.Http.Headers;
+using System.Threading;
 
 namespace UDPServerTester.Controllers
 {
@@ -15,92 +18,91 @@ namespace UDPServerTester.Controllers
     [Route("CCF/[action]")]
     public class CCFController : Controller
     {
-        private static IRoomServerManager rsm;
-        private static ServiceCode service = ServiceCode.Create(new rsm());
-
+        private static IDocumentProccessor docsProccessot;
+        private static ServiceCode service = ServiceCode.Create(new Proccessor());
 
         public CCFController()
         {
-            rsm
-                = RemoteWorker.Create<IRoomServerManager>("http://localhost:55279");
+            docsProccessot
+                = RemoteWorker.Create<IDocumentProccessor>("http://localhost:62961");
         }
+
         public IActionResult Send()
         {
-            var result = rsm.CreateServer();
-            return Content(result.ToString());
+            var doc = docsProccessot.AddToHandle("myFile.doc", System.IO.File.OpenRead(@"C:\Users\maksa\Desktop\Belyaeva_Olya_k_pr\Belyaeva_Olya_k_pr.doc"));
+            while (true)
+            {
+                Thread.Sleep(1000);
+                var picStream = doc.GetPicture(1);
+                if (picStream != null)
+                {
+                    using (var str = System.IO.File.Create(@"C:\Users\maksa\Desktop\New folder (2)\image.png"))
+                        picStream.CopyTo(str);
+                    return Content("success getted pic!");
+                }
+            }
         }
 
-        public IActionResult Kill(int port)
-        {
-            var server = rsm.GetRoomServer(port);
-            var success = server.Kill();
-            return Content(success.ToString());
-        }
-
-        public IActionResult List()
-        {
-            var list = rsm.GetAllRoomServer();
-            return Content(list.Count().ToString());
-        }
         public IActionResult Recieve()
         {
-            var res = service.Handle(Request.Form);
-            return Content(res);
-        }
 
-    }
+            var res = service.Handle(Request.Form["simpleargs"], Request.Form.Files.Select(F => new StreamValue { Name = F.Name, Value = F.OpenReadStream()}));
+            if (res == null)
+                return NoContent();
+            switch (res)
+            {
+                case string stringResult:
+                    return Content(stringResult);
 
-    public interface IRoomServerManager
-    {
-        int CreateServer();
-        IEnumerable<IRoomServer> GetAllRoomServer();
-        IRoomServer GetRoomServer(int Port);
-    }
-    public interface IRoomServer
-    {
-        int Port { get; }
+                case Stream streamResult:
+                    return new FileStreamResult(streamResult, "text/plain");
 
-        bool Kill();
-        void ResiveMessage(string massage);
-    }
-
-    class rsm : IRoomServerManager
-    {
-        private List<Server> servers = new List<Server>();
-        private static int port = 5000;
-        public int CreateServer()
-        {
-            servers.Add(new Server(port++));
-            return servers.Last().Port;
-        }
-
-        public IEnumerable<IRoomServer> GetAllRoomServer()
-        {
-            return servers;
-        }
-
-        public IRoomServer GetRoomServer(int Port)
-        {
-            return servers.FirstOrDefault(S => S.Port == Port);
+                default:
+                    return NotFound();
+            }
         }
     }
 
-    class Server : IRoomServer
+    internal class Proccessor : IDocumentProccessor
+    {
+        private Dictionary<Guid, IDocument> docs = new Dictionary<Guid, IDocument>();
+
+        public IDocument AddToHandle(string fileName, Stream fileStream)
+        {
+            
+            var guid = Guid.NewGuid();
+            IDocument doc = new Document(guid);
+            docs.Add(guid, doc);
+            return doc;
+        }
+
+        public IDocument CheckDocument(Guid id)
+        {
+            if (docs.TryGetValue(id, out var doc))
+                return doc;
+            else
+                return null;
+        }
+    }
+
+    internal class Document : IDocument
     {
 
-        public int Port { get; private set; }
+        
 
-        public Server(int port)
+        public IEnumerable<int> AvailablePages => new int[] { 1, 2, 3, 4 };
+
+        public Document(Guid id)
         {
-            Port = port;
+            Id = id;
         }
+        public Guid Id { get; set; }
 
-        public bool Kill()
+        public string Name => "Name";
+
+        public Stream GetPicture(int pageNum)
         {
-            return true;
+            return null;
         }
-
-        public void ResiveMessage(string massage)
-        {}
     }
 }

@@ -1,15 +1,15 @@
-﻿using System;
+﻿using DocsToPictures.Interfaces;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using System.Web;
 
 namespace DocsToPictures.Models
 {
-    public class DocumentProcessor
+    public class DocumentProcessor : IDocumentProccessor
     {
         private static DocumentProcessor proccessor = new DocumentProcessor();
         private List<DocumentHandler> handlers;
@@ -28,45 +28,53 @@ namespace DocsToPictures.Models
             Task.Factory.StartNew(async () => await DocsCheck());
         }
 
-
-        public void AddToHandle(Document doc)
+        public IDocument AddToHandle(string fileName, Stream fileStream)
         {
+            var dataDir = Path.Combine(AppDomain.CurrentDomain.GetData("DataDirectory").ToString(), "uploads");
+            Guid folderGuid = Guid.NewGuid();
+            var folder = Directory.CreateDirectory(Path.Combine(dataDir, folderGuid.ToString()));
+            using (var fileWriteStream = File.Create(Path.Combine(folder.FullName, fileName)))
+                fileStream.CopyTo(fileWriteStream);
+
+            var doc = new Document
+            {
+                Id = folderGuid,
+                Name = fileName,
+                Folder = folder.FullName
+            };
             var neededHandler = handlers.FirstOrDefault(H => H.CanConvert(doc));
             if (neededHandler == null)
                 throw new Exception("doc format unsopported");
             documentsBase[doc.Id] = doc;
             neededHandler.AddToHandle(doc);
-
+            return doc;
         }
 
-        public Document GetDocument(Guid Id)
+        public IDocument CheckDocument(Guid Id)
         {
             Document doc;
             if (!documentsBase.TryGetValue(Id, out doc))
-                throw new Exception("No doc with id " + Id);
+                return null;
             return doc;
         }
 
         private async Task DocsCheck()
         {
-            while(true)
+            while (true)
             {
-                foreach(var doc in documentsBase.Values.ToArray())
+                foreach (var doc in documentsBase.Values.ToArray())
                     if (DateTime.Now - Directory.GetCreationTime(doc.Folder) > TimeSpan.FromHours(2))
-                        DeleteDocument(doc.Id);
+                        DeleteDocument(doc);
                 await Task.Delay(TimeSpan.FromMinutes(20));
             }
         }
 
-        private void DeleteDocument(Guid id)
+        private void DeleteDocument(Document doc)
         {
-            Document document;
-            if (documentsBase.TryRemove(id, out document))
-            {
-                Directory.Delete(document.Folder, true);
-            }
+            Document d = null;
+            if (!documentsBase.TryRemove(doc.Id, out d))
+                return;
+            Directory.Delete(doc.Folder, true);
         }
-
-
     }
 }

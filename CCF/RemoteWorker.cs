@@ -62,7 +62,6 @@ namespace CCF
 
         private static void CheckType(Type type)
         {
-            return;
             if (type.GetMembers().Count() != type.GetMethods().Count())
                 throw new NotSupportedException($"Type {type.FullName} is not supported");
 

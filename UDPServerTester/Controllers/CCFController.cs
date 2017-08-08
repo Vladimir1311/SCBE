@@ -11,6 +11,7 @@ using DocsToPictures.Interfaces;
 using System.Text;
 using Microsoft.Net.Http.Headers;
 using System.Threading;
+using Storage.Interface;
 
 namespace UDPServerTester.Controllers
 {
@@ -18,29 +19,23 @@ namespace UDPServerTester.Controllers
     [Route("CCF/[action]")]
     public class CCFController : Controller
     {
-        private static IDocumentProccessor docsProccessot;
+        private static IStorage docsProccessot;
         private static ServiceCode service = ServiceCode.Create(new Proccessor());
 
         public CCFController()
         {
             docsProccessot
-                = RemoteWorker.Create<IDocumentProccessor>("http://localhost:62961");
+                = RemoteWorker.Create<IStorage>("http://52.163.250.253/storage/CCF");
         }
 
         public IActionResult Send()
         {
-            var doc = docsProccessot.AddToHandle("myFile.doc", System.IO.File.OpenRead(@"C:\Users\maksa\Desktop\Belyaeva_Olya_k_pr\Belyaeva_Olya_k_pr.doc"));
-            while (true)
-            {
-                Thread.Sleep(1000);
-                var picStream = doc.GetPicture(1);
-                if (picStream != null)
-                {
-                    using (var str = System.IO.File.Create(@"C:\Users\maksa\Desktop\New folder (2)\image.png"))
-                        picStream.CopyTo(str);
-                    return Content("success getted pic!");
-                }
-            }
+            var doc = docsProccessot.CreateUserSpace("Misha");
+            Console.WriteLine(doc);
+            var folder = docsProccessot.GetRootDirectory("Misha");
+            Console.WriteLine(folder.FullPath);
+            var dir = folder.CreateDirectory("New Folder");
+            return Content(dir.FullPath);
         }
 
         public IActionResult Recieve()

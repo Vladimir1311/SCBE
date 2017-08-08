@@ -12,5 +12,6 @@ namespace IPResolver.Models
         public ServicesContext(DbContextOptions<ServicesContext> options) : base(options)
         {}
         public DbSet<ServiceRow> ServiseRows { get; set; }
+        public DbSet<CCFService> CCFServises { get; set; }
     }
 }

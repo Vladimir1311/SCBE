@@ -8,9 +8,10 @@ using IPResolver.Models;
 namespace IPResolver.Migrations
 {
     [DbContext(typeof(ServicesContext))]
-    partial class ServicesContextModelSnapshot : ModelSnapshot
+    [Migration("20170808143146_CCF")]
+    partial class CCF
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
             modelBuilder
                 .HasAnnotation("ProductVersion", "1.1.2")

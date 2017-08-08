@@ -104,7 +104,7 @@ namespace CCF
 
             StringContent content = new StringContent(data);
             multiContent.Add(content, "simpleargs");
-            var result = httpClient.PostAsync("CCF/Recieve", multiContent).Result;
+            var result = httpClient.PostAsync("", multiContent).Result;
 
             if (result.StatusCode == System.Net.HttpStatusCode.NoContent)
                 return;

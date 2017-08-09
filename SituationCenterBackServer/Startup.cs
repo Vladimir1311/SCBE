@@ -1,4 +1,5 @@
-﻿using Common.Services;
+﻿using CCF.IPResolver.Adapter;
+using Common.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -9,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using SituationCenterBackServer.Data;
+using SituationCenterBackServer.Interfaces;
 using SituationCenterBackServer.Logging;
 using SituationCenterBackServer.Models;
 using SituationCenterBackServer.Models.Options;
@@ -71,6 +73,7 @@ namespace SituationCenterBackServer
 
             //Storage
             services.AddSingleton<IStorageManager, InProjectSavingStorageManager>();
+            services.AddTransient<IAccessValidator, AccessValidator>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -79,8 +82,10 @@ namespace SituationCenterBackServer
             Console.WriteLine(env.EnvironmentName);
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
-            //loggerFactory.AddDebug(LogLevel.Trace);
             loggerFactory.AddProvider(new SocketLoggerProvider());
+
+            app.UseAsServise<IAccessValidator>("Core/CCFService");
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

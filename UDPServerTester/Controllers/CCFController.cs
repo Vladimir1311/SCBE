@@ -12,6 +12,7 @@ using System.Text;
 using Microsoft.Net.Http.Headers;
 using System.Threading;
 using Storage.Interface;
+using SituationCenterBackServer.Interfaces;
 
 namespace UDPServerTester.Controllers
 {
@@ -19,23 +20,21 @@ namespace UDPServerTester.Controllers
     [Route("CCF/[action]")]
     public class CCFController : Controller
     {
-        private static IStorage docsProccessot;
+        private static IAccessValidator docsProccessot;
         private static ServiceCode service = ServiceCode.Create(new Proccessor());
 
         public CCFController()
         {
             docsProccessot
-                = RemoteWorker.Create<IStorage>("http://52.163.250.253/storage/CCF");
+                = RemoteWorker.Create<IAccessValidator>("http://localhost/core/CCFService");
         }
 
         public IActionResult Send()
         {
-            var doc = docsProccessot.CreateUserSpace("Misha");
-            Console.WriteLine(doc);
-            var folder = docsProccessot.GetRootDirectory("Misha");
-            Console.WriteLine(folder.FullPath);
-            var dir = folder.CreateDirectory("New Folder");
-            return Content(dir.FullPath);
+            Console.WriteLine(docsProccessot.CanAccessToFolder("value1", "value2"));
+            Console.WriteLine(docsProccessot.CanAccessToFolder("value1", "value2"));
+            Console.WriteLine(docsProccessot.CanAccessToFolder("value0", "value0"));
+            return Content(docsProccessot.CanAccessToFolder("value1", "value1").ToString());
         }
 
         public IActionResult Recieve()

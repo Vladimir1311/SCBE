@@ -35,6 +35,7 @@
   <ItemGroup>
     <ProjectReference Include="..\CCF\CCF.csproj" />
     <ProjectReference Include="..\DocsToPictures.Interfaces\DocsToPictures.Interfaces.csproj" />
+    <ProjectReference Include="..\SituiationCenterBackServer.Interfaces\SituationCenterBackServer.Interfaces.csproj" />
   </ItemGroup>
 
 </Project>

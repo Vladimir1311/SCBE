@@ -32,7 +32,7 @@ namespace UDPServerTester
             services.AddMvc();
 
 
-            services.AddSingleton<UdpConnector>(SP => new UdpConnector(13000, SP.GetService<ILogger<UdpConnector>>()));
+            //services.AddSingleton<UdpConnector>(SP => new UdpConnector(13000, SP.GetService<ILogger<UdpConnector>>()));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

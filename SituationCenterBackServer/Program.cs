@@ -12,7 +12,7 @@ namespace SituationCenterBackServer
                 urls = "http://localhost:5000";
             var host = new WebHostBuilder()
                 .UseKestrel()
-                .UseUrls(urls)
+                //.UseUrls(urls)
                 .UseContentRoot(Directory.GetCurrentDirectory())
                 .UseIISIntegration()
                 .UseStartup<Startup>()

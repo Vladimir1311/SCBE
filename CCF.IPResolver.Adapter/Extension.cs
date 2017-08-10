@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Net.Http;
-using System.Text;
+
+
 
 namespace CCF.IPResolver.Adapter
 {
@@ -32,6 +32,20 @@ namespace CCF.IPResolver.Adapter
                 Console.WriteLine("http request error!!! :(");
             }
             return app;
+        }
+
+
+        public static IServiceCollection AddCCFService<T>(this IServiceCollection services) where T : class
+        {
+            using (var client = new HttpClient())
+            {
+                var result = client.GetStringAsync($"http://ipresolver.azurewebsites.net/ip/GetCCFEndPoint?interfaceName={typeof(T)}").Result;
+                if (result == "") throw new Exception($"No availabale service for {typeof(T)}");
+                var worker = RemoteWorker.Create<T>(result);
+                services.AddSingleton(worker);
+            }
+
+            return services;
         }
     }
 }

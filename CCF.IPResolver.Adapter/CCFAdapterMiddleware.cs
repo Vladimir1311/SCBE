@@ -14,10 +14,10 @@ namespace CCF.IPResolver.Adapter
         private ServiceCode serviceCode;
         private string endPoint;
 
-        public CCFAdapterMiddleware(RequestDelegate next, string endPoint, T serviceInstance)
+        public CCFAdapterMiddleware(RequestDelegate next, string endPoint, T serviceInstance, ServiceCode serviceCode)
         {
             _next = next;
-            serviceCode = ServiceCode.Create<T>(serviceInstance);
+            this.serviceCode = serviceCode;
             this.endPoint = endPoint.StartsWith("/") ? endPoint : "/" + endPoint;
         }
 

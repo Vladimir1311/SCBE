@@ -20,21 +20,25 @@ namespace UDPServerTester.Controllers
     [Route("CCF/[action]")]
     public class CCFController : Controller
     {
-        private static IAccessValidator docsProccessot;
+        private static IStorage docsProccessot;
         private static ServiceCode service = ServiceCode.Create(new Proccessor());
 
         public CCFController()
         {
             docsProccessot
-                = RemoteWorker.Create<IAccessValidator>("http://localhost/core/CCFService");
+                = RemoteWorker.Create<IStorage>("http://52.163.250.253/storage/CCF");
         }
 
         public IActionResult Send()
         {
-            Console.WriteLine(docsProccessot.CanAccessToFolder("value1", "value2"));
-            Console.WriteLine(docsProccessot.CanAccessToFolder("value1", "value2"));
-            Console.WriteLine(docsProccessot.CanAccessToFolder("value0", "value0"));
-            return Content(docsProccessot.CanAccessToFolder("value1", "value1").ToString());
+            var tok = "Max";
+            var space = docsProccessot.CreateUserSpace(tok);
+            Console.WriteLine(space + " created");
+            var root = docsProccessot.GetRootDirectory(tok);
+            Console.WriteLine("path: " + root.FullPath);
+            var dir = root.CreateDirectory("SUKA BLYUAT");
+            Console.WriteLine("path: " + dir.FullPath);
+            return Content(dir.FullPath);
         }
 
         public IActionResult Recieve()

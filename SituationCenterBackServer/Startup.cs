@@ -19,6 +19,7 @@ using SituationCenterBackServer.Models.StorageModels;
 using SituationCenterBackServer.Models.TokenAuthModels;
 using SituationCenterBackServer.Models.VoiceChatModels;
 using SituationCenterBackServer.Services;
+using Storage.Interfaces;
 using System;
 using System.Text;
 
@@ -72,8 +73,9 @@ namespace SituationCenterBackServer
             services.AddSingleton<IBuffer, ASPNETBufferService>();
 
             //Storage
-            services.AddSingleton<IStorageManager, InProjectSavingStorageManager>();
             services.AddTransient<IAccessValidator, AccessValidator>();
+
+            services.AddCCFService<IStorage>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -84,7 +86,7 @@ namespace SituationCenterBackServer
             loggerFactory.AddDebug();
             loggerFactory.AddProvider(new SocketLoggerProvider());
 
-            app.UseAsServise<IAccessValidator>("Core/CCFService");
+            //app.UseAsServise<IAccessValidator>("Core/CCFService");
 
             if (env.IsDevelopment())
             {

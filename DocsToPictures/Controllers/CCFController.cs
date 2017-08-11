@@ -13,6 +13,7 @@ using System.IO;
 
 namespace DocsToPictures.Controllers
 {
+    [System.Web.Mvc.Route("doctopic/CCF")]
     public class CCFController : Controller
     {
 

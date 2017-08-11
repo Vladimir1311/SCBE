@@ -5,62 +5,49 @@ using Microsoft.AspNetCore.Mvc;
 using SituationCenterBackServer.Models;
 using SituationCenterBackServer.Models.StorageModels;
 using SituationCenterBackServer.Services;
+using Storage.Interfaces;
+using System.Linq;
 using IO = System.IO;
 
 namespace SituationCenterBackServer.Controllers
 {
     [Authorize]
-    [Route("storage/[action]/{*pathToFolder}")]
-    public class StorageController : Controller
+    [Route("storagefiles/[action]/{*pathToFolder}")]
+    public class StorageFilesController : Controller
     {
-        private readonly IStorageManager storageManager;
+        private readonly IStorage storageManager;
         private readonly UserManager<ApplicationUser> userManager;
-        private IDocumentHandlerService docHandler;
 
-        public StorageController(IStorageManager storageManager,
-            UserManager<ApplicationUser> userManager,
-            IDocumentHandlerService docHandler)
+        public StorageFilesController(IStorage storageManager,
+            UserManager<ApplicationUser> userManager)
         {
             this.storageManager = storageManager;
             this.userManager = userManager;
-            this.docHandler = docHandler;
-            this.docHandler.NewPagesAvailable += DocHandler_NewPagesAvailable;
-        }
-
-        private void DocHandler_NewPagesAvailable(File file)
-        {
-            foreach (var pic in file.Pictures)
-            {
-                if (pic?.State == PictureState.CanBeDownloaded)
-                    storageManager.SavePictureAsync(file, pic, docHandler.GetPicture(file, pic.Number));
-            }
         }
 
         public IActionResult Index(string pathToFolder)
         {
             pathToFolder = pathToFolder ?? "";
             string userId = GetUserId();
-            var content = storageManager.GetContentInFolder(userId, pathToFolder);
-            docHandler.FillStates(content.Files);
-            return View(content);
+
+            if (!storageManager.ExistsUserSpace(userId))
+                storageManager.CreateUserSpace(userId);
+
+            var content = storageManager.GetRootDirectory(userId).GetDirectory(pathToFolder);
+            
+            return View(new DirectoryContent { Directories = content.Directories.ToList(), Files = content.Files.ToList()});
         }
 
         public IActionResult Add(string pathToFolder, IFormFile file)
         {
             pathToFolder = pathToFolder ?? "";
             string userId = GetUserId();
-            File savedFile;
-            if (docHandler.IsSupported(IO.Path.GetExtension(file.FileName)))
-            {
-                savedFile = storageManager.SaveDocument(userId, pathToFolder, file);
-                docHandler.SendDocumentToHandle(savedFile);
-            }
-            else
-            {
-                savedFile = storageManager.Save(userId, pathToFolder, file);
-            }
-            //TODO handle errors with sendind doc!!!
-            docHandler.FillState(savedFile);
+
+            if (!storageManager.ExistsUserSpace(userId))
+                storageManager.CreateUserSpace(userId);
+
+            var targetFolder = storageManager.GetRootDirectory(userId).GetDirectory(pathToFolder);
+            targetFolder.CreateFile(file.FileName, file.OpenReadStream());
             return RedirectToAction("index");
         }
 

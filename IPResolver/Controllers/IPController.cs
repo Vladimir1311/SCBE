@@ -50,7 +50,7 @@ namespace IPResolver.Controllers
 
         public ContentResult GetCCFEndPoint(string interfaceName)
         {
-            var endPoint = servicesDb.CCFServises.FirstOrDefault(S => S.InterfaceName == interfaceName).CCFEndPoint;
+            var endPoint = servicesDb.CCFServises.FirstOrDefault(S => S.InterfaceName == interfaceName)?.CCFEndPoint;
 
             return Content(endPoint ?? "");
         }

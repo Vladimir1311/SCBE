@@ -20,11 +20,11 @@
 <ol>
     @foreach (var file in Model.Files)
     {
-        <li>@file.Name  @file.State @file.Progress%</li>
+        <li>@file.Name</li>
     }
 </ol>
 <h3>Добавить в эту директорию</h3>
-<form asp-action="Add" asp-controller="Storage" method="post" enctype="multipart/form-data">
+<form asp-action="Add" asp-controller="StorageFiles" method="post" enctype="multipart/form-data">
     <input type="file" name="file" />
 
     <input type="submit" value="Load" class="btn" />

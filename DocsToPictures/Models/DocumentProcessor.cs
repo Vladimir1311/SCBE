@@ -30,6 +30,7 @@ namespace DocsToPictures.Models
 
         public IDocument AddToHandle(string fileName, Stream fileStream)
         {
+            fileName = Path.GetFileName(fileName);
             var dataDir = Path.Combine(AppDomain.CurrentDomain.GetData("DataDirectory").ToString(), "uploads");
             Guid folderGuid = Guid.NewGuid();
             var folder = Directory.CreateDirectory(Path.Combine(dataDir, folderGuid.ToString()));

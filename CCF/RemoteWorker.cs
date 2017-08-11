@@ -113,7 +113,9 @@ namespace CCF
                 invocation.ReturnValue = result.Content.ReadAsStreamAsync().Result;
                 return;
             }
-            var invokeResult = JsonConvert.DeserializeObject<InvokeResult>(result.Content.ReadAsStringAsync().Result);
+            var resultstr = result.Content.ReadAsStringAsync().Result;
+            Console.WriteLine(resultstr);
+            var invokeResult = JsonConvert.DeserializeObject<InvokeResult>(resultstr);
 
             if (invocation.Method.ReturnType == typeof(void))
                 return;

@@ -35,10 +35,10 @@ namespace DocsToPictures.Models
                     for (var i = 0; i < pdfFile.Pages.Count; i++)
                     {
                         var image = pdfFile.SaveAsImage(i); 
-                        string imagePath = Path.Combine(neededDoc.Folder, $"{i}.png");
+                        string imagePath = Path.Combine(neededDoc.Folder, $"{i+1}.png");
                         image.Save(imagePath, ImageFormat.Png);
                         image.Dispose();
-                        neededDoc.PagesPaths[i] = imagePath;
+                        neededDoc.PagesPaths[i + 1] = imagePath;
                         neededDoc.Progress = Percents(i, pdfFile.Pages.Count);
                     }
 

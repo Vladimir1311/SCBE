@@ -26,7 +26,7 @@ namespace UDPServerTester.Controllers
         public CCFController()
         {
             docsProccessot
-                = RemoteWorker.Create<IDocumentProccessor>("http://52.187.66.24/doctopic/CCF");
+                = RemoteWorker.Create<IDocumentProccessor>("http://localhost:62961/CCF/Recieve");
         }
 
         public IActionResult Send()
@@ -39,7 +39,7 @@ namespace UDPServerTester.Controllers
             var doc = docsProccessot.AddToHandle(file.FileName, file.OpenReadStream());
             while (doc.AvailablePages.Count() != doc.PagesCount)
             {
-                Thread.Sleep(2000);
+                Wait(20);
             }
             foreach (var picNum in doc.AvailablePages)
             {
@@ -53,6 +53,16 @@ namespace UDPServerTester.Controllers
             return Content("yeah");
         }
 
+
+        private void Wait(int secs)
+        {
+            while (secs > 0)
+            {
+                Console.WriteLine(secs);
+                Thread.Sleep(1000);
+                secs--;
+            }
+        }
         public IActionResult Recieve()
         {
 
@@ -109,6 +119,8 @@ namespace UDPServerTester.Controllers
         public Guid Id { get; set; }
 
         public string Name => "Name";
+
+        public int PagesCount => throw new NotImplementedException();
 
         public Stream GetPicture(int pageNum)
         {

@@ -20,25 +20,37 @@ namespace UDPServerTester.Controllers
     [Route("CCF/[action]")]
     public class CCFController : Controller
     {
-        private static IStorage docsProccessot;
+        private static IDocumentProccessor docsProccessot;
         private static ServiceCode service = ServiceCode.Create(new Proccessor());
 
         public CCFController()
         {
             docsProccessot
-                = RemoteWorker.Create<IStorage>("http://52.163.250.253/storage/CCF");
+                = RemoteWorker.Create<IDocumentProccessor>("http://52.187.66.24/doctopic/CCF");
         }
 
         public IActionResult Send()
         {
-            var tok = "Max";
-            var space = docsProccessot.CreateUserSpace(tok);
-            Console.WriteLine(space + " created");
-            var root = docsProccessot.GetRootDirectory(tok);
-            Console.WriteLine("path: " + root.FullPath);
-            var dir = root.CreateDirectory("SUKA BLYUAT");
-            Console.WriteLine("path: " + dir.FullPath);
-            return Content(dir.FullPath);
+            return Content("LAL");
+        }
+
+        public IActionResult Test(IFormFile file)
+        {
+            var doc = docsProccessot.AddToHandle(file.FileName, file.OpenReadStream());
+            while (doc.AvailablePages.Count() != doc.PagesCount)
+            {
+                Thread.Sleep(2000);
+            }
+            foreach (var picNum in doc.AvailablePages)
+            {
+                using (var fileStream = System.IO.File.Create($@"C:\Users\maksa\Desktop\New folder (3)\{picNum}.jpeg"))
+                {
+                    doc.GetPicture(picNum).CopyTo(fileStream);
+                }
+            }
+
+
+            return Content("yeah");
         }
 
         public IActionResult Recieve()

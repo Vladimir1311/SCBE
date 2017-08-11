@@ -17,6 +17,7 @@ namespace DocsToPictures.Models
 
         public IEnumerable<int> AvailablePages => PagesPaths?.Select((P, N) => N).Where(N => N > 0) ?? new int [0];
 
+        public int PagesCount => PagesPaths?.Count() - 1 ?? -1;
         public Stream GetPicture(int pageNum)
         {
             if (PagesPaths == null) return null;

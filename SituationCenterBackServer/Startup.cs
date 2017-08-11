@@ -1,4 +1,5 @@
-﻿using CCF.IPResolver.Adapter;
+﻿using CCF;
+using CCF.IPResolver.Adapter;
 using Common.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -74,6 +75,7 @@ namespace SituationCenterBackServer
 
             //Storage
             services.AddTransient<IAccessValidator, AccessValidator>();
+            services.AddSingleton(SP => ServiceCode.Create(SP.GetService<IAccessValidator>()));
 
             services.AddCCFService<IStorage>();
         }
@@ -86,7 +88,7 @@ namespace SituationCenterBackServer
             loggerFactory.AddDebug();
             loggerFactory.AddProvider(new SocketLoggerProvider());
 
-            //app.UseAsServise<IAccessValidator>("Core/CCFService");
+            app.UseAsServise<IAccessValidator>("Core/CCFService");
 
             if (env.IsDevelopment())
             {

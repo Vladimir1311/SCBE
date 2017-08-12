@@ -40,6 +40,7 @@ namespace CCF.IPResolver.Adapter
             using (var client = new HttpClient())
             {
                 var result = client.GetStringAsync($"http://ipresolver.azurewebsites.net/ip/GetCCFEndPoint?interfaceName={typeof(T)}").Result;
+                Console.WriteLine($"getted url for {typeof(T)} >> {result}");
                 if (result == "") throw new Exception($"No availabale service for {typeof(T)}");
                 var worker = RemoteWorker.Create<T>(result);
                 services.AddSingleton(worker);

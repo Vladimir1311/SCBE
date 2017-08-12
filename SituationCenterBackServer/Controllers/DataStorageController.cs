@@ -44,16 +44,8 @@ namespace SituationCenterBackServer.Controllers
         {
             pathToFolder = pathToFolder ?? "";
             string userId = GetUserId();
-            var doc = docsProcessor.AddToHandle(IO.Path.GetFileName(file.FileName), file.OpenReadStream());
-            //var targetFolder = storageManager.GetDirectory("Moq token", userId, pathToFolder);
-            //targetFolder.CreateFile(IO.Path.GetFileName(file.FileName), file.OpenReadStream());
-            int i = 20;
-            while (i > 0)
-            {
-                System.Console.WriteLine(i);
-                Thread.Sleep(1000);
-                i--;
-            }
+            var targetFolder = storageManager.GetDirectory("Moq token", userId, pathToFolder);
+            targetFolder.CreateFile(IO.Path.GetFileName(file.FileName), file.OpenReadStream());
             return RedirectToAction("index");
         }
 

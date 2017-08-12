@@ -30,10 +30,7 @@ namespace SituationCenterBackServer.Controllers
             pathToFolder = pathToFolder ?? "";
             string userId = GetUserId();
 
-            if (!storageManager.ExistsUserSpace(userId))
-                storageManager.CreateUserSpace(userId);
-
-            var content = storageManager.GetRootDirectory(userId).GetDirectory(pathToFolder);
+            var content = storageManager.GetRootDirectory("Moq token", userId);
             
             return View(new DirectoryContent { Directories = content.Directories.ToList(), Files = content.Files.ToList()});
         }
@@ -43,10 +40,7 @@ namespace SituationCenterBackServer.Controllers
             pathToFolder = pathToFolder ?? "";
             string userId = GetUserId();
 
-            if (!storageManager.ExistsUserSpace(userId))
-                storageManager.CreateUserSpace(userId);
-
-            var targetFolder = storageManager.GetRootDirectory(userId).GetDirectory(pathToFolder);
+            var targetFolder = storageManager.GetDirectory("Moq token", userId, pathToFolder);
             targetFolder.CreateFile(file.FileName, file.OpenReadStream());
             return RedirectToAction("index");
         }

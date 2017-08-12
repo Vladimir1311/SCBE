@@ -35,14 +35,11 @@ namespace SituationCenterBackServer.Controllers.API.V1
             var userId = userManager.GetUserId(User);
             try
             {
-                if (!storageManager.ExistsUserSpace(userManager.GetUserId(User)))
-                    storageManager.CreateUserSpace(userManager.GetUserId(User));
                 DirectoryContent content = new Models.StorageModels.DirectoryContent
                 {
                     Files =
                     storageManager
-                    .GetRootDirectory(userId)
-                    .GetDirectory(pathToFolder ?? "")
+                    .GetDirectory("Moq token", userId, pathToFolder ?? "")
                     .Files.ToList()
                 };
                 return Json(content);

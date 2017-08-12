@@ -13,12 +13,12 @@ namespace SituationCenterBackServer.Controllers
 {
     [Authorize]
     [Route("storagefiles/[action]/{*pathToFolder}")]
-    public class StorageFilesController : Controller
+    public class DataStorageController : Controller
     {
         private readonly IStorage storageManager;
         private readonly UserManager<ApplicationUser> userManager;
 
-        public StorageFilesController(IStorage storageManager,
+        public DataStorageController(IStorage storageManager,
             UserManager<ApplicationUser> userManager)
         {
             this.storageManager = storageManager;

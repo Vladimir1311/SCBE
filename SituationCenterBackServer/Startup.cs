@@ -1,6 +1,7 @@
 ﻿using CCF;
 using CCF.IPResolver.Adapter;
 using Common.Services;
+using DocsToPictures.Interfaces;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -78,6 +79,7 @@ namespace SituationCenterBackServer
             services.AddSingleton(SP => ServiceCode.Create(SP.GetService<IAccessValidator>()));
 
             services.AddCCFService<IStorage>();
+            services.AddCCFService<IDocumentProccessor>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

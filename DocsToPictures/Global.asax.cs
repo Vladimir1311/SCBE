@@ -31,7 +31,7 @@ namespace DocsToPictures
             {
                 using (var client = new HttpClient())
                 {
-                    var result = client.GetStringAsync($"http://ipresolver.azurewebsites.net/ip/SetCCFEndPoint?interfaceName={typeof(IDocumentProccessor).FullName}&url=doctopic/CCF").Result;
+                    var result = client.GetStringAsync($"http://ipresolver.azurewebsites.net/ip/SetCCFEndPoint?interfaceName={typeof(IDocumentProccessor).FullName}&url=CCF/Recieve").Result;
                     if (result == "OK")
                     {
                         Console.WriteLine($"Registrate as {typeof(IDocumentProccessor).FullName} success");

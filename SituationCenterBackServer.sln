@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26430.16
+VisualStudioVersion = 15.0.26730.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SituationCenterBackServer", "SituationCenterBackServer\SituationCenterBackServer.csproj", "{E168B5BB-3F5E-47D2-A8CA-E7771DB579BD}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -30,7 +30,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocsToPictures.Interfaces",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SituationCenterBackServer.Interfaces", "SituiationCenterBackServer.Interfaces\SituationCenterBackServer.Interfaces.csproj", "{60AE3138-D229-442F-9841-046214F6A480}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CCF.IPResolver.Adapter", "CCF.IPResolver.Adapter\CCF.IPResolver.Adapter.csproj", "{32D016B5-7F68-4A09-BE59-308F69E841A8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CCF.IPResolver.Adapter", "CCF.IPResolver.Adapter\CCF.IPResolver.Adapter.csproj", "{32D016B5-7F68-4A09-BE59-308F69E841A8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SituationCenterCore", "SituationCenterCore\SituationCenterCore.csproj", "{4074DDC7-253B-496D-BEF8-D69D639C29C6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SituationCenter.Shared", "SituationCenter.Shared\SituationCenter.Shared.csproj", "{424ACD21-2C6B-4044-B3FD-2422A0C51378}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -256,8 +260,43 @@ Global
 		{32D016B5-7F68-4A09-BE59-308F69E841A8}.Release|x64.Build.0 = Release|Any CPU
 		{32D016B5-7F68-4A09-BE59-308F69E841A8}.Release|x86.ActiveCfg = Release|Any CPU
 		{32D016B5-7F68-4A09-BE59-308F69E841A8}.Release|x86.Build.0 = Release|Any CPU
+		{4074DDC7-253B-496D-BEF8-D69D639C29C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4074DDC7-253B-496D-BEF8-D69D639C29C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4074DDC7-253B-496D-BEF8-D69D639C29C6}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{4074DDC7-253B-496D-BEF8-D69D639C29C6}.Debug|ARM.Build.0 = Debug|Any CPU
+		{4074DDC7-253B-496D-BEF8-D69D639C29C6}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{4074DDC7-253B-496D-BEF8-D69D639C29C6}.Debug|x64.Build.0 = Debug|Any CPU
+		{4074DDC7-253B-496D-BEF8-D69D639C29C6}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{4074DDC7-253B-496D-BEF8-D69D639C29C6}.Debug|x86.Build.0 = Debug|Any CPU
+		{4074DDC7-253B-496D-BEF8-D69D639C29C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4074DDC7-253B-496D-BEF8-D69D639C29C6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4074DDC7-253B-496D-BEF8-D69D639C29C6}.Release|ARM.ActiveCfg = Release|Any CPU
+		{4074DDC7-253B-496D-BEF8-D69D639C29C6}.Release|ARM.Build.0 = Release|Any CPU
+		{4074DDC7-253B-496D-BEF8-D69D639C29C6}.Release|x64.ActiveCfg = Release|Any CPU
+		{4074DDC7-253B-496D-BEF8-D69D639C29C6}.Release|x64.Build.0 = Release|Any CPU
+		{4074DDC7-253B-496D-BEF8-D69D639C29C6}.Release|x86.ActiveCfg = Release|Any CPU
+		{4074DDC7-253B-496D-BEF8-D69D639C29C6}.Release|x86.Build.0 = Release|Any CPU
+		{424ACD21-2C6B-4044-B3FD-2422A0C51378}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{424ACD21-2C6B-4044-B3FD-2422A0C51378}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{424ACD21-2C6B-4044-B3FD-2422A0C51378}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{424ACD21-2C6B-4044-B3FD-2422A0C51378}.Debug|ARM.Build.0 = Debug|Any CPU
+		{424ACD21-2C6B-4044-B3FD-2422A0C51378}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{424ACD21-2C6B-4044-B3FD-2422A0C51378}.Debug|x64.Build.0 = Debug|Any CPU
+		{424ACD21-2C6B-4044-B3FD-2422A0C51378}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{424ACD21-2C6B-4044-B3FD-2422A0C51378}.Debug|x86.Build.0 = Debug|Any CPU
+		{424ACD21-2C6B-4044-B3FD-2422A0C51378}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{424ACD21-2C6B-4044-B3FD-2422A0C51378}.Release|Any CPU.Build.0 = Release|Any CPU
+		{424ACD21-2C6B-4044-B3FD-2422A0C51378}.Release|ARM.ActiveCfg = Release|Any CPU
+		{424ACD21-2C6B-4044-B3FD-2422A0C51378}.Release|ARM.Build.0 = Release|Any CPU
+		{424ACD21-2C6B-4044-B3FD-2422A0C51378}.Release|x64.ActiveCfg = Release|Any CPU
+		{424ACD21-2C6B-4044-B3FD-2422A0C51378}.Release|x64.Build.0 = Release|Any CPU
+		{424ACD21-2C6B-4044-B3FD-2422A0C51378}.Release|x86.ActiveCfg = Release|Any CPU
+		{424ACD21-2C6B-4044-B3FD-2422A0C51378}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D34BAF4D-7CDF-4EA3-B862-DFF2BE29997C}
 	EndGlobalSection
 EndGlobal

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using SituationCenterCore.Models.Rooms.Security;
 
 namespace SituationCenterCore.Data
 {
@@ -21,5 +22,7 @@ namespace SituationCenterCore.Data
             // For example, you can rename the ASP.NET Identity table names and more.
             // Add your customizations after calling base.OnModelCreating(builder);
         }
+
+        public DbSet<RoomSecurityRule> Rules { get; set; }
     }
 }

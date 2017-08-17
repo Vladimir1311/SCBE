@@ -1,9 +1,8 @@
 ﻿using DocsToPictures.Interfaces;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 using System.IO;
+using System.Linq;
 
 namespace DocsToPictures.Models
 {
@@ -27,6 +26,7 @@ namespace DocsToPictures.Models
         }
 
         public int PagesCount => PagesPaths?.Count() - 1 ?? -1;
+
         public Stream GetPicture(int pageNum)
         {
             if (PagesPaths == null) return null;

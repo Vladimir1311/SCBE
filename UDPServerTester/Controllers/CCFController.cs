@@ -1,18 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using CCF;
+using DocsToPictures.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using CCF;
+using System;
+using System.Collections.Generic;
 using System.IO;
-using System.Net.Http;
-using DocsToPictures.Interfaces;
-using System.Text;
-using Microsoft.Net.Http.Headers;
+using System.Linq;
 using System.Threading;
-using Storage.Interface;
-using SituationCenterBackServer.Interfaces;
 
 namespace UDPServerTester.Controllers
 {
@@ -49,10 +43,8 @@ namespace UDPServerTester.Controllers
                 }
             }
 
-
             return Content("yeah");
         }
-
 
         private void Wait(int secs)
         {
@@ -63,10 +55,10 @@ namespace UDPServerTester.Controllers
                 secs--;
             }
         }
+
         public IActionResult Recieve()
         {
-
-            var res = service.Handle(Request.Form["simpleargs"], Request.Form.Files.Select(F => new StreamValue { Name = F.Name, Value = F.OpenReadStream()}));
+            var res = service.Handle(Request.Form["simpleargs"], Request.Form.Files.Select(F => new StreamValue { Name = F.Name, Value = F.OpenReadStream() }));
             if (res == null)
                 return NoContent();
             switch (res)
@@ -89,7 +81,6 @@ namespace UDPServerTester.Controllers
 
         public IDocument AddToHandle(string fileName, Stream fileStream)
         {
-            
             var guid = Guid.NewGuid();
             IDocument doc = new Document(guid);
             docs.Add(guid, doc);
@@ -107,15 +98,13 @@ namespace UDPServerTester.Controllers
 
     internal class Document : IDocument
     {
-
-        
-
         public IEnumerable<int> AvailablePages => new int[] { 1, 2, 3, 4 };
 
         public Document(Guid id)
         {
             Id = id;
         }
+
         public Guid Id { get; set; }
 
         public string Name => "Name";

@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using SituationCenter.Shared.Exceptions;
 using SituationCenter.Shared.Models.Rooms;
 using SituationCenterCore.Data;
+using SituationCenterCore.Data.DatabaseAbstraction;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,22 +13,17 @@ namespace SituationCenterCore.Models.Rooms.Security
 {
     public class RoomSecurityManager : IRoomSecurityManager
     {
-        private readonly ApplicationDbContext dataBase;
-        private readonly RoleManager<IdentityRole> roleManager;
-        private readonly UserManager<ApplicationUser> userManager;
+        private readonly IRepository repository;
         private readonly ILogger<RoomSecurityManager> logger;
 
         //TODO Add rules generator in DI
         private RoomRolesGenerator roomRolesGenerator = new RoomRolesGenerator();
 
-        public RoomSecurityManager(ApplicationDbContext dataBase,
-            RoleManager<IdentityRole> roleManager,
-            UserManager<ApplicationUser> userManager,
+        public RoomSecurityManager(
+            IRepository repository,
             ILogger<RoomSecurityManager> logger)
         {
-            this.dataBase = dataBase;
-            this.roleManager = roleManager;
-            this.userManager = userManager;
+            this.repository = repository;
             this.logger = logger;
         }
 
@@ -68,7 +64,7 @@ namespace SituationCenterCore.Models.Rooms.Security
         public void Validate(ApplicationUser user, Room room, string data)
         {
             logger.LogDebug($"user {user.Email} try to join room {room.Id}, with {data}");
-            var rule = room.SecurityRule ?? dataBase.Rules.FirstOrDefault(R => R.Id == room.RoomSecurityRuleId);
+            var rule = room.SecurityRule ?? repository.GetRulesAsync().Result.FirstOrDefault(R => R.Id == room.RoomSecurityRuleId);
             logger.LogDebug($"room {room.Id} have privacy rule {rule.PrivacyRule}");
             switch (rule.PrivacyRule)
             {
@@ -108,10 +104,10 @@ namespace SituationCenterCore.Models.Rooms.Security
         public void AddAdminRole(ApplicationUser user, Room room)
         {
             var adminRole = roomRolesGenerator.GetAdministratorRole(room);
-            var createResult = roleManager.CreateAsync(new IdentityRole(adminRole)).Result;
+            var createResult = repository.CreateRoleAsync(new IdentityRole(adminRole)).Result;
             if (!createResult.Succeeded)
                 throw new Exception("Can't create role for room " + string.Join(" ", createResult.Errors.Select(E => $"{E.Code} {E.Description}")));
-            var addToRoleResult = userManager.AddToRoleAsync(user, adminRole).Result;
+            var addToRoleResult = repository.AddToRoleAsync(user, adminRole).Result;
             if (!addToRoleResult.Succeeded)
                 throw new Exception("Can't add to room" + string.Join(" ", addToRoleResult.Errors.Select(E => $"{E.Code} {E.Description}")));
         }
@@ -119,17 +115,17 @@ namespace SituationCenterCore.Models.Rooms.Security
         public bool CanDelete(ApplicationUser user, Room room)
         {
             var adminRole = roomRolesGenerator.GetAdministratorRole(room);
-            return userManager.IsInRoleAsync(user, adminRole).Result
-                || userManager.IsInRoleAsync(user, "Administrator").Result
+            return repository.IsInRoleAsync(user, adminRole).Result
+                || repository.IsInRoleAsync(user, "Administrator").Result
                 ;
         }
 
         public void ClearRoles(Room room)
         {
             var adminRoleName = roomRolesGenerator.GetAdministratorRole(room);
-            var adminRole = roleManager.FindByNameAsync(adminRoleName).Result;
+            var adminRole = repository.FindRoleByNameAsync(adminRoleName).Result;
             if (adminRole != null)
-                roleManager.DeleteAsync(adminRole).Wait();
+                repository.DeleteRoleAsync(adminRole).Wait();
         }
 
         public bool CanJoin(ApplicationUser user, Room room)

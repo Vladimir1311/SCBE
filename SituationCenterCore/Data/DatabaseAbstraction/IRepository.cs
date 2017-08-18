@@ -16,5 +16,13 @@ namespace SituationCenterCore.Data.DatabaseAbstraction
 
         Task<bool> IsInRoleAsync(ApplicationUser user, string roleName);
         Task<IdentityResult> AddToRoleAsync(ApplicationUser user, string roleName);
+        Task<IdentityResult> CreateUserAsync(ApplicationUser user, string password);
+
+        Task<List<ApplicationUser>> FindUsers(Func<ApplicationUser, bool> predicate);
+        Task<bool> AnyUser(Func<ApplicationUser, bool> predicate);
+        Task<ApplicationUser> FindUserByEmailAsync(string email);
+        Task<bool> CheckUserPasswordAsync(ApplicationUser user, string password);
+
+
     }
 }

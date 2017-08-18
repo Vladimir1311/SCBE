@@ -38,6 +38,21 @@ namespace SituationCenterCore.Data.DatabaseAbstraction
 
         public async Task<IdentityResult> AddToRoleAsync(ApplicationUser user, string roleName) =>
             await userManager.AddToRoleAsync(user, roleName);
-        
+
+
+        public async Task<IdentityResult> CreateUserAsync(ApplicationUser user, string password) =>
+            await userManager.CreateAsync(user, password);
+
+        public Task<List<ApplicationUser>> FindUsers(Func<ApplicationUser, bool> predicate) =>
+            Task.FromResult(Users.Where(predicate).ToList());
+
+        public Task<bool> AnyUser(Func<ApplicationUser, bool> predicate) =>
+            Task.FromResult(Users.Any(predicate));
+
+        public Task<ApplicationUser> FindUserByEmailAsync(string email) =>
+            userManager.FindByEmailAsync(email);
+
+        public Task<bool> CheckUserPasswordAsync(ApplicationUser user, string password) =>
+            userManager.CheckPasswordAsync(user, password);
     }
 }

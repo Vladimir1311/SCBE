@@ -29,7 +29,8 @@ namespace SituationCenterCore.Controllers.API.V1
         private readonly IRepository repository;
         private readonly AuthOptions authOptions;
 
-        public AccountController(ILogger<AccountController> logger,
+        public AccountController(
+            ILogger<AccountController> logger,
             IOptions<AuthOptions> option,
             IRepository repository)
         {

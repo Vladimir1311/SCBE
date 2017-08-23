@@ -11,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SituationCenterCore.Data;
 using SituationCenterCore.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace SituationCenterCore
 {
@@ -32,6 +33,18 @@ namespace SituationCenterCore
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
+
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(o =>
+            {
+                o.Authority = Configuration["JWT:Authority"];
+                o.Audience = Configuration["JWT:Audience"];
+                //o.Events
+            }); 
+
 
             services.AddMvc()
                 .AddRazorPagesOptions(options =>

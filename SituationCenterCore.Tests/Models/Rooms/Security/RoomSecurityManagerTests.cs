@@ -92,26 +92,6 @@ namespace SituationCenterCore.Tests.Models.Rooms.Security
         }
     }
 
-    internal class EmptyLogger<T> : ILogger<T>
-    {
-        public IDisposable BeginScope<TState>(TState state)
-        {
-            return new Disp();
-        }
-
-        private class Disp : IDisposable
-        {
-            public void Dispose()
-            {
-            }
-        }
-
-        public bool IsEnabled(LogLevel logLevel) => false;
-
-        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
-        { }
-    }
-
     internal class EmptyArrayDataRow : DataRowAttribute
     {
         public EmptyArrayDataRow(Type type) : base(Array.CreateInstance(type, 0))

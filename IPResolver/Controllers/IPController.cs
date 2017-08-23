@@ -32,6 +32,11 @@ namespace IPResolver.Controllers
             return IPRowsListResponse.Create(rows);
         }
 
+        public JsonResult CCFList()
+        {
+            return Json(new { CCFs = servicesDb.CCFServises.ToArray() });
+        }
+
         public JsonResult CoreIP()
         {
             return Json(new
@@ -41,6 +46,42 @@ namespace IPResolver.Controllers
             }
             );
         }
+
+
+        public ContentResult GetCCFEndPoint(string interfaceName)
+        {
+            var endPoint = servicesDb.CCFServises.FirstOrDefault(S => S.InterfaceName == interfaceName)?.CCFEndPoint;
+
+            return Content(endPoint ?? "");
+        }
+
+        public ContentResult SetCCFEndPoint(string interfaceName, string url)
+        {
+            try
+            {
+                var createdRow = servicesDb.CCFServises.FirstOrDefault(R => R.InterfaceName == interfaceName);
+                if (createdRow != null)
+                {
+                    createdRow.CCFEndPoint = BuildEndPoint(url);
+                }
+                else
+                {
+                    createdRow = new CCFService
+                    {
+                        InterfaceName = interfaceName,
+                        CCFEndPoint = BuildEndPoint(url)
+                    };
+                    servicesDb.CCFServises.Add(createdRow);
+                }
+                servicesDb.SaveChanges();
+                return Content("OK");
+            }
+            catch (Exception ex)
+            {
+                return Content(ex.Message);
+            }
+        }
+
 
         public string SetCoreIP(string value)
         {
@@ -86,12 +127,10 @@ namespace IPResolver.Controllers
         }
 
 
-        private IPAddress ClientIP()
+        private string BuildEndPoint(string url)
         {
-            var ip = HttpContext.Connection.RemoteIpAddress;
-            
-
-            return ip;
+            var ip = HttpContext.Connection.RemoteIpAddress.MapToIPv4();
+            return $"http://{ip}/{url}";
         }
     }
 }

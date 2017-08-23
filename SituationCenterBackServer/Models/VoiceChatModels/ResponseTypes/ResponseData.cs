@@ -1,6 +1,4 @@
-﻿
-
-namespace SituationCenterBackServer.Models.VoiceChatModels.ResponseTypes
+﻿namespace SituationCenterBackServer.Models.VoiceChatModels.ResponseTypes
 {
     public class ResponseData
     {

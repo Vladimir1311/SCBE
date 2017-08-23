@@ -27,72 +27,74 @@ namespace DocsToPictures.Controllers
 
         public ResponseBase GetInfo(Guid docId)
         {
-            try
-            {
-                var doc = docsProcessor.GetDocument(docId);
-                return ResponseBase.GoodResponse(new
-                {
-                    Progress = doc.Progress,
-                    AvailablePages = doc.PagesPaths
-                        .Where(P => P != null)
-                        .Select((P, N) => N + 1)});
-            }
-            catch (Exception ex)
-            {
-                return ResponseBase.BadResponse(ex.Message);
-            }
+            //try
+            //{
+            //    var doc = docsProcessor.GetDocument(docId);
+            //    return ResponseBase.GoodResponse(new
+            //    {
+            //        Progress = doc.Progress,
+            //        AvailablePages = doc.PagesPaths
+            //            .Where(P => P != null)
+            //            .Select((P, N) => N + 1)});
+            //}
+            //catch (Exception ex)
+            //{
+            //    return ResponseBase.BadResponse(ex.Message);
+            //}
+            return ResponseBase.BadResponse("Sorry, old func");
         }
 
         public ActionResult Download(Guid docId, int pageNum)
         {
-            try
-            {
-                var doc = docsProcessor.GetDocument(docId);
-                if (pageNum <= 0 || doc.PagesPaths.Length < pageNum || doc.PagesPaths[pageNum] == null)
-                    return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-                return File(doc.PagesPaths[pageNum],
-                    System.Net.Mime.MediaTypeNames.Application.Octet,
-                    $"Page {pageNum}.png");
-            }
-            catch
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.InternalServerError);
-            }
+            //try
+            //{
+            //    var doc = docsProcessor.GetDocument(docId);
+            //    if (pageNum <= 0 || doc.PagesPaths.Length < pageNum || doc.PagesPaths[pageNum] == null)
+            //        return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            //    return File(doc.PagesPaths[pageNum],
+            //        System.Net.Mime.MediaTypeNames.Application.Octet,
+            //        $"Page {pageNum}.png");
+            //}
+            //catch
+            //{
+            //    return new HttpStatusCodeResult(HttpStatusCode.InternalServerError);
+            //}
+            return Content("Sorry, old func");
         }
 
         [System.Web.Mvc.HttpPost]
         public ResponseBase Load(HttpPostedFileBase file)
         {
-            // Verify that the user selected a file
-            if (file != null && file.ContentLength > 0)
-            {
-                // extract only the filename
-                var prepare = file.FileName.TryToGetOriginalFileName();
-                var fileName = Path.GetFileName(prepare);
-                // store the file inside ~/App_Data/uploads folder
-                Guid folderId = Guid.NewGuid();
-                var folderPath = Server.MapPath("~\\App_Data\\uploads");
-                var folderForDoc = Directory.CreateDirectory(Path.Combine(folderPath, folderId.ToString())).FullName;
-                file.SaveAs(Path.Combine(folderForDoc, fileName));
-                Document doc = new Document
-                {
-                    Id = folderId,
-                    Folder = folderForDoc,
-                    Name = fileName
-                };
-                try
-                {
-                    docsProcessor.AddToHandle(doc);
-                }
-                catch(Exception ex)
-                {
-                    return ResponseBase.BadResponse(ex.Message);
-                }
-                return ResponseBase.GoodResponse(new
-                {
-                    PackId = folderId
-                });
-            }
+            //// Verify that the user selected a file
+            //if (file != null && file.ContentLength > 0)
+            //{
+            //    // extract only the filename
+            //    var prepare = file.FileName.TryToGetOriginalFileName();
+            //    var fileName = Path.GetFileName(prepare);
+            //    // store the file inside ~/App_Data/uploads folder
+            //    Guid folderId = Guid.NewGuid();
+            //    var folderPath = Server.MapPath("~\\App_Data\\uploads");
+            //    var folderForDoc = Directory.CreateDirectory(Path.Combine(folderPath, folderId.ToString())).FullName;
+            //    file.SaveAs(Path.Combine(folderForDoc, fileName));
+            //    Document doc = new Document
+            //    {
+            //        Id = folderId,
+            //        Folder = folderForDoc,
+            //        Name = fileName
+            //    };
+            //    try
+            //    {
+            //        docsProcessor.AddToHandle(doc);
+            //    }
+            //    catch(Exception ex)
+            //    {
+            //        return ResponseBase.BadResponse(ex.Message);
+            //    }
+            //    return ResponseBase.GoodResponse(new
+            //    {
+            //        PackId = folderId
+            //    });
+            //}
             return ResponseBase.BadResponse("Not valid file");
         }
 

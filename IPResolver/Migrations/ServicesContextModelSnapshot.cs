@@ -29,6 +29,20 @@ namespace IPResolver.Migrations
 
                     b.ToTable("ServiseRows");
                 });
+
+            modelBuilder.Entity("IPResolver.Models.CCFService", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("CCFEndPoint");
+
+                    b.Property<string>("InterfaceName");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("CCFServises");
+                });
         }
     }
 }

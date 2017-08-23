@@ -1,17 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using SituationCenterBackServer.Models.StorageModels;
+﻿using SituationCenterBackServer.Models.StorageModels;
+using System;
 using System.Net.Http;
 using IO = System.IO;
-using Microsoft.AspNetCore.Mvc;
 
 namespace SituationCenterBackServer.Services
 {
     public class ASPNETBufferService : IBuffer
     {
-
         private const string linkToServer = "http://172.22.104.101:62631/";
         private IStorageManager storageManager;
 
@@ -20,7 +15,7 @@ namespace SituationCenterBackServer.Services
             this.storageManager = storageManager;
         }
 
-        public string ServLink =>  linkToServer + "buffer/download?docId=";
+        public string ServLink => linkToServer + "buffer/download?docId=";
 
         public string GetLinkFor(File file)
         {
@@ -39,7 +34,7 @@ namespace SituationCenterBackServer.Services
                 {
                     { bytes, "file", IO.Path.GetFileName(file.Name)}
                 };
-                
+
                 var result = client.PostAsync("buffer/load", multiContent)
                     .Result
                     .Content

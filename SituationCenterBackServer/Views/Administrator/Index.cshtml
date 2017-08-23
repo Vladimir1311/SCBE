@@ -1,6 +1,6 @@
-﻿
-@{
+﻿@{
     ViewData["Title"] = "Index";
+
 }
 @using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 @functions
@@ -10,58 +10,98 @@
         return Model.Roles.FirstOrDefault(R => R.Id == userRole.RoleId)?.Name ?? "UNKNOWN ROLE!!!";
     }
 
+    string Sex(bool sex) => sex ? "Man" : "Woman";
+    int userNum = 0;
+    int UserNum(bool need) => need ? userNum++ : userNum;
+
 }
 @model SituationCenterBackServer.Models.AdministratorViewModels.IndexViewModel
-    <h2>Administrator panel</h2>
-    <a href="Administrator/logs"><input type="button" class="btn-primary btn-lg" value="Logs" /></a>
-    <div class="row">
-        <div class="col-lg-6">
-            <h1>Users table</h1>
-            <table class="table-bordered table-condensed">
-                <tr>
-                    <td>email</td>
-                    <td>phone number</td>
-                    <td>roles</td>
-                </tr>
-                @foreach (var user in Model.Users)
+<h2>Administrator panel</h2>
+<a href="Administrator/logs"><input type="button" class="btn-primary btn-lg" value="Logs" /></a>
+<div class="row">
+    <div class="col-lg-9">
+        <h1>Users table</h1>
+        <table class="table-bordered table-condensed">
+            <tr>
+                <td>email<br />name</td>
+                <td>phone number<br />surname</td>
+                <td>roles<br />sex</td>
+                <td>In room<br />birthday</td>
+            </tr>
+            @foreach (var user in Model.Users)
             {
-                    <tr>
-                        <td>@user.Email</td>
-                        <td>@user.PhoneNumber</td>
-                        <td>
-                            @string.Join(" ", user.Roles.Select(R => RoleName(R)))
-                            
-                        </td>
-                    </tr>
-                }
-            </table>
-        </div>
-        <div class="col-lg-6">
-            <h1>Rooms table</h1>
-            <table class="table-bordered table-condensed">
                 <tr>
-                    <td>Name</td>
-                    <td>Privacy rule</td>
+                    <td>@user.Email</td>
+                    <td>@user.PhoneNumber</td>
+                    <td>
+                        <table class="table-bordered">
+                            @foreach(var role in user.Roles)
+                            {
+                                <tr>
+                                    <td>@RoleName(role)</td>
+                                    <td><a href="/administrator/removerolefromuser?userid=@role.UserId&roleId=@role.RoleId"><input type="button" class="btn-danger" value="X" /></a></td>
+                                </tr>
+                            }
+                        </table>
+                    </td>
+                    @if (user.Room != null)
+                    {
+                        <td>@Html.ActionLink(user.Room.Name, "room", new { roomid = user.RoomId })</td>
+                    }
+                    else
+                    {
+                        <td>No room</td>
+                    }
+                    <td><button class="bg-primary" onclick="ShowHide('user @UserNum(false)')">...</button></td>
                 </tr>
-                @foreach(var room in Model.Rooms)
-                {
-                    <tr>
-                        <td>@Html.ActionLink(room.Name, "room", new { roomid=room.Id })</td>
-                        <td>@room.SecurityRule.PrivacyRule</td>
-                    </tr>
-
-                }
-            </table>
-        </div>
+                <tr id="user @UserNum(true)" hidden>
+                    <td>@user.Name</td>
+                    <td>@user.Surname</td>
+                    <td>@Sex(user.Sex)</td>
+                    <td>@user.Birthday.Day / @user.Birthday.Month / @user.Birthday.Year</td>
+                    <td><a href="/administrator/deleteuser?userid=@user.Id"><input type="button" class="btn-danger" value="X" /></a></td>
+                </tr>
+            }
+        </table>
     </div>
+    <div class="col-lg-3">
+        <h1>Rooms table</h1>
+        <table class="table-bordered table-condensed">
+            <tr>
+                <td>Name</td>
+                <td>Privacy rule</td>
+                <td>Fullness</td>
+            </tr>
+            @foreach (var room in Model.Rooms)
+            {
+                <tr>
+                    <td>@Html.ActionLink(room.Name, "room", new { roomid = room.Id })</td>
+                    <td>@room.SecurityRule.PrivacyRule</td>
+                    <td>@Model.Users.Count(U => U.RoomId == room.Id) / @room.PeopleCountLimit</td>
+                    <td>@Html.ActionLink("delete", "DeleteRoom", new { roomid = room.Id})</td>
+                </tr>
+
+            }
+        </table>
+    </div>
+</div>
 <div class="row">
     <div class="col-lg-4">
         <h1>All roles</h1>
         <ol>
-            @foreach(var role in Model.Roles)
+            @foreach (var role in Model.Roles)
             {
                 <li>@role.Name</li>
             }
         </ol>
     </div>
-    </div>
+</div>
+<script>
+    function ShowHide(id) {
+        var el = document.getElementById(id);
+        if (el.hasAttribute("hidden"))
+            el.removeAttribute("hidden")
+        else
+            el.setAttribute("hidden", "hidden")
+    }
+</script>

@@ -14,9 +14,10 @@ namespace SituationCenterBackServer.Models.VoiceChatModels.Connectors
 {
     public class TCPConnector : IStableConnector
     {
-
         public event Action<FromClientPack> OnRecieveData;
+
         public event Action<ApplicationUser> OnUserConnected;
+
         public event Action<ApplicationUser> OnUserDisconnected;
 
         private readonly TcpListener _listener;
@@ -25,7 +26,6 @@ namespace SituationCenterBackServer.Models.VoiceChatModels.Connectors
         private readonly ILogger<TCPConnector> _logger;
         private readonly Dictionary<ApplicationUser, TcpClient> _connectionForUsers = new Dictionary<ApplicationUser, TcpClient>();
         private Func<string, ApplicationUser> _findUserFunc;
-
 
         public TCPConnector(ILogger<TCPConnector> logger, IOptions<UnrealAPIConfiguration> options)
         {
@@ -69,16 +69,18 @@ namespace SituationCenterBackServer.Models.VoiceChatModels.Connectors
             var bytestoSend = CreateHeader(pack.Data.Count() + 2).Concat(((byte)pack.PackType).Concat(pack.Data)).ToArray();
             tcpClient.GetStream().WriteAsync(bytestoSend, 0, bytestoSend.Length).Wait();
         }
+
         public void SetBindToUser(Func<string, ApplicationUser> findUserFunc)
         {
             _findUserFunc = findUserFunc;
         }
+
         private void Listen(CancellationToken token)
         {
             while (!token.IsCancellationRequested)
             {
                 _logger.LogInformation("Waiting for client...");
-                var client= _listener.AcceptTcpClientAsync().Result;
+                var client = _listener.AcceptTcpClientAsync().Result;
                 if (client != null)
                 {
                     Task.Factory.StartNew(() => HandleClient(client, token), token);
@@ -86,6 +88,7 @@ namespace SituationCenterBackServer.Models.VoiceChatModels.Connectors
                 token.ThrowIfCancellationRequested();
             }
         }
+
         private async void HandleClient(TcpClient client, CancellationToken token)
         {
             _logger.LogInformation($"Client {client.Client.RemoteEndPoint}. Waiting for initial message.");
@@ -93,7 +96,7 @@ namespace SituationCenterBackServer.Models.VoiceChatModels.Connectors
             if (!Auth(client, token, out var user))
                 return;
             OnUserConnected(user);
-            
+
             int readed = 0;
             do
             {
@@ -103,7 +106,7 @@ namespace SituationCenterBackServer.Models.VoiceChatModels.Connectors
                 {
                     User = user,
                     PackType = (PackType)buffer[0],
-                    Data = buffer.Skip(1).Take(readed-1).ToArray()
+                    Data = buffer.Skip(1).Take(readed - 1).ToArray()
                 });
             } while (readed != 0 && !token.IsCancellationRequested);
             client.Dispose();
@@ -139,10 +142,9 @@ namespace SituationCenterBackServer.Models.VoiceChatModels.Connectors
             return true;
         }
 
-
         private byte[] CreateHeader(int value)
         {
-            return new byte[] { (byte)(value >> 8), (byte)(value)};
+            return new byte[] { (byte)(value >> 8), (byte)(value) };
         }
-    } 
+    }
 }

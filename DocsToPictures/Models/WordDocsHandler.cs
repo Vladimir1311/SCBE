@@ -7,6 +7,7 @@ using System.Reflection;
 using Microsoft.Office.Interop.Word;
 using System.Drawing;
 using System.Drawing.Imaging;
+using Spire.Pdf;
 
 namespace DocsToPictures.Models
 {
@@ -22,33 +23,27 @@ namespace DocsToPictures.Models
             Document neededDoc = null;
             while (documentsStream.TryDequeue(out neededDoc))
             {
-                var doc = wordApp.Documents.Add(Path.Combine(neededDoc.Folder, neededDoc.Name));
-                var window = doc.ActiveWindow;
-                var pane = window.ActivePane;
-                neededDoc.PagesPaths = new string[pane.Pages.Count + 1];
-                for (var i = 1; i <= pane.Pages.Count; i++)
-                {
-                    var bits = pane.Pages[i].EnhMetaFileBits;
-                    try
-                    {
-                        using (var ms = new MemoryStream((byte[])(bits)))
-                        {
-                            var image = Image.FromStream(ms);
-                            image = Transparent2Color(image, Color.White);
-                            string imagePath = Path.Combine(neededDoc.Folder, $"{i}.png");
-                            image.Save(imagePath, ImageFormat.Png);
-                            image.Dispose();
-                            neededDoc.PagesPaths[i] = imagePath;
-                            neededDoc.Progress = Percents(i, pane.Pages.Count);
-                        }
-                    }
-                    catch
-                    {
+                var wordFileName = Path.Combine(neededDoc.Folder, neededDoc.Name);
+                var doc = wordApp.Documents.Add(wordFileName);
+                var pdfFileName = Path.ChangeExtension(wordFileName, "pdf");
+                doc.SaveAs2(pdfFileName, WdSaveFormat.wdFormatPDF);
+                doc.Close(WdSaveOptions.wdDoNotSaveChanges, Type.Missing, Type.Missing);
 
+                using (var pdfFile = new PdfDocument(pdfFileName))
+                {
+                    neededDoc.PagesPaths = new string[pdfFile.Pages.Count + 1];
+                    for (var i = 0; i < pdfFile.Pages.Count; i++)
+                    {
+                        var image = pdfFile.SaveAsImage(i); 
+                        string imagePath = Path.Combine(neededDoc.Folder, $"{i+1}.png");
+                        image.Save(imagePath, ImageFormat.Png);
+                        image.Dispose();
+                        neededDoc.PagesPaths[i + 1] = imagePath;
+                        neededDoc.Progress = Percents(i, pdfFile.Pages.Count);
                     }
+
                 }
-                object doNotSaveChanges = WdSaveOptions.wdDoNotSaveChanges;
-                doc.Close(ref doNotSaveChanges, Type.Missing, Type.Missing);
+                
             }
             wordApp.Quit(Type.Missing, Type.Missing, Type.Missing);
         }

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace SituationCenterBackServer.Models.VoiceChatModels.ResponseTypes
+﻿namespace SituationCenterBackServer.Models.VoiceChatModels.ResponseTypes
 {
     public class GetTokenInfo : ResponseData
     {

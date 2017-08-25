@@ -26,7 +26,7 @@ namespace UDPServerTester.Controllers
         public CCFController()
         {
             docsProccessot
-                = RemoteWorker.Create<IDocumentProccessor>("http://localhost:62961/CCF/Recieve");
+                = RemoteWorker.Create<IDocumentProccessor>("http://52.187.64.106/CCF/Recieve");
         }
 
         public IActionResult Send()
@@ -43,7 +43,7 @@ namespace UDPServerTester.Controllers
             }
             foreach (var picNum in doc.AvailablePages)
             {
-                using (var fileStream = System.IO.File.Create($@"C:\Users\maksa\Desktop\New folder (3)\{picNum}.jpeg"))
+                using (var fileStream = System.IO.File.Create($@"D:\Users\maksa\Desktop\New folder\{picNum}.jpeg"))
                 {
                     doc.GetPicture(picNum).CopyTo(fileStream);
                 }

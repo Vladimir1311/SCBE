@@ -294,6 +294,7 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\Office\OfficeDocHandler.cs" />
     <Compile Include="Models\PowerPointHandler.cs" />
     <Compile Include="Models\Document.cs" />
     <Compile Include="Models\DocumentProcessor.cs" />

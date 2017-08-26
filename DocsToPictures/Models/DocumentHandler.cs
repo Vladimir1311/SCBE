@@ -12,6 +12,7 @@ namespace DocsToPictures.Models
 {
     public abstract class DocumentHandler
     {
+        protected ManualResetEvent workQueueStopper;
         private List<string> supportedFormats;
         private Thread workThread;
 
@@ -20,9 +21,10 @@ namespace DocsToPictures.Models
             supportedFormats = GetType().GetCustomAttributes<SupportedFormatAttribyte>()
                 .Select(A => A.Format)
                 .ToList();
+            workQueueStopper = new ManualResetEvent(false);
         }
 
-        public bool CanConvert(IDocument doc)=>
+        public bool CanConvert(IDocument doc) =>
             supportedFormats.Contains(Path.GetExtension(doc.Name));
 
         protected ConcurrentQueue<Document> documentsStream = new ConcurrentQueue<Document>();
@@ -31,13 +33,12 @@ namespace DocsToPictures.Models
             if (!CanConvert(doc))
                 return;
             documentsStream.Enqueue(doc);
-            lock (this)
-                if (workThread == null || !workThread.IsAlive)
-                {
-                    workThread = new Thread(Handle);
-                    workThread.Start();
-                }
+        }
 
+        public void Initialize()
+        {
+            workThread = new Thread(Handle);
+            workThread.Start();
         }
         protected abstract void Handle();
     }

@@ -24,6 +24,7 @@ namespace DocsToPictures.Models
                 .Where(T => T.IsExtended<DocumentHandler>())
                 .Select(T => Activator.CreateInstance(T) as DocumentHandler)
                 .ToList();
+            handlers.ForEach(DH => DH.Initialize());
             documentsBase = new ConcurrentDictionary<Guid, Document>();
             Task.Factory.StartNew(async () => await DocsCheck());
         }

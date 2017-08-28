@@ -14,6 +14,8 @@
     <PackageReference Include="Microsoft.Office.Interop.Word" Version="15.0.4797.1003" />
     <PackageReference Include="MicrosoftOfficeCore" Version="15.0.0" />
     <PackageReference Include="Spire.PDF" Version="3.9.285" />
+    <PackageReference Include="System.Drawing-dotnet-core" Version="1.2.2" />
+    <PackageReference Include="System.Drawing.Primitives" Version="4.3.0" />
     <PackageReference Include="System.Reflection.Extensions" Version="4.3.0" />
   </ItemGroup>
 

@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using Microsoft.Office.Core;
+using System.Threading.Tasks;
 using Microsoft.Office.Interop.PowerPoint;
+using Microsoft.Office.Core;
 using System.IO;
 
 namespace DocsToPictures.Models
@@ -14,26 +14,36 @@ namespace DocsToPictures.Models
     {
         protected override void Handle()
         {
-            Application pptApplication = new Application();
-            pptApplication.Visible = MsoTriState.msoTrue;
-            Document neededPPT = null;
-            while (documentsStream.TryDequeue(out neededPPT))
+            Application pptApplication = new Application
             {
-                Presentation ppt = pptApplication.Presentations.Open(Path.Combine(neededPPT.Folder, neededPPT.Name), MsoTriState.msoFalse, MsoTriState.msoFalse, MsoTriState.msoFalse);
-                var count = 1;
-                neededPPT.PagesPaths = new string[ppt.Slides.Count + 1];
-                foreach (Slide slide in ppt.Slides)
+                Visible = MsoTriState.msoTrue
+            };
+            while (true)
+            {
+                workQueueStopper.WaitOne();
+                while (documentsStream.TryDequeue(out var neededPPT))
                 {
-                    string imagePath = Path.Combine(neededPPT.Folder, $"{count}.png");
-                    slide.Export(imagePath, "png", 960, 720);
-                    count++;
-                    neededPPT.PagesPaths[count] = imagePath;
-                    neededPPT.Progress = Percents(count, ppt.Slides.Count);
-                    //object doNotSaveChanges = WDSaveOptions.wdDoNotSaveChanges;
-                    //ppt.Close(ref doNotSaveChanges, Type.Missing, Type.Missing);
+                    Presentation ppt = pptApplication.Presentations.Open(Path.Combine(neededPPT.Folder, neededPPT.Name), MsoTriState.msoFalse, MsoTriState.msoFalse, MsoTriState.msoFalse);
+                    neededPPT.PagesPaths = new string[ppt.Slides.Count + 1];
+                    var folderName = Guid.NewGuid().ToString();
+                    ppt.SaveAs(neededPPT.Folder, PpSaveAsFileType.ppSaveAsPNG);
+                    for (int i = 1; i <= neededPPT.PagesCount; i++) 
+                    {
+                        neededPPT.PagesPaths[i] = Path.Combine(neededPPT.Folder, $"Slide{i}.PNG");
+                    }
+                    //foreach (Slide slide in ppt.Slides)
+                    //{
+                    //    string imagePath = Path.Combine(neededPPT.Folder, $"{count}.png");
+                    //    slide.Export(imagePath, "png", 960, 720);
+                    //    count++;
+                    //    neededPPT.PagesPaths[count] = imagePath;
+                    //    neededPPT.Progress = Percents(count, ppt.Slides.Count);
+                    //    //object doNotSaveChanges = WDSaveOptions.wdDoNotSaveChanges;
+                    //    //ppt.Close(ref doNotSaveChanges, Type.Missing, Type.Missing);
+                    //}
                     ppt.Close();
                 }
-                pptApplication.Quit();
+                workQueueStopper.Reset();
             }
         }
         private static int Percents(double done, double all)

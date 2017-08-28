@@ -26,7 +26,7 @@ namespace UDPServerTester.Controllers
         public CCFController()
         {
             docsProccessot
-                = RemoteWorker.Create<IDocumentProccessor>("http://localhost:62961/CCF/Recieve");
+                = RemoteWorker.Create<IDocumentProccessor>("http://localhost:51176/DocToPic/CCF");
         }
 
         public IActionResult Send()

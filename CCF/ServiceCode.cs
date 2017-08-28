@@ -105,6 +105,7 @@ namespace CCF
                 {
                     allTypes.Enqueue(baseType);
                 }
+                allTypes.Enqueue(type.GetTypeInfo().BaseType);
             }
             return null;
         }

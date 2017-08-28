@@ -19,7 +19,6 @@ namespace CCF.IPResolver.Adapter
                     if (result == "OK")
                     {
                         Console.WriteLine($"Registrate as {typeof(T).FullName} success");
-                        app.UseMiddleware<CCFAdapterMiddleware<T>>(endPoint);
                     }
                     else
                     {
@@ -30,6 +29,11 @@ namespace CCF.IPResolver.Adapter
             catch
             {
                 Console.WriteLine("http request error!!! :(");
+            }
+            finally
+            {
+                app.UseMiddleware<CCFAdapterMiddleware<T>>(endPoint);
+                Console.WriteLine("Use Middleware");
             }
             return app;
         }

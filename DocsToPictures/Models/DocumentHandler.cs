@@ -1,12 +1,10 @@
-﻿using System;
+﻿using DocsToPictures.Interfaces;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Reflection;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 using System.Threading;
-using DocsToPictures.Interfaces;
 
 namespace DocsToPictures.Models
 {
@@ -33,6 +31,7 @@ namespace DocsToPictures.Models
             if (!CanConvert(doc))
                 return;
             documentsStream.Enqueue(doc);
+            workQueueStopper.Set();
         }
 
         public void Initialize()

@@ -1,4 +1,5 @@
 ﻿using DocsToPictures.Interfaces;
+using Microsoft.AspNetCore.Hosting;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -11,17 +12,15 @@ namespace DocsToPictures.Models
 {
     public class DocumentProcessor : IDocumentProccessor
     {
-        private static DocumentProcessor proccessor = new DocumentProcessor();
         private List<DocumentHandler> handlers;
         private ConcurrentDictionary<Guid, Document> documentsBase;
-
-        public static DocumentProcessor Instance => proccessor;
-
-        private DocumentProcessor()
+        private string dataFolder;
+        public DocumentProcessor(IHostingEnvironment env)
         {
+            dataFolder = env.ContentRootPath;
             handlers = Assembly.GetExecutingAssembly()
                 .GetTypes()
-                .Where(T => T.IsExtended<DocumentHandler>())
+                .Where(T => T.IsSubclassOf(typeof(DocumentHandler)))
                 .Select(T => Activator.CreateInstance(T) as DocumentHandler)
                 .ToList();
             handlers.ForEach(DH => DH.Initialize());
@@ -32,7 +31,7 @@ namespace DocsToPictures.Models
         public IDocument AddToHandle(string fileName, Stream fileStream)
         {
             fileName = Path.GetFileName(fileName);
-            var dataDir = Path.Combine(AppDomain.CurrentDomain.GetData("DataDirectory").ToString(), "uploads");
+            var dataDir = Path.Combine(dataFolder, "uploads");
             Guid folderGuid = Guid.NewGuid();
             var folder = Directory.CreateDirectory(Path.Combine(dataDir, folderGuid.ToString()));
             using (var fileWriteStream = File.Create(Path.Combine(folder.FullName, fileName)))

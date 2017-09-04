@@ -5,7 +5,7 @@ using System.Text;
 
 namespace DocsToPictures.Interfaces
 {
-    public interface IDocumentProccessor
+    public interface IDocumentProcessor
     {
         IDocument AddToHandle(string fileName, Stream fileStream);
 

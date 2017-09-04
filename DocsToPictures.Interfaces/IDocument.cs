@@ -10,7 +10,8 @@ namespace DocsToPictures.Interfaces
         Guid Id { get; }
         string Name { get; }
         int PagesCount { get; }
-        IEnumerable<int> AvailablePages { get; }
+        int ReadyPagesCount { get; }
+        List<int> GetAvailablePages();
         Stream GetPicture(int pageNum);
     }
 }

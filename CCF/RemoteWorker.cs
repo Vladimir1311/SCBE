@@ -7,12 +7,21 @@ using System.Linq;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using System.IO;
+using CCF.Transport;
+using System.Threading;
+using System.Collections.Concurrent;
 
 namespace CCF
 {
     public class RemoteWorker : IInterceptor
     {
         private static IProxyGenerator proxyGenerator = new ProxyGenerator();
+
+        private class WaitPair
+        {
+            public ManualResetEvent ResetEvent { get; set; }
+            public InvokeResult Result { get; set; }
+        }
 
         private static Type[] PrimitiveTypes =
             typeof(JToken)
@@ -21,27 +30,35 @@ namespace CCF
             .Select(M => M.GetParameters()[0].ParameterType)
             .ToArray();
 
-        private string endPoint;
-        private HttpClient httpClient;
-        private int objectId;
 
-        private RemoteWorker(string endPoint, int objectId)
+        private readonly ITransporter transporter;
+        private int objectId;
+        private ConcurrentDictionary<Guid, WaitPair> waiters
+            = new ConcurrentDictionary<Guid, WaitPair>();
+
+
+        private RemoteWorker(ITransporter transporter, int objectId)
         {
-            this.endPoint = endPoint;
-            httpClient = new HttpClient()
-            {
-                BaseAddress = new Uri(endPoint),
-                Timeout = TimeSpan.FromHours(5)
-            };
+            this.transporter = transporter;
             this.objectId = objectId;
+            transporter.OnReceiveResult += Transporter_OnReceiveResult;
         }
 
-        public static T Create<T>(string endPoint)
+        private void Transporter_OnReceiveResult(InvokeResult obj)
+        {
+            if (waiters.TryGetValue(obj.Id, out var value))
+            {
+                value.Result = obj;
+                value.ResetEvent.Set();
+            }
+        }
+
+        internal static T Create<T>(ITransporter transporter)
         {
             CheckType(typeof(T));
             return (T)proxyGenerator.CreateInterfaceProxyWithoutTarget(
                 typeof(T),
-                new RemoteWorker(endPoint, -1));
+                new RemoteWorker(transporter, -1));
         }
 
         private static object Create(Type targetType, RemoteWorker worker)
@@ -77,55 +94,64 @@ namespace CCF
         {
             InvokeMessage message = new InvokeMessage
             {
+                Id = Guid.NewGuid(),
                 MethodName = invocation.Method.Name,
                 SubObjectId = objectId
             };
 
-            Dictionary<string, JToken> args = new Dictionary<string, JToken>();
-            MultipartFormDataContent multiContent = new MultipartFormDataContent();
             int i = 0;
             foreach (var param in invocation.Method.GetParameters())
             {
                 var argument = invocation.Arguments[i++];
                 if (argument is Stream stream)
                 {
-                    StreamContent argContent = new StreamContent(stream);
-                    multiContent.Add(argContent, param.Name, param.Name);
+                    message.Streams[param.Name] = stream;
                 }
                 else
                 {
-                    args.Add(param.Name, JToken.FromObject(argument));
+                    message.Args[param.Name] = JToken.FromObject(argument);
                 }
             }
-            message.Args = args;
             var data = JsonConvert.SerializeObject(message, Formatting.Indented);
             Console.WriteLine(data);
 
-            StringContent content = new StringContent(data);
-            multiContent.Add(content, "simpleargs");
-            var result = httpClient.PostAsync("", multiContent).Result;
+            ManualResetEvent resetEvent = new ManualResetEvent(false);
 
-            if (result.StatusCode == System.Net.HttpStatusCode.NoContent)
-                return;
-            
-            if (invocation.Method.ReturnType == typeof(Stream))
+            waiters.TryAdd(message.Id, new WaitPair { ResetEvent = resetEvent });
+
+            transporter.SendMessage(message);
+
+            resetEvent.WaitOne();
+
+            if (!waiters.TryRemove(message.Id, out var waitPair))
+                throw new Exception("Blya blya blya nety waitera!!!!");
+            var result = waitPair.Result;
+
+            if (result.SubObjectId != -1)
             {
-                invocation.ReturnValue = result.Content.ReadAsStreamAsync().Result;
+                var worker = new RemoteWorker(transporter, result.SubObjectId);
+                invocation.ReturnValue = Create(invocation.Method.ReturnType, worker);
                 return;
             }
-            var resultstr = result.Content.ReadAsStringAsync().Result;
-            Console.WriteLine(resultstr);
-            var invokeResult = JsonConvert.DeserializeObject<InvokeResult>(resultstr);
+
+            if (result.IsPrimitive)
+            {
+                invocation.ReturnValue = result.Value?.ToObject(invocation.Method.ReturnType);
+                return;
+            }
+
+
+            if (invocation.Method.ReturnType == typeof(Stream))
+            {
+                invocation.ReturnValue = result.StreamValue;
+                return;
+            }
+            if (result.Value.Type == JTokenType.Null)
+                return;
 
             if (invocation.Method.ReturnType == typeof(void))
                 return;
-            if (invokeResult.IsPrimitive)
-            {
-                invocation.ReturnValue = invokeResult.Value?.ToObject(invocation.Method.ReturnType);
-                return;
-            }
-            var worker = new RemoteWorker(endPoint, invokeResult.SubObjectId);
-            invocation.ReturnValue = Create(invocation.Method.ReturnType, worker);
+
         }
     }
 }

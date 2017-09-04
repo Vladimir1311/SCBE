@@ -9,6 +9,7 @@ using Newtonsoft.Json;
 using Microsoft.AspNetCore.Http;
 using System.Collections.Concurrent;
 using System.IO;
+using CCF.Transport;
 
 namespace CCF
 {
@@ -23,36 +24,37 @@ namespace CCF
 
         private object worker;
         private Type workerType;
-
+        private readonly ITransporter transporter;
         private static int lastSubWorkerId;
 
         private static ConcurrentDictionary<int, ServiceCode> subWorkers
             = new ConcurrentDictionary<int, ServiceCode>();
 
-        public static ServiceCode Create<T>(T targetObject)
+        internal static ServiceCode Create<T>(ITransporter transporter, T serviceInvoker)
         {
-            return new ServiceCode(targetObject, typeof(T));
+            return new ServiceCode(serviceInvoker, typeof(T), transporter);
         }
 
-        private ServiceCode(object targetObject, Type objectType)
+        private ServiceCode(object targetObject, Type objectType, ITransporter transporter)
         {
             worker = targetObject;
             workerType = objectType;
+            this.transporter = transporter;
+            transporter.OnReceiveMessge += M => transporter.SendResult(Handle(M));
         }
 
 
-        public object Handle(string request, IEnumerable<StreamValue> streams)
+        private InvokeResult Handle(InvokeMessage invokeMessage)
         {
-            var message = JsonConvert.DeserializeObject<InvokeMessage>(request);
 
-            if (subWorkers.TryGetValue(message.SubObjectId, out var handler))
+            if (subWorkers.TryGetValue(invokeMessage.SubObjectId, out var handler))
             {
-                return handler.HardWork(message, streams);
+                return handler.HardWork(invokeMessage);
             }
-            return HardWork(message, streams);
+            return HardWork(invokeMessage);
         }
 
-        private object HardWork(InvokeMessage message, IEnumerable<StreamValue> streams)
+        private InvokeResult HardWork(InvokeMessage message)
         {
             var targetMethod = GetTargetMethod(message.MethodName);
             var parameters = new List<object>();
@@ -64,31 +66,42 @@ namespace CCF
                 }
                 else
                 {
-                    var stream = streams.FirstOrDefault(P => P.Name == param.Name).Value;
+                    var stream = message.Streams.FirstOrDefault(P => P.Key == param.Name).Value;
                     parameters.Add(stream);
                 }
             }
             var result = targetMethod.Invoke(worker, parameters.ToArray());
             if (result == null)
             {
-                return null;
+                return new InvokeResult
+                {
+                    Id = message.Id,
+                    IsPrimitive = false,
+                    Value = JValue.CreateNull()
+                };
             }
             if (PrimitiveTypes.Contains(targetMethod.ReturnType))
-                return JsonConvert.SerializeObject(
-                    new InvokeResult
-                    {
-                        IsPrimitive = true,
-                        Value = JToken.FromObject(result ?? "Void")
-                    });
-            if (result is Stream streamResult) return streamResult;
-            var subWorkerKey = lastSubWorkerId++;
-            subWorkers[subWorkerKey] = new ServiceCode(result, targetMethod.ReturnType);
-            return JsonConvert.SerializeObject(
-                new InvokeResult
+                return new InvokeResult
                 {
+                    Id = message.Id,
+                    IsPrimitive = true,
+                    Value = JToken.FromObject(result ?? "Void")
+                };
+            if (result is Stream streamResult)
+                return new InvokeResult
+                {
+                    Id = message.Id,
                     IsPrimitive = false,
-                    SubObjectId = subWorkerKey
-                });
+                    StreamValue = streamResult
+                };
+            var subWorkerKey = lastSubWorkerId++;
+            subWorkers[subWorkerKey] = new ServiceCode(result, targetMethod.ReturnType, transporter);
+            return new InvokeResult
+            {
+                Id = message.Id,
+                IsPrimitive = false,
+                SubObjectId = subWorkerKey
+            };
         }
 
         private MethodInfo GetTargetMethod(string methodName)

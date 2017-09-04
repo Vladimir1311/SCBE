@@ -40,6 +40,7 @@ namespace IPResolver
             // Add framework services.
             services.AddMvc();
 
+            services.AddSingleton(new RemoteServicesManager(5476));
             services.AddTransient<IConfigsManager, FileConfigsManager>();
         }
 

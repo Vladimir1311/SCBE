@@ -13,28 +13,24 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-
+using CCF;
 namespace UDPTester
 {
     public class Program
     {
         static void Main(string[] args)
         {
-            ProxyGenerator generator = new ProxyGenerator();
-            ILOL t = (ILOL)generator.CreateInterfaceProxyWithoutTarget(typeof(ILOL), new Worker());
-            t.StrLength("sdfsdfsgsrg");
+            CCFServicesManager.RegisterService(new lol() as ILOL);
+
+            var service = CCFServicesManager.GetService<ILOL>();
+            Console.WriteLine(service.StrLength("Hello world!"));
         }
     }
 
-    class Worker : IInterceptor
+    class lol : ILOL
     {
-        public void Intercept(IInvocation invocation)
-        {
-            invocation.ReturnValue = "sdfsfe";
-        }
+        public int StrLength(string str) => str.Length;
     }
-
-
     public interface ILOL
     {
         int StrLength(string str);

@@ -55,7 +55,6 @@
     <ProjectReference Include="..\CCF.IPResolver.Adapter\CCF.IPResolver.Adapter.csproj" />
     <ProjectReference Include="..\Common\Common.csproj" />
     <ProjectReference Include="..\DocsToPictures.Interfaces\DocsToPictures.Interfaces.csproj" />
-    <ProjectReference Include="..\SituiationCenterBackServer.Interfaces\SituationCenterBackServer.Interfaces.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,25 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
+using CCF;
+using DocsToPictures.Models;
+using DocsToPictures.Interfaces;
+using System.Threading;
 
 namespace DocsToPictures
 {
-    public class Program
+    class Program
     {
-        public static void Main(string[] args)
+        static void Main(string[] args)
         {
-            BuildWebHost(args).Run();
+            CCFServicesManager.RegisterService(new DocumentProcessor() as IDocumentProcessor);
+            while(true)
+            {
+                Console.WriteLine("Go to wait!");
+                Thread.Sleep(TimeSpan.FromMinutes(5));
+            }
         }
-
-        public static IWebHost BuildWebHost(string[] args) =>
-            WebHost.CreateDefaultBuilder(args)
-                .UseStartup<Startup>()
-                .Build();
     }
 }

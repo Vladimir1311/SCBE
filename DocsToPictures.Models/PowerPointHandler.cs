@@ -12,9 +12,10 @@ namespace DocsToPictures.Models
     [SupportedFormatAttribyte(".ppt")]
     public class PowerPointHandler : DocumentHandler
     {
+        private Application pptApplication;
         protected override void Handle()
         {
-            Application pptApplication = new Application
+            pptApplication = new Application
             {
                 Visible = MsoTriState.msoTrue
             };
@@ -49,6 +50,16 @@ namespace DocsToPictures.Models
         private static int Percents(double done, double all)
         {
             return (int)Math.Floor((done / all) * 100);
+        }
+
+        public override void Dispose()
+        {
+            if (pptApplication != null)
+            {
+                foreach (var presentaion in pptApplication.Presentations.Cast<Presentation>())
+                    presentaion.Close();
+                pptApplication.Quit();
+            }
         }
     }
 }

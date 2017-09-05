@@ -7,6 +7,7 @@ using CCF;
 using DocsToPictures.Models;
 using DocsToPictures.Interfaces;
 using System.Threading;
+using System.IO;
 
 namespace DocsToPictures
 {
@@ -14,11 +15,20 @@ namespace DocsToPictures
     {
         static void Main(string[] args)
         {
-            CCFServicesManager.RegisterService(new DocumentProcessor() as IDocumentProcessor);
-            while(true)
+            IDocumentProcessor processor = null;
+            try
             {
-                Console.WriteLine("Go to wait!");
-                Thread.Sleep(TimeSpan.FromMinutes(5));
+                processor = new DocumentProcessor();
+                CCFServicesManager.RegisterService(processor);
+                while (true)
+                {
+                    Console.WriteLine("Go to wait!");
+                    Thread.Sleep(TimeSpan.FromMinutes(5));
+                }
+            }
+            finally
+            {
+                processor.Dispose();
             }
         }
     }

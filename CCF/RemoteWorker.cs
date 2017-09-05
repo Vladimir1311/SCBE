@@ -129,6 +129,7 @@ namespace CCF
 
             if (result.SubObjectId != -1)
             {
+                Console.WriteLine($"Hard object, id: {result.SubObjectId} for request {message.MethodName}");
                 var worker = new RemoteWorker(transporter, result.SubObjectId);
                 invocation.ReturnValue = Create(invocation.Method.ReturnType, worker);
                 return;
@@ -136,6 +137,7 @@ namespace CCF
 
             if (result.IsPrimitive)
             {
+                Console.WriteLine($"Primitive, value: {result.Value} for resuest {message.MethodName}");
                 invocation.ReturnValue = result.Value?.ToObject(invocation.Method.ReturnType);
                 return;
             }
@@ -143,14 +145,21 @@ namespace CCF
 
             if (invocation.Method.ReturnType == typeof(Stream))
             {
+                Console.WriteLine($"Stream, length: {result.StreamValue.Length} for request {message.MethodName}");
                 invocation.ReturnValue = result.StreamValue;
                 return;
             }
             if (result.Value.Type == JTokenType.Null)
+            {
+                Console.WriteLine($"null value for request {message.MethodName}");
                 return;
+            }
 
             if (invocation.Method.ReturnType == typeof(void))
+            {
+                Console.WriteLine($"void method {message.MethodName}");
                 return;
+            }
 
         }
     }

@@ -7,6 +7,8 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using CCF.Extensions;
+using Microsoft.Extensions.Logging;
+
 namespace CCF.Transport
 {
     
@@ -20,19 +22,21 @@ namespace CCF.Transport
         public event Action<InvokeResult> OnReceiveResult;
 
         private TcpClient tcpClient;
+        private readonly ILogger<TCPTransporter> logger;
 
-
-        public TCPTransporter(string host, int port, string password)
+        public TCPTransporter(string host, int port, string password, ILogger<TCPTransporter> logger)
         {
             tcpClient = new TcpClient();
             tcpClient.ConnectAsync(host, port).Wait();
             using (var writer = new BinaryWriter(tcpClient.GetStream(), Encoding.ASCII, true))
                 writer.Write(password);
             new Task(async () => await ReadStream()).Start();
+            this.logger = logger;
         }
 
         public void SendMessage(InvokeMessage message)
         {
+            logger.LogDebug($"sending message {message.Id}");
             var streamToOut = EncodeMessage(message);
             streamToOut.Position = 0;
             streamToOut.CopyTo(tcpClient.GetStream());
@@ -40,6 +44,7 @@ namespace CCF.Transport
 
         public void SendResult(InvokeResult result)
         {
+            logger.LogDebug($"sending result {result.Id}");
             var streamToOut = EncodeResult(result);
             streamToOut.Position = 0;
             streamToOut.CopyTo(tcpClient.GetStream());
@@ -61,22 +66,24 @@ namespace CCF.Transport
 
                 await clientStream.ReadAsync(forType, 0, 1);
                 var type = (MessageType)forType[0];
+                logger.LogDebug($"read packetId {id} type is {type}");
 
                 var contentStream = new MemoryStream();
                 //TODO обрезание long в int!!!!
-                var data = new byte[(int)size - 17];
-                await clientStream.ReadAsync(data, 0, data.Length);
-                contentStream.Write(data, 0, data.Length);
+                await clientStream.CopyPart(contentStream, (int)size - 17);
+
                 contentStream.Position = 0;
                 switch (type)
                 {
                     case MessageType.Message:
                         InvokeMessage message = DecodeMessage(contentStream, id);
                         OnReceiveMessge?.Invoke(message);
+                        logger.LogDebug($"invoked message handler for {id}, go to new iteration");
                         break;
                     case MessageType.Result:
                         InvokeResult result = DecodeResult(contentStream, id);
                         OnReceiveResult?.Invoke(result);
+                        logger.LogDebug($"invoked result handler for {id}, go to new iteration");
                         break;
                     default:
                         break;

@@ -32,15 +32,15 @@ namespace CCF
 
         internal static ServiceCode Create<T>(ITransporter transporter, T serviceInvoker)
         {
-            return new ServiceCode(serviceInvoker, typeof(T), transporter);
+            var code = new ServiceCode(serviceInvoker, typeof(T));
+            transporter.OnReceiveMessge += M => transporter.SendResult(code.Handle(M));
+            return code;
         }
 
-        private ServiceCode(object targetObject, Type objectType, ITransporter transporter)
+        private ServiceCode(object targetObject, Type objectType)
         {
             worker = targetObject;
             workerType = objectType;
-            this.transporter = transporter;
-            transporter.OnReceiveMessge += M => transporter.SendResult(Handle(M));
         }
 
 
@@ -95,7 +95,7 @@ namespace CCF
                     StreamValue = streamResult
                 };
             var subWorkerKey = lastSubWorkerId++;
-            subWorkers[subWorkerKey] = new ServiceCode(result, targetMethod.ReturnType, transporter);
+            subWorkers[subWorkerKey] = new ServiceCode(result, targetMethod.ReturnType);
             return new InvokeResult
             {
                 Id = message.Id,

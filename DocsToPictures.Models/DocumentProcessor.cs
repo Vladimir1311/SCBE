@@ -76,5 +76,20 @@ namespace DocsToPictures.Models
                 return;
             Directory.Delete(doc.Folder, true);
         }
+
+        public void Dispose()
+        {
+            foreach (var handler in handlers)
+            {
+                try
+                {
+                    handler.Dispose();
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine($"error while disposing handler {ex.Message}");
+                }
+            }
+        }
     }
 }

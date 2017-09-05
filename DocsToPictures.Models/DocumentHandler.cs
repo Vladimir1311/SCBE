@@ -1,4 +1,5 @@
 ﻿using DocsToPictures.Interfaces;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
@@ -8,7 +9,7 @@ using System.Threading;
 
 namespace DocsToPictures.Models
 {
-    public abstract class DocumentHandler
+    public abstract class DocumentHandler : IDisposable
     {
         protected ManualResetEvent workQueueStopper;
         private List<string> supportedFormats;
@@ -40,5 +41,7 @@ namespace DocsToPictures.Models
             workThread.Start();
         }
         protected abstract void Handle();
+
+        public abstract void Dispose();
     }
 }

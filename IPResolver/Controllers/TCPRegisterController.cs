@@ -10,7 +10,7 @@ using System.Text;
 namespace IPResolver.Controllers
 {
     [Produces("application/json")]
-    [Route("api/TCPRegister/[action]")]
+    [Route("ip/TCPRegister/[action]")]
     public class TCPRegisterController : Controller
     {
         

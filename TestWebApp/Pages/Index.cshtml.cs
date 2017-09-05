@@ -38,8 +38,11 @@ namespace TestWebApp.Pages
                     Thread.Sleep(TimeSpan.FromSeconds(1));
                 }
             }
-            foreach (var page in document.GetAvailablePages())
+            var pages = document.GetAvailablePages();
+            Console.WriteLine($"getted {pages.Count} pages");
+            foreach (var page in pages)
             {
+                Console.WriteLine($"page num : {page}");
                 using (var pic = System.IO.File.Create($@"D:\Users\maksa\Desktop\DocsToPictures\{page}.png"))
                     document.GetPicture(page).CopyTo(pic);
             }

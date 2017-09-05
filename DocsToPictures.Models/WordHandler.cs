@@ -53,5 +53,15 @@ namespace DocsToPictures.Models
             return (int)Math.Floor((done / all) * 100);
         }
 
+        public override void Dispose()
+        {
+            if (wordApp != null)
+            {
+
+                foreach (var document in wordApp.Documents.Cast<Microsoft.Office.Interop.Word.Document>())
+                    document.Close(WdSaveOptions.wdDoNotSaveChanges);
+                wordApp.Quit(WdSaveOptions.wdDoNotSaveChanges);
+            }
         }
+    }
     }

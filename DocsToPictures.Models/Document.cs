@@ -17,7 +17,7 @@ namespace DocsToPictures.Models
 
         private List<int> indexes;
 
-        public List<int> GetAvailablePages()
+        public ICollection<int> GetAvailablePages()
         {
                 indexes = PagesPaths?
                     .Select((P, N) => new { Num = N, Path = P})

@@ -11,7 +11,7 @@ namespace DocsToPictures.Interfaces
         string Name { get; }
         int PagesCount { get; }
         int ReadyPagesCount { get; }
-        List<int> GetAvailablePages();
+        ICollection<int> GetAvailablePages();
         Stream GetPicture(int pageNum);
     }
 }

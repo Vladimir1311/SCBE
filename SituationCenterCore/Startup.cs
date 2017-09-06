@@ -40,6 +40,7 @@ namespace SituationCenterCore
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             }).AddJwtBearer(o =>
             {
+                o.RequireHttpsMetadata = false;
                 o.Authority = Configuration["JWT:Authority"];
                 o.Audience = Configuration["JWT:Audience"];
                 //o.Events

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -17,15 +16,8 @@ namespace SituationCenter.Shared.ResponseObjects.IPRows
         {}
         public ServiceRow(IPAddress address, string serviceType)
         {
-            IP = address;
+            StringIP = address.MapToIPv4().ToString();
             ServiceType = serviceType;
-        }
-
-        [NotMapped][JsonIgnore]
-        public IPAddress IP {
-
-            get => IPAddress.Parse(StringIP);
-            set => StringIP = value.MapToIPv4().ToString();
         }
     }
 }

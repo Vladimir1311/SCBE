@@ -18,7 +18,7 @@ namespace UDPTester
 {
     public class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             CCFServicesManager.RegisterService(new lol() as ILOL);
 

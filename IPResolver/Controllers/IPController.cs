@@ -6,7 +6,6 @@ using IPResolver.Models.RequestModels;
 using IPResolver.Services;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -23,7 +22,6 @@ namespace IPResolver.Controllers
         {
             this.configsManager = configsManager;
             this.servicesDb = servicesDB;
-
         }
 
         public ResponseBase Get()
@@ -46,7 +44,6 @@ namespace IPResolver.Controllers
             }
             );
         }
-
 
         public ContentResult GetCCFEndPoint(string interfaceName)
         {
@@ -82,7 +79,6 @@ namespace IPResolver.Controllers
             }
         }
 
-
         public string SetCoreIP(string value)
         {
             try
@@ -113,7 +109,7 @@ namespace IPResolver.Controllers
                 return ResponseBase.BadResponse("token is incorrect");
             var ip = HttpContext.Connection.RemoteIpAddress;
             var createdRow = servicesDb.ServiseRows.FirstOrDefault(R => R.ServiceType == request.ServiceType);
-            if(createdRow != null)
+            if (createdRow != null)
             {
                 createdRow.IP = ip;
             }
@@ -125,7 +121,6 @@ namespace IPResolver.Controllers
             await servicesDb.SaveChangesAsync();
             return ResponseBase.GoodResponse();
         }
-
 
         private string BuildEndPoint(string url)
         {

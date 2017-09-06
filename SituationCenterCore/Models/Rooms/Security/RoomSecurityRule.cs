@@ -1,7 +1,8 @@
-﻿using Common.Models.Rooms;
+﻿
+using SituationCenter.Shared.Models.Rooms;
 using System;
 
-namespace SituationCenterBackServer.Models.RoomSecurity
+namespace SituationCenterCore.Models.Rooms.Security
 {
     public class RoomSecurityRule
     {

@@ -149,15 +149,16 @@ namespace CCF
                 invocation.ReturnValue = result.StreamValue;
                 return;
             }
-            if (result.Value.Type == JTokenType.Null)
-            {
-                Console.WriteLine($"null value for request {message.MethodName}");
-                return;
-            }
 
             if (invocation.Method.ReturnType == typeof(void))
             {
                 Console.WriteLine($"void method {message.MethodName}");
+                return;
+            }
+
+            if (result.Value.Type == JTokenType.Null)
+            {
+                Console.WriteLine($"null value for request {message.MethodName}");
                 return;
             }
 

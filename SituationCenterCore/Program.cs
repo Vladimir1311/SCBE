@@ -23,8 +23,7 @@ namespace SituationCenterCore
             builder.UseConfiguration(new ConfigurationBuilder()
                                 .AddJsonFile("appsettings.jwt.json", optional: false)
                                 .Build())
-                    .UseStartup<Startup>()
-                    .UseUrls("http://*:80");
+                    .UseStartup<Startup>();
             return builder.Build();
         }
     }

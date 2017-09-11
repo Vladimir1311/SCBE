@@ -10,10 +10,15 @@ namespace CCF
 {
     public class CCFServicesManager
     {
-        private const string SITE_IP = "52.163.250.253";
+        //private const string SITE_IP = "52.163.250.253";
+        //private const string SITE_PORT = "80";
+
+        private const string SITE_IP = "127.0.0.1";
+        private const string SITE_PORT = "5100";
+
         public static void RegisterService<T>(T serviceInvoker)
         {
-            var result = new HttpClient().GetStringAsync($"http://{SITE_IP}/ip/TCPRegister/registerService?interfaceName={typeof(T).Name}").Result;
+            var result = new HttpClient().GetStringAsync($"http://{SITE_IP}:{SITE_PORT}/ip/TCPRegister/registerService?interfaceName={typeof(T).Name}").Result;
             var obj = JObject.Parse(result);
             var password = obj["password"].ToObject<string>();
             var port = obj["port"].ToObject<int>();
@@ -24,7 +29,7 @@ namespace CCF
 
         public static T GetService<T>()
         {
-            var result = new HttpClient().GetStringAsync($"http://{SITE_IP}/ip/TCPRegister/useService?interfaceName={typeof(T).Name}").Result;
+            var result = new HttpClient().GetStringAsync($"http://{SITE_IP}:{SITE_PORT}/ip/TCPRegister/useService?interfaceName={typeof(T).Name}").Result;
             var obj = JObject.Parse(result);
             var password = obj["password"].ToObject<string>();
             var port = obj["port"].ToObject<int>();

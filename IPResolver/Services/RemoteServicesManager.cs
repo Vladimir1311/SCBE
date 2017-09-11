@@ -126,14 +126,10 @@ namespace IPResolver.Services
                         Guid packId = new Guid(reader.ReadBytes(16));
                         logger.LogInformation($"read packet {packId} to service {targetService.InterfaceName}");
                         user.WaitedPacks.Add(packId);
-                        var ms = new MemoryStream();
-                        ms.Write(BitConverter.GetBytes(packLength));
-                        ms.Write(packId.ToByteArray());
-                        var data = new byte[(int)packLength - 16];
-                        await reader.BaseStream.ReadAsync(data, 0, data.Length);
-                        ms.Write(data);
-                        ms.Position = 0;
-                        await ms.CopyToAsync(targetService.Connection.GetStream());
+                        var serviceStream = targetService.Connection.GetStream();
+                        serviceStream.Write(BitConverter.GetBytes(packLength));
+                        serviceStream.Write(packId.ToByteArray());
+                        await reader.BaseStream.CopyPart(serviceStream, (int)packLength - 16);
                     }
                 }
             }
@@ -155,18 +151,14 @@ namespace IPResolver.Services
                         long packLength = reader.ReadInt64();
                         Guid packId = new Guid(reader.ReadBytes(16));
                         logger.LogInformation($"read packet {packId} from service {service.InterfaceName}");
-                        var ms = new MemoryStream();
-                        ms.Write(BitConverter.GetBytes(packLength));
-                        ms.Write(packId.ToByteArray());
-                        var data = new byte[(int)packLength - 16];
-                        await reader.BaseStream.ReadAsync(data, 0, data.Length);
-                        ms.Write(data);
-                        ms.Position = 0;
                         var targetUser = service.Listeners.FirstOrDefault(U => U.WaitedPacks.Contains(packId));
                         if (targetUser != null)
                         {
                             targetUser.WaitedPacks.Remove(packId);
-                            await ms.CopyToAsync(targetUser.Connection.GetStream());
+                            var clientStream = targetUser.Connection.GetStream();
+                            clientStream.Write(BitConverter.GetBytes(packLength));
+                            clientStream.Write(packId.ToByteArray());
+                            await reader.BaseStream.CopyPart(clientStream, (int)packLength - 16);
                         }
                         else
                         {

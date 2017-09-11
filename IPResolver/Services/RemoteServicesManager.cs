@@ -140,7 +140,7 @@ namespace IPResolver.Services
             catch (Exception ex)
             {
                 targetService.Listeners.Remove(user);
-                logger.LogWarning($"error with client {ex.Message}");
+                logger.LogWarning($"error with client {ex.Message}, deketing from listeners");
             }
         }
 

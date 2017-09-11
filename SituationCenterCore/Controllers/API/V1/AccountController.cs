@@ -18,11 +18,14 @@ using Microsoft.Extensions.Options;
 using SituationCenter.Shared.ResponseObjects;
 using SituationCenterCore.Pages.Account;
 using SituationCenter.Shared.ResponseObjects.Account;
+using SituationCenterCore.Filters;
 
 namespace SituationCenterCore.Controllers.API.V1
 {
     [Produces("application/json")]
     [Route("api/v1/Account/[action]")]
+    [Authorize(AuthenticationSchemes = "Bearer")]
+    [TypeFilter(typeof(JsonExceptionsFilterAttribute))]
     public class AccountController : Controller
     {
         private readonly ILogger<AccountController> logger;
@@ -44,14 +47,11 @@ namespace SituationCenterCore.Controllers.API.V1
         public async Task<ResponseBase> Authorize([FromBody]LoginModel.InputModel model)
         {
             if (!ModelState.IsValid)
-                return ResponseBase.BadResponse("not correct email or password");
+                throw new StatusCodeException(SituationCenter.Shared.Exceptions.StatusCode.ArgumentsIncorrect);
             var user = await repository.FindUserByEmailAsync(model.Email);
 
-            if (user == null)
-                return ResponseBase.BadResponse("not correct email");
-
-            if (!await repository.CheckUserPasswordAsync(user, model.Password))
-                return ResponseBase.BadResponse("not correct password");
+            if (user == null || !await repository.CheckUserPasswordAsync(user, model.Password))
+                throw new StatusCodeException(SituationCenter.Shared.Exceptions.StatusCode.AuthorizeError);
 
             var claims = new Claim[]
             {
@@ -59,18 +59,18 @@ namespace SituationCenterCore.Controllers.API.V1
                 new Claim(ClaimsIdentity.DefaultRoleClaimType, "user"),
                 new Claim(ClaimTypes.NameIdentifier, user.Id)
             };
+            var identity = new ClaimsIdentity(claims, "Token", ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType);
+            var now = DateTime.UtcNow;
             var jwt = new JwtSecurityToken(
-                issuer: authOptions.Issuer,
-                audience: authOptions.Audience,
-                notBefore: DateTime.Now,
-                claims: claims,
-                expires: DateTime.Now.Add(authOptions.Expiration),
-                signingCredentials: new SigningCredentials(
-                    authOptions.GetSymmetricSecurityKey(),
-                    SecurityAlgorithms.HmacSha256));
-            var encodetJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
+                        issuer: MockAuthOptions.ISSUER,
+                        audience: MockAuthOptions.AUDIENCE,
+                        notBefore: now,
+                        claims: identity.Claims,
+                        expires: now.Add(TimeSpan.FromMinutes(MockAuthOptions.LIFETIME)),
+                        signingCredentials: new SigningCredentials(MockAuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
+            var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
             logger.LogDebug($"Send token for {user.Email}");
-            return AuthorizeResponse.Create(encodetJwt);
+            return AuthorizeResponse.Create(encodedJwt);
         }
 
         [HttpPost]

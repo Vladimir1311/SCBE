@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using SituationCenterCore.Models.Rooms.Security;
+using SituationCenterCore.Models.Rooms;
 
 namespace SituationCenterCore.Data
 {
@@ -24,5 +25,6 @@ namespace SituationCenterCore.Data
         }
 
         public DbSet<RoomSecurityRule> Rules { get; set; }
+        public DbSet<Room> Rooms { get; set; }
     }
 }

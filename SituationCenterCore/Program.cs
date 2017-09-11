@@ -17,9 +17,15 @@ namespace SituationCenterCore
             BuildWebHost(args).Run();
         }
 
-        public static IWebHost BuildWebHost(string[] args) =>
-            WebHost.CreateDefaultBuilder(args)
-                .UseStartup<Startup>()
-                .Build();
+        public static IWebHost BuildWebHost(string[] args)
+        {
+            var builder = WebHost.CreateDefaultBuilder(args);
+            builder.UseConfiguration(new ConfigurationBuilder()
+                                .AddJsonFile("appsettings.jwt.json", optional: false)
+                                .Build())
+                    .UseStartup<Startup>()
+                    .UseUrls("http://*:80");
+            return builder.Build();
+        }
     }
 }

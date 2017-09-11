@@ -1,18 +1,15 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Net.Http;
-
-
 
 namespace CCF.IPResolver.Adapter
 {
     public static class Extension
     {
-        public static IApplicationBuilder UseAsServise<T>(this IApplicationBuilder app, string endPoint)
+        public static IApplicationBuilder UseAsServise<T>(this IApplicationBuilder app, T service)
         {
-            var serviceInvoker = app.ApplicationServices.GetService<T>();
-            CCFServicesManager.RegisterService(serviceInvoker);
+            service = service == null ? throw new ArgumentNullException($"service cannot be null {nameof(service)}") : service;
+            CCFServicesManager.RegisterService(service);
             return app;
         }
 

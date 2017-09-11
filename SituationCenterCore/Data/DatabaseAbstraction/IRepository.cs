@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Security.Claims;
 
 namespace SituationCenterCore.Data.DatabaseAbstraction
 {
@@ -21,8 +22,10 @@ namespace SituationCenterCore.Data.DatabaseAbstraction
         Task<List<ApplicationUser>> FindUsers(Func<ApplicationUser, bool> predicate);
         Task<bool> AnyUser(Func<ApplicationUser, bool> predicate);
         Task<ApplicationUser> FindUserByEmailAsync(string email);
+        Task<ApplicationUser> FindUser(ClaimsPrincipal user);
+        Guid GetUserId(ClaimsPrincipal user);
         Task<bool> CheckUserPasswordAsync(ApplicationUser user, string password);
-
+        IQueryable<ApplicationUser> Users { get; }
 
     }
 }

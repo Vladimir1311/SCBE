@@ -2,17 +2,16 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using SituationCenterBackServer.Models;
-using SituationCenterBackServer.Models.StorageModels;
-using SituationCenterBackServer.Services;
+using SituationCenterCore.Data;
+using SituationCenterCore.Models.StorageModels;
 using Storage.Interfaces;
 using System.Linq;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
-namespace SituationCenterBackServer.Controllers.API.V1
+namespace SituationCenterCore.Controllers.API.V1
 {
-    [Authorize]
+    [Authorize(AuthenticationSchemes = "Bearer")]
     [Route("api/v1/[controller]/[action]/{*pathToFolder}")]
     public class StorageController : Controller
     {
@@ -26,7 +25,6 @@ namespace SituationCenterBackServer.Controllers.API.V1
             this.storageManager = storageManager;
             this.userManager = userManager;
             this.logger = logger;
-            
         }
 
         [HttpGet]
@@ -102,12 +100,5 @@ namespace SituationCenterBackServer.Controllers.API.V1
         //        return BadRequest();
         //    }
         //}
-
-        private string LinkToFile(string userId, string pathToFile)
-        {
-            return ("http://192.168.137.73/api/v1/storage/download/" + pathToFile).Replace(@"\", "/");
-            //var file = storageManager.GetFileInfo(userId, pathToFile ?? "");
-            //return fileBuffer.ServLink + fileBuffer.GetLinkFor(file);
-        }
     }
 }

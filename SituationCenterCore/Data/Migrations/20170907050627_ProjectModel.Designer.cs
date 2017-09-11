@@ -12,9 +12,10 @@ using System;
 namespace SituationCenterCore.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20170907050627_ProjectModel")]
+    partial class ProjectModel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -209,7 +210,7 @@ namespace SituationCenterCore.Data.Migrations
 
                     b.HasIndex("RoomSecurityRuleId");
 
-                    b.ToTable("Rooms");
+                    b.ToTable("Room");
                 });
 
             modelBuilder.Entity("SituationCenterCore.Models.Rooms.Security.RoomSecurityRule", b =>

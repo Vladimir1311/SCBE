@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -12,6 +13,8 @@ namespace SituationCenterCore.Data.DatabaseAbstraction
     {
         private readonly RoleManager<IdentityRole> roleManager;
         private readonly UserManager<ApplicationUser> userManager;
+
+        IQueryable<ApplicationUser> IRepository.Users => userManager.Users;
 
         public EntityRepository(DbContextOptions<ApplicationDbContext> options, 
             RoleManager<IdentityRole> roleManager,
@@ -54,5 +57,11 @@ namespace SituationCenterCore.Data.DatabaseAbstraction
 
         public Task<bool> CheckUserPasswordAsync(ApplicationUser user, string password) =>
             userManager.CheckPasswordAsync(user, password);
+
+        public Task<ApplicationUser> FindUser(ClaimsPrincipal user) =>
+            userManager.FindByIdAsync(userManager.GetUserId(user));
+
+        public Guid GetUserId(ClaimsPrincipal user) =>
+            Guid.Parse(userManager.GetUserId(user));
     }
 }

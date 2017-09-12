@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Http;
 using System.IO;
 
-namespace SituationCenterCore.Pages.Storage
+namespace SituationCenterCore.Pages.Files
 {
     [Authorize]
     public class IndexModel : PageModel

@@ -9,6 +9,7 @@ namespace CCF.Transport
     {
         event Action<InvokeMessage> OnReceiveMessge;
         event Action<InvokeResult> OnReceiveResult;
+        event Action OnConnectionLost;
         void SendMessage(InvokeMessage result);
         void SendResult(InvokeResult result);
     }

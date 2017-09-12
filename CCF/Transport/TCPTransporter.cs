@@ -11,7 +11,7 @@ using Microsoft.Extensions.Logging;
 
 namespace CCF.Transport
 {
-    
+
     class TCPTransporter : ITransporter
     {
         private enum MessageType : byte
@@ -20,6 +20,7 @@ namespace CCF.Transport
         }
         public event Action<InvokeMessage> OnReceiveMessge;
         public event Action<InvokeResult> OnReceiveResult;
+        public event Action OnConnectionLost;
 
         private TcpClient tcpClient;
         private readonly ILogger<TCPTransporter> logger;
@@ -30,7 +31,19 @@ namespace CCF.Transport
             tcpClient.ConnectAsync(host, port).Wait();
             using (var writer = new BinaryWriter(tcpClient.GetStream(), Encoding.ASCII, true))
                 writer.Write(password);
-            new Task(async () => await ReadStream()).Start();
+            new Task(
+                async () =>
+                {
+                    try
+                    {
+                        await ReadStream();
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.LogWarning($"Connection was aborted, exception: {ex.Message}");
+                        OnConnectionLost?.Invoke();
+                    }
+                }).Start();
             this.logger = logger;
         }
 
@@ -112,7 +125,7 @@ namespace CCF.Transport
                     message.Streams[streamName] = innerStream;
                 }
             }
-             return message;
+            return message;
         }
 
         private Stream EncodeMessage(InvokeMessage message)
@@ -149,7 +162,7 @@ namespace CCF.Transport
                 result.SubObjectId = reader.ReadInt32();
                 result.IsPrimitive = reader.ReadBoolean();
                 result.Value = JToken.Parse(reader.ReadString());
-                if(contentStream.Position != contentStream.Length)
+                if (contentStream.Position != contentStream.Length)
                 {
                     var size = (int)reader.ReadInt64();
                     var innerStream = new MemoryStream();

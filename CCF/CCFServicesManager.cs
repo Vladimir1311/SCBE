@@ -1,4 +1,4 @@
-﻿using CCF.Transport;
+﻿.using CCF.Transport;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -10,11 +10,11 @@ namespace CCF
 {
     public class CCFServicesManager
     {
-        //private const string SITE_IP = "52.163.250.253";
-        //private const string SITE_PORT = "80";
+        private const string SITE_IP = "52.163.250.253";
+        private const string SITE_PORT = "80";
 
-        private const string SITE_IP = "127.0.0.1";
-        private const string SITE_PORT = "5100";
+        //private const string SITE_IP = "127.0.0.1";
+        //private const string SITE_PORT = "5100";
 
         public static void RegisterService<T>(T serviceInvoker)
         {

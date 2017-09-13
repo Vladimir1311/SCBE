@@ -10,6 +10,7 @@ using System.IO;
 using CCF.Transport;
 using System.Threading;
 using System.Collections.Concurrent;
+using CCF.Exceptions;
 
 namespace CCF
 {
@@ -35,6 +36,7 @@ namespace CCF
         private int objectId;
         private ConcurrentDictionary<Guid, WaitPair> waiters
             = new ConcurrentDictionary<Guid, WaitPair>();
+        private bool aborted = false;
 
 
         private RemoteWorker(ITransporter transporter, int objectId)
@@ -42,6 +44,11 @@ namespace CCF
             this.transporter = transporter;
             this.objectId = objectId;
             transporter.OnReceiveResult += Transporter_OnReceiveResult;
+            transporter.OnConnectionLost += () =>
+                 {
+                     Console.WriteLine("client connection aborted");
+                     aborted = true;
+                 };
         }
 
         private void Transporter_OnReceiveResult(InvokeResult obj)
@@ -92,6 +99,7 @@ namespace CCF
 
         public void Intercept(IInvocation invocation)
         {
+            if (aborted) throw new ServiceUnavailableException();
             InvokeMessage message = new InvokeMessage
             {
                 Id = Guid.NewGuid(),
@@ -121,7 +129,10 @@ namespace CCF
 
             transporter.SendMessage(message);
 
-            resetEvent.WaitOne();
+            while(!resetEvent.WaitOne(TimeSpan.FromSeconds(0.5)))
+            {
+                if (aborted) throw new ServiceUnavailableException();
+            }
 
             if (!waiters.TryRemove(message.Id, out var waitPair))
                 throw new Exception("Blya blya blya nety waitera!!!!");

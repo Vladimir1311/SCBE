@@ -42,7 +42,7 @@ namespace IPResolver.Services
                     {
                         await HandleClient(client);
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         logger.LogWarning($"error with handling client {ex.Message}");
                     }
@@ -171,6 +171,12 @@ namespace IPResolver.Services
             {
                 logger.LogWarning($"connection to service {service.InterfaceName} aborted.");
                 logger.LogWarning($"error with service {ex.Message}");
+                foreach (var client in service.Listeners)
+                {
+                    client.Connection.Dispose();
+                    users.Remove(client);
+                }
+                services.TryRemove(service.InterfaceName, out _);
             }
         }
     }

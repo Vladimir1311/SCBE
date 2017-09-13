@@ -23,6 +23,7 @@ namespace CCF
             var password = obj["password"].ToObject<string>();
             var port = obj["port"].ToObject<int>();
             var transporter = new TCPTransporter(SITE_IP, port, password, new ConsoleLogger());
+            transporter.OnConnectionLost += () => Console.WriteLine($"connection aborted!!!!!");
             ServiceCode code = ServiceCode.Create(transporter ,serviceInvoker);
         }
 

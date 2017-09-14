@@ -13,6 +13,12 @@ namespace CCF.IPResolver.Adapter
             return app;
         }
 
+        public static IApplicationBuilder UseAsServise<T>(this IApplicationBuilder app)
+        {
+            var service = app.ApplicationServices.GetService<T>();
+            service = service == null ? throw new ArgumentException($"service {typeof(T).FullName} cannot be found in service provider") : service;
+            return app.UseAsServise(service);
+        }
 
         public static IServiceCollection AddCCFService<T>(this IServiceCollection services) where T : class
         {

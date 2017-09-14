@@ -33,12 +33,12 @@ namespace SituationCenterCore.Controllers.API.V1
             var userId = userManager.GetUserId(User);
             try
             {
+                var directoryDescription = storageManager
+                    .GetDirectoryInfo("Moq token", userId, pathToFolder ?? "");
                 DirectoryContent content = new DirectoryContent
                 {
-                    Files =
-                    storageManager
-                    .GetDirectory("Moq token", userId, pathToFolder ?? "")
-                    .Files.ToList()
+                    Files = directoryDescription.Files.ToList(),
+                    Directories = directoryDescription.Directories.ToList()
                 };
                 return Json(content);
             }

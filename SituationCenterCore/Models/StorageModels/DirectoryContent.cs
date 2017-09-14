@@ -10,8 +10,8 @@ namespace SituationCenterCore.Models.StorageModels
     public class DirectoryContent
     {
         [JsonProperty("directories")]
-        public List<IDirectory> Directories { get; set; }
+        public List<IDirectoryDesc> Directories { get; set; }
         [JsonProperty("files")]
-        public List<IFile> Files { get; set; }
+        public List<IFileDesc> Files { get; set; }
     }
 }

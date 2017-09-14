@@ -19,8 +19,8 @@ namespace SituationCenterCore.Pages.Files
         private readonly IStorage storage;
         private readonly UserManager<ApplicationUser> userManager;
 
-        public IDirectory CurrentDirectory { get; private set; }
-        
+        public IDirectoryDesc CurrentDirectory { get; private set; }
+
 
         public IndexModel(IStorage storage, UserManager<ApplicationUser> userManager)
         {
@@ -48,11 +48,13 @@ namespace SituationCenterCore.Pages.Files
             if (files.Count == 0)
                 return Page();
             var file = files[0];
-            storage
-                .GetDirectory("sample token", owner, path)
-                .CreateFile(Path.GetFileName(file.FileName), file.OpenReadStream());
-
-            return Page();
+            var success = storage.CreateFile(
+                "sample token",
+                owner,
+                Path.Combine(path, Path.GetFileName(file.FileName)),
+                file.OpenReadStream()
+                );
+            return LocalRedirect("/Files?folderPath=" + folderPath);
         }
 
 
@@ -61,7 +63,7 @@ namespace SituationCenterCore.Pages.Files
             var owner = folderPath.Substring(0, folderPath.IndexOf("/") == -1 ? folderPath.Length : folderPath.IndexOf("/"));
             var path = folderPath.Substring(owner.Length);
             owner = owner == "self" ? userManager.GetUserId(User) : owner;
-            CurrentDirectory = storage.GetDirectory("sample token", owner, path);
+            CurrentDirectory = storage.GetDirectoryInfo("sample token", owner, path);
             return (owner, path);
         }
     }

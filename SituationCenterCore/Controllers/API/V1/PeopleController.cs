@@ -34,10 +34,12 @@ namespace SSituationCenterCore.Controllers.API.V1
         }
 
         [HttpPost]
-        public ResponseBase SelectContacts([FromBody]SelectContactsInfo selectInfo)
+        public async Task<ResponseBase> SelectContacts([FromBody]SelectContactsInfo selectInfo)
         {
+            var currentUser = await repository.FindUser(User);
             var usersPresents = repository
                 .Users
+                .Where(U => U.PhoneNumber != currentUser.PhoneNumber)
                 .Where(U => selectInfo.PhoneNumbers.Contains(U.PhoneNumber))
                 .Select(U => U.ToPresent())
                 .ToArray();

@@ -77,6 +77,9 @@ namespace SituationCenter.Shared.Exceptions
         AccessDenied,
 
         [Description("Попытка создать комнату без приглашенных. Необходимо пригласить как минимум себя")]
-        EmptyInvationRoom
+        EmptyInvationRoom,
+
+        [Description("Попытка сделать что-то с текущей комнатой, хотя клиент в комнате не находится")]
+        YouAreNotInRoom
     }
 }

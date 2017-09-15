@@ -4,16 +4,18 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using SituationCenter.Shared.Exceptions;
 using SituationCenter.Shared.ResponseObjects;
+using SituationCenter.Shared.ResponseObjects.People;
 using SituationCenter.Shared.ResponseObjects.Rooms;
 using SituationCenterBackServer.Extensions;
 using SituationCenterCore.Data;
 using SituationCenterCore.Data.DatabaseAbstraction;
+using SituationCenterCore.Extensions;
 using SituationCenterCore.Filters;
 using SituationCenterCore.Models.Rooms;
 using SituationCenterCore.Models.Rooms.Security;
 using System;
 using System.Linq;
-
+using System.Threading.Tasks;
 using Exceptions = SituationCenter.Shared.Exceptions;
 
 namespace SituationCenterCore.Controllers.API.V1
@@ -77,5 +79,17 @@ namespace SituationCenterCore.Controllers.API.V1
             var room = roomsManager.FindRoom(roomId) ?? throw new StatusCodeException(Exceptions.StatusCode.DontExistRoom);
             return RoomInfoResponse.Create(room.ToRoomPresent());
         }
+
+        public async Task<ResponseBase> Current()
+        {
+            var user = await repository.FindUser(User);
+            var room = roomsManager.FindRoom(user.RoomId ?? Guid.Empty) ?? throw new StatusCodeException(Exceptions.StatusCode.YouAreNotInRoom);
+            return UsersListResponse.Create(
+                room
+                .Users
+                .Where(U => U.Id != user.Id)
+                .Select(U => U.ToPresent()));
+        }
+
     }
 }

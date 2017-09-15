@@ -1,0 +1,21 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+<h2>Index</h2>
+<table class="table-bordered">
+    <tr>
+        <td>Code</td>
+        <td>Description</td>
+        <td>CSharpName</td>
+    </tr>
+    @foreach (var code in Model.StatusCodes)
+    {
+        <tr>
+            <td>@code.Code</td>
+            <td>@code.Description</td>
+            <td>@code.CSharpName</td>
+        </tr>
+    }
+</table>

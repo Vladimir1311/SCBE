@@ -1,0 +1,19 @@
+﻿
+@{
+    ViewData["Title"] = "Index";
+}
+@model IPResolver.Controllers.ViewController.ViewModel
+<h2>Index</h2>
+<table>
+    <tr>
+        <th>InterfaceName</th>
+        <th>Status</th>
+    </tr>
+    @foreach(var service in Model.Services)
+    {
+        <tr>
+            <th>@service.InterfaceName</th>
+            <th>@service.Connection.Connected</th>
+        </tr>
+    }
+</table>

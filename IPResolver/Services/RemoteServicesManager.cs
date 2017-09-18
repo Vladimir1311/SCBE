@@ -74,6 +74,9 @@ namespace IPResolver.Services
             users.Add(user);
         }
 
+        internal List<TCPService> GetServices() =>
+            services.Select(S => S.Value).ToList();
+
         private async Task HandleClient(TcpClient client)
         {
             using (client)

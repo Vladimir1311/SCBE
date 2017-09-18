@@ -4,8 +4,6 @@
     <TargetFramework>netcoreapp2.0</TargetFramework>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugOffline|AnyCPU'" />
-
   <ItemGroup>
     <Folder Include="wwwroot\" />
   </ItemGroup>

@@ -158,7 +158,9 @@ namespace SituationCenterCore.Models.Rooms
                 ?? throw new ArgumentException();
             var allrooms = dataBase
                 .Rooms
-                .Include(R => R.SecurityRule).ToList();
+                .Include(R => R.Users)
+                .Include(R => R.SecurityRule)
+                .ToList();
             return allrooms
                 .Where(R => roomSecyrityManager.CanJoin(user, R))
                 .ToArray();

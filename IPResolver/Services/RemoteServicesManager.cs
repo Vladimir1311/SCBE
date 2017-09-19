@@ -32,6 +32,9 @@ namespace IPResolver.Services
             this.logger = logger;
         }
 
+        internal bool HasService(string interfaceName) =>
+            services.Any(P => P.Key == interfaceName);
+
         private async Task HandleClientsAccept()
         {
             while (true)

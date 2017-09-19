@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace CCF.Exceptions
+namespace CCF.Shared.Exceptions
 {
     public class ServiceUnavailableException : Exception
     {

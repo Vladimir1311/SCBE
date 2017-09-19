@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 using Microsoft.Extensions.Logging;
+using CCF.Shared.Exceptions;
 
 namespace CCF
 {
@@ -32,6 +33,9 @@ namespace CCF
         {
             var result = new HttpClient().GetStringAsync($"http://{SITE_IP}:{SITE_PORT}/ip/TCPRegister/useService?interfaceName={typeof(T).Name}").Result;
             var obj = JObject.Parse(result);
+            var success = obj["success"].ToObject<bool>();
+            if (!success)
+                throw new ServiceUnavailableException();
             var password = obj["password"].ToObject<string>();
             var port = obj["port"].ToObject<int>();
             var transporter = new TCPTransporter(SITE_IP, port, password, new ConsoleLogger());

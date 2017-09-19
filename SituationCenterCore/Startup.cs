@@ -21,6 +21,7 @@ using CCF.IPResolver.Adapter;
 using Storage.Interfaces;
 using SituationCenterCore.Models.Rooms;
 using SituationCenterCore.Models.Rooms.Security;
+using SituationCenterBackServer.Interfaces;
 
 namespace SituationCenterCore
 {
@@ -53,7 +54,7 @@ namespace SituationCenterCore
                     {
                         options.RequireHttpsMetadata = false;
                         options.TokenValidationParameters = new TokenValidationParameters
-                        {   
+                        {
                             // укзывает, будет ли валидироваться издатель при валидации токена
                             ValidateIssuer = true,
                             // строка, представляющая издателя
@@ -86,6 +87,8 @@ namespace SituationCenterCore
 
 
             services.AddCCFService<IStorage>();
+
+            services.UseAsServise<IAccessValidator, AlwaysTrueAccessValidator>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -101,7 +104,6 @@ namespace SituationCenterCore
             {
                 app.UseExceptionHandler("/Error");
             }
-
             app.UseStaticFiles();
 
             app.UseAuthentication();

@@ -87,13 +87,13 @@ namespace IPResolver.Services
             {
                 Guid messageId = Guid.NewGuid();
                 pings.Add(messageId);
-                while (!Monitor.TryEnter(service, TimeSpan.FromMilliseconds(50)))
-                { }
-                var stream = service.Connection.GetStream();
-                stream.Write(BitConverter.GetBytes((long)17));
-                stream.Write(messageId.ToByteArray());
-                stream.WriteByte((byte)MessageType.PingRequest);
-                Monitor.Exit(service);
+                lock (service)
+                {
+                    var stream = service.Connection.GetStream();
+                    stream.Write(BitConverter.GetBytes((long)17));
+                    stream.Write(messageId.ToByteArray());
+                    stream.WriteByte((byte)MessageType.PingRequest);
+                }
             }
         }
 
@@ -152,7 +152,7 @@ namespace IPResolver.Services
                         Guid packId = new Guid(reader.ReadBytes(16));
                         MessageType type = (MessageType)reader.ReadByte();
                         logger.LogInformation($"read packet {packId} type {type} to service {targetService.InterfaceName}");
-                        if(type == MessageType.PingResponse)
+                        if (type == MessageType.PingResponse)
                         {
                             logger.LogDebug($"read ping response, wait for normal code");
                             user.LastPing = DateTime.Now;
@@ -161,13 +161,13 @@ namespace IPResolver.Services
                         logger.LogInformation($"read packet {packId} type {type} to service {targetService.InterfaceName}");
                         user.WaitedPacks.Add(packId);
                         var serviceStream = targetService.Connection.GetStream();
-                        while (!Monitor.TryEnter(targetService, TimeSpan.FromMilliseconds(50)))
-                        { }
-                        serviceStream.Write(BitConverter.GetBytes(packLength));
-                        serviceStream.Write(packId.ToByteArray());
-                        serviceStream.Write(new byte[] { (byte)type });
-                        await reader.BaseStream.CopyPart(serviceStream, (int)packLength - 17);
-                        Monitor.Exit(targetService);
+                        lock (targetService)
+                        {
+                            serviceStream.Write(BitConverter.GetBytes(packLength));
+                            serviceStream.Write(packId.ToByteArray());
+                            serviceStream.Write(new byte[] { (byte)type });
+                            reader.BaseStream.CopyPart(serviceStream, (int)packLength - 17).Wait();
+                        }
                     }
                 }
             }
@@ -201,13 +201,13 @@ namespace IPResolver.Services
                         {
                             targetUser.WaitedPacks.Remove(packId);
                             var clientStream = targetUser.Connection.GetStream();
-                            while (!Monitor.TryEnter(targetUser, TimeSpan.FromMilliseconds(50)))
-                            { }
-                            clientStream.Write(BitConverter.GetBytes(packLength));
-                            clientStream.Write(packId.ToByteArray());
-                            clientStream.Write(new byte[] { (byte)type });
-                            await reader.BaseStream.CopyPart(clientStream, (int)packLength - 16);
-                            Monitor.Exit(targetUser);
+                            lock (targetUser)
+                            {
+                                clientStream.Write(BitConverter.GetBytes(packLength));
+                                clientStream.Write(packId.ToByteArray());
+                                clientStream.Write(new byte[] { (byte)type });
+                                reader.BaseStream.CopyPart(clientStream, (int)packLength - 16).Wait();
+                            }
                         }
                         else
                         {

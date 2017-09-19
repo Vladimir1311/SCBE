@@ -10,7 +10,7 @@ using System.IO;
 using CCF.Transport;
 using System.Threading;
 using System.Collections.Concurrent;
-using CCF.Exceptions;
+using CCF.Shared.Exceptions;
 
 namespace CCF
 {

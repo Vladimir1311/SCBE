@@ -1,4 +1,5 @@
-﻿using IPResolver.Extensions;
+﻿using CCF.Shared;
+using IPResolver.Extensions;
 using IPResolver.Models;
 using Microsoft.Extensions.Logging;
 using System;
@@ -9,6 +10,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace IPResolver.Services
@@ -29,6 +31,9 @@ namespace IPResolver.Services
             Task.Run(HandleClientsAccept);
             this.logger = logger;
         }
+
+        internal bool HasService(string interfaceName) =>
+            services.Any(P => P.Key == interfaceName);
 
         private async Task HandleClientsAccept()
         {
@@ -77,6 +82,25 @@ namespace IPResolver.Services
         internal List<TCPService> GetServices() =>
             services.Select(S => S.Value).ToList();
 
+        private HashSet<Guid> pings = new HashSet<Guid>();
+
+        internal void PingAll()
+        {
+            foreach (var service in services.Values)
+            {
+                Guid messageId = Guid.NewGuid();
+                pings.Add(messageId);
+                lock (service)
+                {
+                    var stream = service.Connection.GetStream();
+                    stream.Write(BitConverter.GetBytes((long)17));
+                    stream.Write(messageId.ToByteArray());
+                    stream.WriteByte((byte)MessageType.PingRequest);
+                }
+            }
+        }
+
+
         private async Task HandleClient(TcpClient client)
         {
             using (client)
@@ -92,6 +116,7 @@ namespace IPResolver.Services
                     logger.LogInformation($"service for {service.InterfaceName} send correct password, replace old service to new");
                     services.AddOrUpdate(service.InterfaceName, service, (K, S) => service);
                     service.Connection = client;
+                    service.ConnectionTime = DateTime.Now;
                     await HandleServiceLogic(service);
                     return;
                 }
@@ -112,6 +137,7 @@ namespace IPResolver.Services
                 }
                 logger.LogInformation($"user sended correct password, and service {targetService.InterfaceName} founded, bind user to service");
                 user.Connection = client;
+                user.ConnectionTime = DateTime.Now;
                 await HandleClientLogic(user, targetService);
             }
         }
@@ -127,12 +153,24 @@ namespace IPResolver.Services
                     {
                         long packLength = reader.ReadInt64();
                         Guid packId = new Guid(reader.ReadBytes(16));
-                        logger.LogInformation($"read packet {packId} to service {targetService.InterfaceName}");
+                        MessageType type = (MessageType)reader.ReadByte();
+                        logger.LogInformation($"read packet {packId} type {type} to service {targetService.InterfaceName}");
+                        if (type == MessageType.PingResponse)
+                        {
+                            logger.LogDebug($"read ping response, wait for normal code");
+                            user.LastPing = DateTime.Now;
+                            continue;
+                        }
+                        logger.LogInformation($"read packet {packId} type {type} to service {targetService.InterfaceName}");
                         user.WaitedPacks.Add(packId);
                         var serviceStream = targetService.Connection.GetStream();
-                        serviceStream.Write(BitConverter.GetBytes(packLength));
-                        serviceStream.Write(packId.ToByteArray());
-                        await reader.BaseStream.CopyPart(serviceStream, (int)packLength - 16);
+                        lock (targetService)
+                        {
+                            serviceStream.Write(BitConverter.GetBytes(packLength));
+                            serviceStream.Write(packId.ToByteArray());
+                            serviceStream.Write(new byte[] { (byte)type });
+                            reader.BaseStream.CopyPart(serviceStream, (int)packLength - 17).Wait();
+                        }
                     }
                 }
             }
@@ -153,15 +191,26 @@ namespace IPResolver.Services
                     {
                         long packLength = reader.ReadInt64();
                         Guid packId = new Guid(reader.ReadBytes(16));
+                        MessageType type = (MessageType)reader.ReadByte();
+                        logger.LogInformation($"read packet {packId} type {type} from service {service.InterfaceName}");
+                        if (type == MessageType.PingResponse)
+                        {
+                            service.LastPing = DateTime.Now;
+                            continue;
+                        }
                         logger.LogInformation($"read packet {packId} from service {service.InterfaceName}");
                         var targetUser = service.Listeners.FirstOrDefault(U => U.WaitedPacks.Contains(packId));
                         if (targetUser != null)
                         {
                             targetUser.WaitedPacks.Remove(packId);
                             var clientStream = targetUser.Connection.GetStream();
-                            clientStream.Write(BitConverter.GetBytes(packLength));
-                            clientStream.Write(packId.ToByteArray());
-                            await reader.BaseStream.CopyPart(clientStream, (int)packLength - 16);
+                            lock (targetUser)
+                            {
+                                clientStream.Write(BitConverter.GetBytes(packLength));
+                                clientStream.Write(packId.ToByteArray());
+                                clientStream.Write(new byte[] { (byte)type });
+                                reader.BaseStream.CopyPart(clientStream, (int)packLength - 17).Wait();
+                            }
                         }
                         else
                         {

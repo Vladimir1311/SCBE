@@ -1,23 +1,38 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Linq;
 
 namespace CCF.IPResolver.Adapter
 {
     public static class Extension
     {
-        public static IApplicationBuilder UseAsServise<T>(this IApplicationBuilder app, T service)
+
+        public static IServiceCollection UseInstanceAsServise<T>(this IServiceCollection services, T service) where T : class
         {
-            service = service == null ? throw new ArgumentNullException($"service cannot be null {nameof(service)}") : service;
-            CCFServicesManager.RegisterService(service);
-            return app;
+            CCFServicesManager.RegisterService(() => service);
+            return services;
         }
 
-        public static IApplicationBuilder UseAsServise<T>(this IApplicationBuilder app)
+        public static IServiceCollection UseAsServise<T, I>(this IServiceCollection app) where T : class where I : class, T =>
+            UseAsTransientServise<T, I>(app);
+
+        public static IServiceCollection UseAsTransientServise<T, I>(this IServiceCollection services) where T : class where I : class, T
         {
-            var service = app.ApplicationServices.GetService<T>();
-            service = service == null ? throw new ArgumentException($"service {typeof(T).FullName} cannot be found in service provider") : service;
-            return app.UseAsServise(service);
+            services.AddTransient<T, I>();
+            Func<T> serviceCreationFunc = () =>
+                services.FirstOrDefault(D => D.ImplementationType == typeof(I)).ImplementationInstance as T;
+
+            CCFServicesManager.RegisterService(serviceCreationFunc);
+            return services;
+        }
+
+
+        public static IServiceCollection UseAsSingleTonServise<T, I>(this IServiceCollection services) where T : class where I : class, T
+        {
+            services.AddSingleton<T, I>();
+            var service = services.FirstOrDefault(D => D.ImplementationType == typeof(T)).ImplementationInstance as I; 
+            return services.UseInstanceAsServise(service);
         }
 
         public static IServiceCollection AddCCFService<T>(this IServiceCollection services) where T : class

@@ -205,7 +205,7 @@ namespace IPResolver.Services
                             { }
                             clientStream.Write(BitConverter.GetBytes(packLength));
                             clientStream.Write(packId.ToByteArray());
-                            serviceStream.Write(new byte[] { (byte)type });
+                            clientStream.Write(new byte[] { (byte)type });
                             await reader.BaseStream.CopyPart(clientStream, (int)packLength - 16);
                             Monitor.Exit(targetUser);
                         }

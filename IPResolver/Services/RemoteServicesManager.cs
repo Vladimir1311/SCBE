@@ -151,19 +151,21 @@ namespace IPResolver.Services
                         long packLength = reader.ReadInt64();
                         Guid packId = new Guid(reader.ReadBytes(16));
                         MessageType type = (MessageType)reader.ReadByte();
+                        logger.LogInformation($"read packet {packId} type {type} to service {targetService.InterfaceName}");
                         if(type == MessageType.PingResponse)
                         {
+                            logger.LogDebug($"read ping response, wait for normal code");
                             user.LastPing = DateTime.Now;
                             continue;
                         }
-                        logger.LogInformation($"read packet {packId} to service {targetService.InterfaceName}");
+                        logger.LogInformation($"read packet {packId} type {type} to service {targetService.InterfaceName}");
                         user.WaitedPacks.Add(packId);
                         var serviceStream = targetService.Connection.GetStream();
                         while (!Monitor.TryEnter(targetService, TimeSpan.FromMilliseconds(50)))
                         { }
                         serviceStream.Write(BitConverter.GetBytes(packLength));
                         serviceStream.Write(packId.ToByteArray());
-                        serviceStream.WriteByte((byte)type);
+                        serviceStream.Write(new byte[] { (byte)type });
                         await reader.BaseStream.CopyPart(serviceStream, (int)packLength - 17);
                         Monitor.Exit(targetService);
                     }

@@ -8,20 +8,18 @@ using System.Text;
 using System.Threading.Tasks;
 using CCF.Extensions;
 using Microsoft.Extensions.Logging;
+using CCF.Shared;
 
 namespace CCF.Transport
 {
 
     class TCPTransporter : ITransporter
     {
-        private enum MessageType : byte
-        {
-            Message, Result
-        }
         public event Action<InvokeMessage> OnReceiveMessge;
         public event Action<InvokeResult> OnReceiveResult;
         public event Action OnConnectionLost;
 
+        private object locker = new object();
         private TcpClient tcpClient;
         private readonly ILogger<TCPTransporter> logger;
 
@@ -49,18 +47,24 @@ namespace CCF.Transport
 
         public void SendMessage(InvokeMessage message)
         {
-            logger.LogDebug($"sending message {message.Id}");
-            var streamToOut = EncodeMessage(message);
-            streamToOut.Position = 0;
-            streamToOut.CopyTo(tcpClient.GetStream());
+            lock (locker)
+            {
+                logger.LogDebug($"sending message {message.Id}");
+                var streamToOut = EncodeMessage(message);
+                streamToOut.Position = 0;
+                streamToOut.CopyTo(tcpClient.GetStream());
+            }
         }
 
         public void SendResult(InvokeResult result)
         {
-            logger.LogDebug($"sending result {result.Id}");
-            var streamToOut = EncodeResult(result);
-            streamToOut.Position = 0;
-            streamToOut.CopyTo(tcpClient.GetStream());
+            lock (locker)
+            {
+                logger.LogDebug($"sending result {result.Id}");
+                var streamToOut = EncodeResult(result);
+                streamToOut.Position = 0;
+                streamToOut.CopyTo(tcpClient.GetStream());
+            }
         }
 
         private async Task ReadStream()
@@ -98,12 +102,30 @@ namespace CCF.Transport
                         OnReceiveResult?.Invoke(result);
                         logger.LogDebug($"invoked result handler for {id}, go to new iteration");
                         break;
+                    case MessageType.PingRequest:
+                        logger.LogDebug($"Request for ping");
+                        SendPingResponse(id);
+                        logger.LogDebug($"Sended ping response");
+                        break;
                     default:
+                        logger.LogWarning($"incorrect message type {type}");
                         break;
                 }
             }
         }
-
+       
+        private void SendPingResponse(Guid id)
+        {
+            lock (locker)
+            {
+                using (var writer = new BinaryWriter(tcpClient.GetStream(), Encoding.Unicode, true))
+                {
+                    writer.Write((long)(16 + 1));
+                    writer.Write(id.ToByteArray());
+                    writer.Write((byte)MessageType.PingResponse);
+                }
+            }
+        }
 
         private InvokeMessage DecodeMessage(MemoryStream contentStream, Guid id)
         {

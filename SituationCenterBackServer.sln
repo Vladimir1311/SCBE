@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26730.10
+VisualStudioVersion = 15.0.26730.15
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SituationCenterBackServer", "SituationCenterBackServer\SituationCenterBackServer.csproj", "{E168B5BB-3F5E-47D2-A8CA-E7771DB579BD}"
 EndProject
@@ -36,6 +36,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SituationCenterBackServer.Interfaces", "SituationCenterBackServer.Interfaces\SituationCenterBackServer.Interfaces.csproj", "{913A6BA7-2A54-4CBE-8038-F5D822EE9992}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestWebApp", "TestWebApp\TestWebApp.csproj", "{9D235B0C-A842-4E05-BCED-5B4528CAE221}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CCF.Shared", "CCF.Shared\CCF.Shared.csproj", "{3C2B6D7F-F508-4139-A850-F98854A47878}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -309,6 +311,22 @@ Global
 		{9D235B0C-A842-4E05-BCED-5B4528CAE221}.Release|x64.Build.0 = Release|Any CPU
 		{9D235B0C-A842-4E05-BCED-5B4528CAE221}.Release|x86.ActiveCfg = Release|Any CPU
 		{9D235B0C-A842-4E05-BCED-5B4528CAE221}.Release|x86.Build.0 = Release|Any CPU
+		{3C2B6D7F-F508-4139-A850-F98854A47878}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3C2B6D7F-F508-4139-A850-F98854A47878}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3C2B6D7F-F508-4139-A850-F98854A47878}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{3C2B6D7F-F508-4139-A850-F98854A47878}.Debug|ARM.Build.0 = Debug|Any CPU
+		{3C2B6D7F-F508-4139-A850-F98854A47878}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{3C2B6D7F-F508-4139-A850-F98854A47878}.Debug|x64.Build.0 = Debug|Any CPU
+		{3C2B6D7F-F508-4139-A850-F98854A47878}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{3C2B6D7F-F508-4139-A850-F98854A47878}.Debug|x86.Build.0 = Debug|Any CPU
+		{3C2B6D7F-F508-4139-A850-F98854A47878}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3C2B6D7F-F508-4139-A850-F98854A47878}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3C2B6D7F-F508-4139-A850-F98854A47878}.Release|ARM.ActiveCfg = Release|Any CPU
+		{3C2B6D7F-F508-4139-A850-F98854A47878}.Release|ARM.Build.0 = Release|Any CPU
+		{3C2B6D7F-F508-4139-A850-F98854A47878}.Release|x64.ActiveCfg = Release|Any CPU
+		{3C2B6D7F-F508-4139-A850-F98854A47878}.Release|x64.Build.0 = Release|Any CPU
+		{3C2B6D7F-F508-4139-A850-F98854A47878}.Release|x86.ActiveCfg = Release|Any CPU
+		{3C2B6D7F-F508-4139-A850-F98854A47878}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

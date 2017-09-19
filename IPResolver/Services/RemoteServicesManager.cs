@@ -189,6 +189,7 @@ namespace IPResolver.Services
                         long packLength = reader.ReadInt64();
                         Guid packId = new Guid(reader.ReadBytes(16));
                         MessageType type = (MessageType)reader.ReadByte();
+                        logger.LogInformation($"read packet {packId} type {type} from service {service.InterfaceName}");
                         if (type == MessageType.PingResponse)
                         {
                             service.LastPing = DateTime.Now;
@@ -204,6 +205,7 @@ namespace IPResolver.Services
                             { }
                             clientStream.Write(BitConverter.GetBytes(packLength));
                             clientStream.Write(packId.ToByteArray());
+                            serviceStream.Write(new byte[] { (byte)type });
                             await reader.BaseStream.CopyPart(clientStream, (int)packLength - 16);
                             Monitor.Exit(targetUser);
                         }

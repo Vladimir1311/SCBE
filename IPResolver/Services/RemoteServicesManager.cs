@@ -26,11 +26,26 @@ namespace IPResolver.Services
 
         public RemoteServicesManager(int port, ILogger<RemoteServicesManager> logger)
         {
-            listener = new TcpListener(IPAddress.Any, port);
-            listener.Start();
+            Port = port;
+            while (true)
+            {
+                try
+                {
+                    listener = new TcpListener(IPAddress.Any, Port);
+                    listener.Start();
+                    break;
+                }
+                catch(Exception ex)
+                {
+                    logger.LogWarning(ex, $"Tryed port {Port}");
+                    Port++;
+                }
+            }
             Task.Run(HandleClientsAccept);
             this.logger = logger;
         }
+
+        internal int Port { get; private set; }
 
         internal bool HasService(string interfaceName) =>
             services.Any(P => P.Key == interfaceName);

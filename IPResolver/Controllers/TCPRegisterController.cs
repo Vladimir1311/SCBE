@@ -25,7 +25,7 @@ namespace IPResolver.Controllers
         {
             var password = CreatePassword();
             remoteServices.AddService(interfaceName, password);
-            return new Response { Password = password, Port = 5476 };
+            return new Response { Password = password, Port = remoteServices.Port };
         }
 
         public Response UseService(string interfaceName)
@@ -36,7 +36,7 @@ namespace IPResolver.Controllers
                 return new Response { Success = false };
             }
             remoteServices.AddServiceUser(interfaceName, password);
-            return new Response { Password = password, Port = 5476 };
+            return new Response { Password = password, Port = remoteServices.Port };
         }
 
         private string CreatePassword()

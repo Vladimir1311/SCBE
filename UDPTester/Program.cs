@@ -14,16 +14,19 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using CCF;
+using SituationCenterBackServer.Interfaces;
+
 namespace UDPTester
 {
     public class Program
     {
         private static void Main(string[] args)
         {
-            CCFServicesManager.RegisterService(new lol() as ILOL);
+            //CCFServicesManager.RegisterService(new lol() as ILOL);
 
-            var service = CCFServicesManager.GetService<ILOL>();
-            Console.WriteLine(service.StrLength("Hello world!"));
+            var service = CCFServicesManager.GetService<IAccessValidator>();
+            Console.WriteLine(service.CanAccessToFolder("TOKENA", "what the fuck"));
+            Console.WriteLine("-------");
         }
     }
 

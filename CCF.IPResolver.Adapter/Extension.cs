@@ -20,18 +20,18 @@ namespace CCF.IPResolver.Adapter
         public static IServiceCollection UseAsTransientServise<T, I>(this IServiceCollection services) where T : class where I : class, T
         {
             services.AddTransient<T, I>();
-            Func<T> serviceCreationFunc = () =>
-                services.FirstOrDefault(D => D.ImplementationType == typeof(I)).ImplementationInstance as T;
+            var provider = services.BuildServiceProvider();
+            Func<T> serviceCreationFunc = provider.GetService<T>;
 
             CCFServicesManager.RegisterService(serviceCreationFunc);
             return services;
         }
 
 
-        public static IServiceCollection UseAsSingleTonServise<T, I>(this IServiceCollection services) where T : class where I : class, T
+        public static IServiceCollection UseAsSingletonServise<T, I>(this IServiceCollection services) where T : class where I : class, T
         {
             services.AddSingleton<T, I>();
-            var service = services.FirstOrDefault(D => D.ImplementationType == typeof(T)).ImplementationInstance as I; 
+            var service = services.BuildServiceProvider().GetService<T>();
             return services.UseInstanceAsServise(service);
         }
 

@@ -154,7 +154,6 @@ namespace IPResolver.Services
                         long packLength = reader.ReadInt64();
                         Guid packId = new Guid(reader.ReadBytes(16));
                         MessageType type = (MessageType)reader.ReadByte();
-                        logger.LogInformation($"read packet {packId} type {type} to service {targetService.InterfaceName}");
                         if (type == MessageType.PingResponse)
                         {
                             logger.LogDebug($"read ping response, wait for normal code");
@@ -192,13 +191,13 @@ namespace IPResolver.Services
                         long packLength = reader.ReadInt64();
                         Guid packId = new Guid(reader.ReadBytes(16));
                         MessageType type = (MessageType)reader.ReadByte();
-                        logger.LogInformation($"read packet {packId} type {type} from service {service.InterfaceName}");
                         if (type == MessageType.PingResponse)
                         {
+                            logger.LogInformation($"read packet {packId} type {type} from service {service.InterfaceName}");
                             service.LastPing = DateTime.Now;
                             continue;
                         }
-                        logger.LogInformation($"read packet {packId} from service {service.InterfaceName}");
+                        logger.LogInformation($"read packet {packId} type {type} from service {service.InterfaceName}");
                         var targetUser = service.Listeners.FirstOrDefault(U => U.WaitedPacks.Contains(packId));
                         if (targetUser != null)
                         {

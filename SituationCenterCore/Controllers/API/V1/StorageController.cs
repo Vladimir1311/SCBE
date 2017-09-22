@@ -49,7 +49,6 @@ namespace SituationCenterCore.Controllers.API.V1
         }
 
         [HttpGet]
-        [Route("{pathToFile}/{pageNum}")]
         public IActionResult DownloadPage(string pathToFile, int pageNum)
         {
             var userId = userManager.GetUserId(User);

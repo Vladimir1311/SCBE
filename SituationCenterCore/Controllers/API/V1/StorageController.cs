@@ -12,7 +12,7 @@ using System.Linq;
 namespace SituationCenterCore.Controllers.API.V1
 {
     [Authorize(AuthenticationSchemes = "Bearer")]
-    [Route("api/v1/[controller]/[action]/{*pathToFolder}")]
+    [Route("api/v1/[controller]/[action]")]
     public class StorageController : Controller
     {
         private readonly IStorage storageManager;

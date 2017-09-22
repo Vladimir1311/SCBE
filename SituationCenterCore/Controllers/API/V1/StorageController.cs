@@ -48,20 +48,20 @@ namespace SituationCenterCore.Controllers.API.V1
             }
         }
 
-        //[HttpGet]
-        //public IActionResult Download(string pathToFolder)
-        //{
-        //    var userId = userManager.GetUserId(User);
-        //    try
-        //    {
-        //        var stream = storageManager.GetFileStream(userId, pathToFolder);
-        //        return File(stream, "application/octet-stream");
-        //    }
-        //    catch
-        //    {
-        //        return BadRequest();
-        //    }
-        //}
+        [HttpGet]
+        public IActionResult DownloadPage(string pathToFile, int pageNum)
+        {
+            var userId = userManager.GetUserId(User);
+            try
+            {
+                var stream = storageManager.GetDocumentPageContent("some token", userId, pathToFile, pageNum);
+                return File(stream, "application/octet-stream");
+            }
+            catch
+            {
+                return BadRequest();
+            }
+        }
 
         //[HttpGet]
         //public IActionResult GetPicturesFor(string pathToFolder)

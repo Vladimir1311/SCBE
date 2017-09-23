@@ -15,8 +15,8 @@ namespace DocsToPictures
     {
         static void Main(string[] args)
         {
-            //IDocumentProcessor processor = new DocumentProcessor();
-            //CCFServicesManager.RegisterService(() =>processor);
+            IDocumentProcessor processor = new DocumentProcessor();
+            CCFServicesManager.RegisterService(() =>processor);
             IAccessValidator accessValidator = new AccessValidator();
             CCFServicesManager.RegisterService(() => accessValidator);
             while (true)

@@ -22,6 +22,10 @@ namespace IPResolver.Services
         private List<TCPService> servicesQueue = new List<TCPService>();
         private ConcurrentDictionary<string, TCPService> services = new ConcurrentDictionary<string, TCPService>();
         private List<TCPServiceUser> users = new List<TCPServiceUser>();
+
+        private HashSet<(Guid guid, int serviceId, ManualResetEvent resetEvent)> servicesIds =
+            new HashSet<(Guid, int, ManualResetEvent)>();
+
         private readonly ILogger<RemoteServicesManager> logger;
 
         public RemoteServicesManager(int port, ILogger<RemoteServicesManager> logger)
@@ -117,7 +121,7 @@ namespace IPResolver.Services
             servicesQueue.Add(service);
         }
 
-        internal void AddServiceUser(string interfaceName, string password)
+        internal int AddServiceUser(string interfaceName, string password)
         {
             logger.LogInformation($"adding user to {interfaceName} service");
             var user = new TCPServiceUser
@@ -125,7 +129,12 @@ namespace IPResolver.Services
                 InterfaceName = interfaceName,
                 Password = password
             };
+            var resetEvent = new ManualResetEvent(false);
+            var tuple = (Guid.NewGuid(), serviceId: -1, resetEvent);
+            servicesIds.Add(tuple);
+            resetEvent.WaitOne();
             users.Add(user);
+            return tuple.serviceId;
         }
 
         internal List<TCPService> GetServices() =>
@@ -216,11 +225,25 @@ namespace IPResolver.Services
                         long packLength = reader.ReadInt64();
                         Guid packId = new Guid(reader.ReadBytes(16));
                         MessageType type = (MessageType)reader.ReadByte();
-                        if (type == MessageType.PingResponse)
+                        switch (type)
                         {
-                            logger.LogInformation($"read ping response {packId} from service {service.InterfaceName}");
-                            service.SetPing(packId);
-                            continue;
+                            case MessageType.PingResponse:
+                                logger.LogInformation($"read ping response {packId} from service {service.InterfaceName}");
+                                service.SetPing(packId);
+                                continue;
+                            case MessageType.ServiceCreateResponse:
+                                logger.LogDebug("get new service instanse id");
+                                var readedInt = reader.ReadInt32();
+                                var tuple = servicesIds.FirstOrDefault(T => T.guid == packId);
+                                if (tuple.resetEvent == null)
+                                {
+                                    logger.LogWarning($"Read packet for instance Id, but waited tuple was not foud");
+                                    continue;
+                                }
+                                tuple.serviceId = readedInt;
+                                tuple.resetEvent.Set();
+                                continue;
+                            default: break;
                         }
                         logger.LogInformation($"read packet {packId} type {type} from service {service.InterfaceName}");
                         var targetUser = service.Listeners.FirstOrDefault(U => U.WaitedPacks.Contains(packId));

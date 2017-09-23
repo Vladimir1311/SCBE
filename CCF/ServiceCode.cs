@@ -24,7 +24,6 @@ namespace CCF
 
         private object worker;
         private Type workerType;
-        private readonly ITransporter transporter;
         private static int lastSubWorkerId;
 
         private static ConcurrentDictionary<int, ServiceCode> subWorkers

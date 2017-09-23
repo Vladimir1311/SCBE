@@ -10,6 +10,7 @@
         <th>Status</th>
         <th>Connection time ago</th>
         <th>last ping ago</th>
+        <th>last ping time</th>
 
     </tr>
     @foreach(var service in Model.Services)
@@ -19,7 +20,7 @@
             <th>@service.Connection.Connected</th>
             <th>@(DateTime.Now - service.ConnectionTime)</th>
             <th>@(DateTime.Now - service.LastPing)</th>
-
+            <th>@(service.PingTime)</th>
         </tr>
     }
 </table>

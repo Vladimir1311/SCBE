@@ -2,8 +2,9 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using SituationCenter.Shared.ResponseObjects;
+using SituationCenter.Shared.ResponseObjects.Storage;
 using SituationCenterCore.Data;
-using SituationCenterCore.Models.StorageModels;
 using Storage.Interfaces;
 using System.Linq;
 
@@ -28,23 +29,25 @@ namespace SituationCenterCore.Controllers.API.V1
         }
 
         [HttpGet]
-        public IActionResult DirectoryContent(string pathToFolder)
+        [Route("{*pathToFolder}")]
+        public ResponseBase DirectoryContent(string pathToFolder)
         {
             var userId = userManager.GetUserId(User);
             try
             {
                 var directoryDescription = storageManager
                     .GetDirectoryInfo("Moq token", userId, pathToFolder ?? "");
-                DirectoryContent content = new DirectoryContent
-                {
-                    Files = directoryDescription.Files.ToList(),
-                    Directories = directoryDescription.Directories.ToList()
-                };
-                return Json(content);
+                DirectoryContentResponse content = DirectoryContentResponse.Create
+                (
+                    directoryDescription.Directories.ToList(),
+                    directoryDescription.Files.ToList(),
+                    directoryDescription.Documents.ToList()
+                );
+                return content;
             }
             catch
             {
-                return BadRequest();
+                return ResponseBase.BadResponse();
             }
         }
 

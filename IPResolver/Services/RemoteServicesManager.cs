@@ -99,19 +99,13 @@ namespace IPResolver.Services
 
         private HashSet<Guid> pings = new HashSet<Guid>();
 
-        internal void PingAll()
+        internal async Task PingAll()
         {
             foreach (var service in services.Values)
             {
                 Guid messageId = Guid.NewGuid();
                 pings.Add(messageId);
-                lock (service)
-                {
-                    var stream = service.Connection.GetStream();
-                    stream.Write(BitConverter.GetBytes((long)17));
-                    stream.Write(messageId.ToByteArray());
-                    stream.WriteByte((byte)MessageType.PingRequest);
-                }
+                await service.SendPing(messageId);
             }
         }
 
@@ -177,21 +171,16 @@ namespace IPResolver.Services
                         }
                         logger.LogInformation($"read packet {packId} type {type} to service {targetService.InterfaceName}");
                         user.WaitedPacks.Add(packId);
-                        var serviceStream = targetService.Connection.GetStream();
-                        lock (targetService)
-                        {
-                            serviceStream.Write(BitConverter.GetBytes(packLength));
-                            serviceStream.Write(packId.ToByteArray());
-                            serviceStream.Write(new byte[] { (byte)type });
-                            reader.BaseStream.CopyPart(serviceStream, (int)packLength - 17).Wait();
-                        }
+
+                        await targetService.SendMessage((int)packLength, packId, type, reader.BaseStream);
+
                     }
                 }
             }
             catch (Exception ex)
             {
                 targetService.Listeners.Remove(user);
-                logger.LogWarning($"error with client {ex.Message}, deketing from listeners");
+                logger.LogWarning($"error with client for service {targetService.InterfaceName} {ex.Message}, deleting from listeners");
             }
         }
 
@@ -208,7 +197,7 @@ namespace IPResolver.Services
                         MessageType type = (MessageType)reader.ReadByte();
                         if (type == MessageType.PingResponse)
                         {
-                            logger.LogInformation($"read packet {packId} type {type} from service {service.InterfaceName}");
+                            logger.LogInformation($"read ping response {packId} from service {service.InterfaceName}");
                             service.LastPing = DateTime.Now;
                             continue;
                         }
@@ -217,14 +206,7 @@ namespace IPResolver.Services
                         if (targetUser != null)
                         {
                             targetUser.WaitedPacks.Remove(packId);
-                            var clientStream = targetUser.Connection.GetStream();
-                            lock (targetUser)
-                            {
-                                clientStream.Write(BitConverter.GetBytes(packLength));
-                                clientStream.Write(packId.ToByteArray());
-                                clientStream.Write(new byte[] { (byte)type });
-                                reader.BaseStream.CopyPart(clientStream, (int)packLength - 17).Wait();
-                            }
+                            await targetUser.SendMessage((int)packLength, packId, type, reader.BaseStream);
                         }
                         else
                         {
@@ -237,12 +219,12 @@ namespace IPResolver.Services
             {
                 logger.LogWarning($"connection to service {service.InterfaceName} aborted.");
                 logger.LogWarning($"error with service {ex.Message}");
+                services.TryRemove(service.InterfaceName, out _);
                 foreach (var client in service.Listeners)
                 {
                     client.Connection.Dispose();
                     users.Remove(client);
                 }
-                services.TryRemove(service.InterfaceName, out _);
             }
         }
     }

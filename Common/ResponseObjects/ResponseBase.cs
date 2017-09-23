@@ -1,8 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Newtonsoft.Json;
 
 namespace Common.ResponseObjects
 {
@@ -10,10 +6,20 @@ namespace Common.ResponseObjects
     {
         [JsonProperty("success")]
         public bool Success { get; set; }
+
         [JsonProperty("message", NullValueHandling = NullValueHandling.Ignore)]
         public string Message { get; set; }
 
-        protected ResponseBase() { Success = true; }
+        [JsonProperty("status")]
+        public StatusCode StatusCode { get; set; }
+
+        [JsonProperty("errors", NullValueHandling = NullValueHandling.Ignore)]
+        public StatusCode[] Errors { get; set; }
+
+        protected ResponseBase()
+        {
+            Success = true; StatusCode = StatusCode.OK;
+        }
 
         protected ResponseBase(string message)
         {
@@ -21,12 +27,31 @@ namespace Common.ResponseObjects
             Message = message;
         }
 
-        public static ResponseBase BadResponse(string message) =>
-            new ResponseBase(message);
-        public static ResponseBase BadResponse(string message, ILogger logger)
+        protected ResponseBase(StatusCode[] statusCodes, string message = null)
         {
-            logger.LogWarning(message);
-            return BadResponse(message);
+            switch (statusCodes.Length)
+            {
+                case 0:
+                    StatusCode = StatusCode.UnknownError;
+                    break;
+
+                case 1:
+                    StatusCode = statusCodes[0];
+                    break;
+
+                default:
+                    StatusCode = StatusCode.ComplexError;
+                    Errors = statusCodes;
+                    break;
+            }
+        }
+
+        public static ResponseBase BadResponse(string message, params StatusCode[] statusCodes) =>
+            new ResponseBase(statusCodes, message);
+
+        public static ResponseBase BadResponse(params StatusCode[] statusCodes)
+        {
+            return new ResponseBase(statusCodes);
         }
 
         public static ResponseBase GoodResponse() => new ResponseBase();

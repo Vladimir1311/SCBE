@@ -1,17 +1,16 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
+using SituationCenterBackServer.Models.DocumentHandlingModels;
+using SituationCenterBackServer.Models.Options;
+using SituationCenterBackServer.Models.StorageModels;
+using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using SituationCenterBackServer.Models.DocumentHandlingModels;
-using SituationCenterBackServer.Models.StorageModels;
-using Microsoft.Extensions.Options;
-using SituationCenterBackServer.Models.Options;
 using System.Net.Http;
-using IO = System.IO;
-using Newtonsoft.Json;
 using System.Threading;
-using System.Collections.Concurrent;
-using Microsoft.Extensions.Logging;
+using IO = System.IO;
 
 namespace SituationCenterBackServer.Services
 {
@@ -40,8 +39,6 @@ namespace SituationCenterBackServer.Services
             };
             docsUpdater = new Timer(UpdateHandledDocuments, null, 1000, -1);
         }
-
-
 
         public void FillState(File file)
         {
@@ -95,7 +92,6 @@ namespace SituationCenterBackServer.Services
             return (response.Success, response.Message);
         }
 
-
         private ConcurrentDictionary<string, File> GetfilesIsHandling()
         {
             return new ConcurrentDictionary<string, File>();
@@ -143,7 +139,7 @@ namespace SituationCenterBackServer.Services
                     }
                     Thread.Sleep(3000);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     logger.LogWarning(ex.Message);
                 }

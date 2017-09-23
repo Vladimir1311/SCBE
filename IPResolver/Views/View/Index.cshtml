@@ -1,0 +1,26 @@
+﻿
+@{
+    ViewData["Title"] = "Index";
+}
+@model IPResolver.Controllers.ViewController.ViewModel
+<h2>Index</h2>
+<table>
+    <tr>
+        <th>InterfaceName</th>
+        <th>Status</th>
+        <th>Connection time ago</th>
+        <th>last ping ago</th>
+        <th>last ping time</th>
+
+    </tr>
+    @foreach(var service in Model.Services)
+    {
+        <tr>
+            <th>@service.InterfaceName</th>
+            <th>@service.Connection.Connected</th>
+            <th>@(DateTime.Now - service.ConnectionTime)</th>
+            <th>@(DateTime.Now - service.LastPing)</th>
+            <th>@(service.PingTime)</th>
+        </tr>
+    }
+</table>

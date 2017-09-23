@@ -1,7 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
-using SituationCenterBackServer.Models.VoiceChatModels.Connectors;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,15 +20,16 @@ namespace SituationCenterBackServer.Models.VoiceChatModels.Connectors
         private Dictionary<ApplicationUser, IPEndPoint> _userEndPoints = new Dictionary<ApplicationUser, IPEndPoint>();
 
         public event Action<FromClientPack> OnRecieveData;
+
         public event Action<ApplicationUser> OnUserConnected;
 
         private Func<string, ApplicationUser> _findUserFunc;
+
         public UdpConnector(ILogger<UdpConnector> logger, IOptions<UnrealAPIConfiguration> config)
         {
             udpClient = new UdpClient(config.Value.UdpPort);
             _logger = logger;
         }
-
 
         public void Start()
         {
@@ -38,8 +37,6 @@ namespace SituationCenterBackServer.Models.VoiceChatModels.Connectors
             var token = cts.Token;
             Task.Run(() => WorkCycle(token), token);
         }
-
-
 
         public void SendPack(ToClientPack pack)
         {

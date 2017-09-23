@@ -13,7 +13,7 @@ namespace Common.ResponseObjects
         [StatusCodeDescription("Произошло несколько ошибок")]
         ComplexError,
         [StatusCodeDescription("Неизвестная ошибка")]
-        UknownError,
+        UnknownError,
         [StatusCodeDescription("Слишком много запросов (Не ддось, плз)")]
         TooManyRequests,
         [StatusCodeDescription("Профилактические работы на сервере, сорри")]
@@ -24,7 +24,7 @@ namespace Common.ResponseObjects
         EmailBusy,
         [StatusCodeDescription("Некорректный формат email")]
         IncorrectEmail,
-        [StatusCodeDescription("Неправильный формат пароля при авторизации/регистрации")]
+        [StatusCodeDescription("Неправильный формат пароля при регистрации")]
         IncorrectPassword,
         [StatusCodeDescription("На данный телефон уже зарегистрирован аккаунт")]
         PhoneBusy,
@@ -34,8 +34,8 @@ namespace Common.ResponseObjects
         IncorrectFullName,
         [StatusCodeDescription("Пароли не совпадают")]
         IncorrectConfirmPassword,
-        [StatusCodeDescription("Неизвестная ошибка при создании компаты")]
-        CreateRoomError,
+        [StatusCodeDescription("Неправильный логин/пароль")]
+        AuthorizeError,
         [StatusCodeDescription("Название комнаты уже занято")]
         RoomNameBusy,
         [StatusCodeDescription("Неерный формат имени комнаты")]
@@ -45,7 +45,18 @@ namespace Common.ResponseObjects
         [StatusCodeDescription("Такой комнаты не существует")]
         DontExistRoom,
         [StatusCodeDescription("Комната заполнена")]
-        RoomFilled
+        RoomFilled,
+        [StatusCodeDescription("Функция не реализована")]
+        NotImplementFunction,
+        [StatusCodeDescription("Неверное указание максимального количества членов комнаты")]
+        MaxPeopleCountInRoomIncorrect,
+        [StatusCodeDescription("Вы находитесь в комнате")]
+        PersonInRoomAtAWrongTime,
+        [StatusCodeDescription("Неправильные переданные параметры")]
+        ArgumentsIncorrect,
+        [StatusCodeDescription("Нет доступа к чему либо. Например попытка присоединения к комнате без приглашения")]
+        AccessDenied
+
     }
 
 

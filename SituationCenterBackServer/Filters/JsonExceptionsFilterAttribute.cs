@@ -1,16 +1,11 @@
-﻿using Common.ResponseObjects;
-using Microsoft.AspNetCore.Mvc;
+﻿using Common.Exceptions;
+using Common.ResponseObjects;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.AspNetCore.Mvc.Internal;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using SituationCenterBackServer.Extensions;
-using SituationCenterBackServer.Models.VoiceChatModels.ResponseTypes;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace SituationCenterBackServer.Filters
 {
@@ -22,8 +17,8 @@ namespace SituationCenterBackServer.Filters
         public JsonExceptionsFilterAttribute(ILogger<JsonExceptionsFilterAttribute> logger)
         {
             _logger = logger;
-            
         }
+
         public void OnException(ExceptionContext context)
         {
             _logger.LogWarning(new EventId(eventId++), context.Exception,
@@ -31,7 +26,31 @@ namespace SituationCenterBackServer.Filters
                 {
                     Action = context.ActionDescriptor.DisplayName
                 }, Formatting.Indented));
-            var toWrite = Encoding.UTF8.GetBytes(ResponseBase.BadResponse(context.Exception.Message, _logger).ToJson());
+
+            ResponseBase responseObj = null;
+            switch (context.Exception)
+            {
+                case StatusCodeException scException:
+                    responseObj = ResponseBase.BadResponse(scException.StatusCode);
+                    break;
+
+                case MultiStatusCodeException mscException:
+                    responseObj = ResponseBase.BadResponse(mscException.Codes);
+                    break;
+
+                case ArgumentException argException:
+                    responseObj = ResponseBase.BadResponse(StatusCode.ArgumentsIncorrect);
+                    break;
+
+                case NotImplementedException niException:
+                    responseObj = ResponseBase.BadResponse(StatusCode.NotImplementFunction);
+                    break;
+
+                default:
+                    responseObj = ResponseBase.BadResponse(StatusCode.UnknownError);
+                    break;
+            }
+            var toWrite = Encoding.UTF8.GetBytes(responseObj.ToJson());
             context.HttpContext.Response.ContentType = "application/json; charset=utf-8";
             context.HttpContext.Response.Body.Write(toWrite, 0, toWrite.Length);
             context.ExceptionHandled = true;

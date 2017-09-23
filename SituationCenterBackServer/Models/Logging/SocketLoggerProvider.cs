@@ -2,7 +2,6 @@
 using SituationCenterBackServer.Extensions;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.WebSockets;
 using System.Threading.Tasks;
 
@@ -35,6 +34,7 @@ namespace SituationCenterBackServer.Logging
         {
             return new SocketLogger(categoryName, _filter, LogToAll);
         }
+
         internal static async Task AddSocketAsync(WebSocket socket)
         {
             lock (sockets)
@@ -58,6 +58,8 @@ namespace SituationCenterBackServer.Logging
             }
         }
 
-        public void Dispose(){}
+        public void Dispose()
+        {
+        }
     }
 }

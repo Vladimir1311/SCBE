@@ -1,9 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace SituationCenterBackServer.Logging
 {
@@ -19,6 +16,7 @@ namespace SituationCenterBackServer.Logging
             _filter = filter;
             _toDo = toDo;
         }
+
         public IDisposable BeginScope<TState>(TState state)
         {
             return new NoopDisposable();
@@ -48,6 +46,7 @@ namespace SituationCenterBackServer.Logging
                     CategoryName = _categoryName
                 }));
         }
+
         private class NoopDisposable : IDisposable
         {
             public void Dispose()

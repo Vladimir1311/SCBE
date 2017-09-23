@@ -1,7 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using CCF;
+using CCF.IPResolver.Adapter;
+using Common.Services;
+using DocsToPictures.Interfaces;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -10,19 +10,20 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using SituationCenterBackServer.Data;
-using SituationCenterBackServer.Models;
-using SituationCenterBackServer.Services;
 using Microsoft.IdentityModel.Tokens;
+using SituationCenterBackServer.Data;
+using SituationCenterBackServer.Interfaces;
+using SituationCenterBackServer.Logging;
+using SituationCenterBackServer.Models;
+using SituationCenterBackServer.Models.Options;
+using SituationCenterBackServer.Models.RoomSecurity;
+using SituationCenterBackServer.Models.StorageModels;
 using SituationCenterBackServer.Models.TokenAuthModels;
 using SituationCenterBackServer.Models.VoiceChatModels;
-using SituationCenterBackServer.Logging;
-using SituationCenterBackServer.Models.VoiceChatModels.Connectors;
-using SituationCenterBackServer.Models.StorageModels;
-using SituationCenterBackServer.Models.Options;
+using SituationCenterBackServer.Services;
+using Storage.Interfaces;
+using System;
 using System.Text;
-using Common.Services;
-using SituationCenterBackServer.Models.RoomSecurity;
 
 namespace SituationCenterBackServer
 {
@@ -53,11 +54,9 @@ namespace SituationCenterBackServer
             // Add framework services.
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DataBaseConnection")));
-
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
-
 
             services.AddMvc();
 
@@ -65,31 +64,34 @@ namespace SituationCenterBackServer
             services.AddTransient<IEmailSender, AuthMessageSender>();
             services.AddTransient<ISmsSender, AuthMessageSender>();
 
-
             services.Configure<UnrealAPIConfiguration>(Configuration.GetSection("UnrealAPI"));
             services.Configure<DocumentsHandlerConfiguration>(Configuration.GetSection("DocumentsHandler"));
             services.Configure<AuthOptions>(Configuration.GetSection("TokenAuthentication"));
 
-
             services.AddSingleton<IRoomManager, RoomsManager>();
             services.AddTransient<IRoomSecurityManager, RoomSecurityManager>();
-            //services.AddSingleton<IConnector, UdpConnector>();
-            //services.AddSingleton<IStableConnector, TCPConnector>();
+
             services.AddSingleton<IDocumentHandlerService, DocumentsHandler>();
             services.AddSingleton<IBuffer, ASPNETBufferService>();
 
             //Storage
-            services.AddSingleton<IStorageManager, InProjectSavingStorageManager>();
+            services.AddTransient<IAccessValidator, AccessValidator>();
+            services.AddSingleton(SP => ServiceCode.Create(SP.GetService<IAccessValidator>()));
+
+            services.AddCCFService<IStorage>();
+            services.AddCCFService<IDocumentProccessor>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
-
+            Console.WriteLine(env.EnvironmentName);
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
-            //loggerFactory.AddDebug(LogLevel.Trace);
             loggerFactory.AddProvider(new SocketLoggerProvider());
+
+            app.UseAsServise<IAccessValidator>("Core/CCFService");
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -103,8 +105,6 @@ namespace SituationCenterBackServer
                     loggerFactory.CreateLogger("Service registrator"));
                 app.UseExceptionHandler("/Home/Error");
             }
-
-
 
             app.UseStaticFiles();
             app.UseWebSockets();
@@ -141,7 +141,7 @@ namespace SituationCenterBackServer
         {
             var userManager = serviceProvider.GetService<UserManager<ApplicationUser>>();
             var roleManager = serviceProvider.GetService<RoleManager<IdentityRole>>();
-            if(roleManager.FindByNameAsync("Administrator").Result == null)
+            if (roleManager.FindByNameAsync("Administrator").Result == null)
                 roleManager.CreateAsync(new IdentityRole("Administrator")).Wait();
             IdentityResult identity = null;
             ApplicationUser administrator = new ApplicationUser()

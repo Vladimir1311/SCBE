@@ -1,10 +1,7 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
-using SituationCenterBackServer.Data;
-using Common.Models.Rooms;
+using System;
 
 namespace SituationCenterBackServer.Data.Migrations
 {
@@ -130,6 +127,8 @@ namespace SituationCenterBackServer.Data.Migrations
 
                     b.Property<int>("AccessFailedCount");
 
+                    b.Property<DateTime>("Birthday");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken();
 
@@ -159,6 +158,8 @@ namespace SituationCenterBackServer.Data.Migrations
                     b.Property<Guid?>("RoomId");
 
                     b.Property<string>("SecurityStamp");
+
+                    b.Property<bool>("Sex");
 
                     b.Property<string>("Surname");
 
@@ -201,6 +202,8 @@ namespace SituationCenterBackServer.Data.Migrations
                         .ValueGeneratedOnAdd();
 
                     b.Property<string>("Name");
+
+                    b.Property<int>("PeopleCountLimit");
 
                     b.Property<Guid>("RoomSecurityRuleId");
 
@@ -252,7 +255,7 @@ namespace SituationCenterBackServer.Data.Migrations
 
             modelBuilder.Entity("SituationCenterBackServer.Models.ApplicationUser", b =>
                 {
-                    b.HasOne("SituationCenterBackServer.Models.VoiceChatModels.Room")
+                    b.HasOne("SituationCenterBackServer.Models.VoiceChatModels.Room", "Room")
                         .WithMany("Users")
                         .HasForeignKey("RoomId");
                 });

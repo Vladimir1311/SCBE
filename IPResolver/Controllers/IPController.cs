@@ -6,7 +6,6 @@ using IPResolver.Models.RequestModels;
 using IPResolver.Services;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -23,13 +22,17 @@ namespace IPResolver.Controllers
         {
             this.configsManager = configsManager;
             this.servicesDb = servicesDB;
-
         }
 
         public ResponseBase Get()
         {
             var rows = servicesDb.ServiseRows.ToArray();
             return IPRowsListResponse.Create(rows);
+        }
+
+        public JsonResult CCFList()
+        {
+            return Json(new { CCFs = servicesDb.CCFServises.ToArray() });
         }
 
         public JsonResult CoreIP()
@@ -40,6 +43,40 @@ namespace IPResolver.Controllers
                 ip = servicesDb.ServiseRows.First(R => R.ServiceType == "Core").IP.ToString()
             }
             );
+        }
+
+        public ContentResult GetCCFEndPoint(string interfaceName)
+        {
+            var endPoint = servicesDb.CCFServises.FirstOrDefault(S => S.InterfaceName == interfaceName)?.CCFEndPoint;
+
+            return Content(endPoint ?? "");
+        }
+
+        public ContentResult SetCCFEndPoint(string interfaceName, string url)
+        {
+            try
+            {
+                var createdRow = servicesDb.CCFServises.FirstOrDefault(R => R.InterfaceName == interfaceName);
+                if (createdRow != null)
+                {
+                    createdRow.CCFEndPoint = BuildEndPoint(url);
+                }
+                else
+                {
+                    createdRow = new CCFService
+                    {
+                        InterfaceName = interfaceName,
+                        CCFEndPoint = BuildEndPoint(url)
+                    };
+                    servicesDb.CCFServises.Add(createdRow);
+                }
+                servicesDb.SaveChanges();
+                return Content("OK");
+            }
+            catch (Exception ex)
+            {
+                return Content(ex.Message);
+            }
         }
 
         public string SetCoreIP(string value)
@@ -72,7 +109,7 @@ namespace IPResolver.Controllers
                 return ResponseBase.BadResponse("token is incorrect");
             var ip = HttpContext.Connection.RemoteIpAddress;
             var createdRow = servicesDb.ServiseRows.FirstOrDefault(R => R.ServiceType == request.ServiceType);
-            if(createdRow != null)
+            if (createdRow != null)
             {
                 createdRow.IP = ip;
             }
@@ -85,13 +122,10 @@ namespace IPResolver.Controllers
             return ResponseBase.GoodResponse();
         }
 
-
-        private IPAddress ClientIP()
+        private string BuildEndPoint(string url)
         {
-            var ip = HttpContext.Connection.RemoteIpAddress;
-            
-
-            return ip;
+            var ip = HttpContext.Connection.RemoteIpAddress.MapToIPv4();
+            return $"http://{ip}/{url}";
         }
     }
 }

@@ -121,7 +121,7 @@ namespace IPResolver.Services
             servicesQueue.Add(service);
         }
 
-        internal int AddServiceUser(string interfaceName, string password)
+        internal async Task<int> AddServiceUser(string interfaceName, string password)
         {
             logger.LogInformation($"adding user to {interfaceName} service");
             var user = new TCPServiceUser
@@ -129,12 +129,10 @@ namespace IPResolver.Services
                 InterfaceName = interfaceName,
                 Password = password
             };
-            var resetEvent = new ManualResetEvent(false);
-            var tuple = (Guid.NewGuid(), serviceId: -1, resetEvent);
-            servicesIds.Add(tuple);
-            resetEvent.WaitOne();
+            if (!services.TryGetValue(interfaceName, out var service))
+                return -1;
             users.Add(user);
-            return tuple.serviceId;
+            return await service.CreateInstanse();
         }
 
         internal List<TCPService> GetServices() =>

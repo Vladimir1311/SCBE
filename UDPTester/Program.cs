@@ -9,7 +9,11 @@ namespace UDPTester
         {
             Func<ILOL> lolcreater = () => new lol();
             CCFServicesManager.RegisterService(lolcreater);
-
+            Console.WriteLine("i register new service!! Yeah!!");
+            var loler = CCFServicesManager.GetService<ILOL>();
+            Console.WriteLine("Yey! I recieve service ILOL!");
+            Console.WriteLine($"string length from iloler is {loler.StrLength("12345")}, must be 5 ^)");
+            Console.WriteLine("Happy end!)");
         }
     }
 

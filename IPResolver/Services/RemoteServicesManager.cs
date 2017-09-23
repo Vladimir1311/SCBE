@@ -35,13 +35,14 @@ namespace IPResolver.Services
                     listener.Start();
                     break;
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     logger.LogWarning(ex, $"Tryed port {Port}");
                     Port++;
                 }
             }
             Task.Run(HandleClientsAccept);
+            Task.Run(PingSending);
             this.logger = logger;
         }
 
@@ -49,6 +50,39 @@ namespace IPResolver.Services
 
         internal bool HasService(string interfaceName) =>
             services.Any(P => P.Key == interfaceName);
+
+
+        private async Task PingSending()
+        {
+            while (true)
+            {
+                await PingAll();
+                await Task.Delay(TimeSpan.FromSeconds(10));
+            }
+        }
+
+        private async Task PingAll()
+        {
+            foreach (var service in services.Values)
+            {
+                try
+                {
+                    await service.SendPing();
+                    foreach (var client in service.Listeners)
+                    {
+                        try { await client.SendPing(); }
+                        catch (Exception ex)
+                        {
+                            logger.LogDebug($"error with sendind ping to CLIENT {client.InterfaceName} exception {ex.Message}");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    logger.LogDebug($"error with sendind ping to SERVICE {service.InterfaceName} exception {ex.Message}");
+                }
+            }
+        }
 
         private async Task HandleClientsAccept()
         {
@@ -96,19 +130,6 @@ namespace IPResolver.Services
 
         internal List<TCPService> GetServices() =>
             services.Select(S => S.Value).ToList();
-
-        private HashSet<Guid> pings = new HashSet<Guid>();
-
-        internal async Task PingAll()
-        {
-            foreach (var service in services.Values)
-            {
-                Guid messageId = Guid.NewGuid();
-                pings.Add(messageId);
-                await service.SendPing(messageId);
-            }
-        }
-
 
         private async Task HandleClient(TcpClient client)
         {
@@ -166,7 +187,7 @@ namespace IPResolver.Services
                         if (type == MessageType.PingResponse)
                         {
                             logger.LogDebug($"read ping response, wait for normal code");
-                            user.LastPing = DateTime.Now;
+                            user.SetPing(packId);
                             continue;
                         }
                         logger.LogInformation($"read packet {packId} type {type} to service {targetService.InterfaceName}");
@@ -198,7 +219,7 @@ namespace IPResolver.Services
                         if (type == MessageType.PingResponse)
                         {
                             logger.LogInformation($"read ping response {packId} from service {service.InterfaceName}");
-                            service.LastPing = DateTime.Now;
+                            service.SetPing(packId);
                             continue;
                         }
                         logger.LogInformation($"read packet {packId} type {type} from service {service.InterfaceName}");

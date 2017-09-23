@@ -19,7 +19,6 @@ namespace IPResolver.Controllers
         }
         public IActionResult Index()
         {
-            manager.PingAll();
             ViewModel data = new ViewModel
             {
                 Services = manager.GetServices()

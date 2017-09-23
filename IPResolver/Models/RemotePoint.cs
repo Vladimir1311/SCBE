@@ -33,6 +33,8 @@ namespace IPResolver.Models
                 stream.Write(BitConverter.GetBytes(packLength));
                 stream.Write(packId.ToByteArray());
                 stream.Write(new byte[] { (byte)type });
+                if (packLength - 17 == 0)
+                    return;
                 await from?.CopyPart(stream, (int)packLength - 17);
             }
             finally

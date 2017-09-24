@@ -2,7 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
+    <PackageReleaseNotes>Новые типы пакетов для передачи данных</PackageReleaseNotes>
   </PropertyGroup>
 
 </Project>

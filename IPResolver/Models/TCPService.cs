@@ -11,8 +11,8 @@ namespace IPResolver.Models
         public HashSet<TCPServiceUser> Listeners { get; set; } = new HashSet<TCPServiceUser>();
 
 
-            new HashSet<(Guid packId, int serviceId, ManualResetEvent msEvent)>();
         private HashSet<(Guid packId, int serviceId, ManualResetEvent msEvent)> servicesIds =
+            new HashSet<(Guid packId, int serviceId, ManualResetEvent msEvent)>();
         internal async Task<int> CreateInstanse()
         {
             var msEvent = new ManualResetEvent(false);

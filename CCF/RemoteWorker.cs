@@ -11,6 +11,7 @@ using CCF.Transport;
 using System.Threading;
 using System.Collections.Concurrent;
 using CCF.Shared.Exceptions;
+using System.Threading.Tasks;
 
 namespace CCF
 {
@@ -51,21 +52,22 @@ namespace CCF
                  };
         }
 
-        private void Transporter_OnReceiveResult(InvokeResult obj)
+        private Task Transporter_OnReceiveResult(InvokeResult obj)
         {
             if (waiters.TryGetValue(obj.Id, out var value))
             {
                 value.Result = obj;
                 value.ResetEvent.Set();
             }
+            return Task.CompletedTask;
         }
 
-        internal static T Create<T>(ITransporter transporter)
+        internal static T Create<T>(ITransporter transporter, int serviceId)
         {
             CheckType(typeof(T));
             return (T)proxyGenerator.CreateInterfaceProxyWithoutTarget(
                 typeof(T),
-                new RemoteWorker(transporter, -1));
+                new RemoteWorker(transporter, serviceId));
         }
 
         private static object Create(Type targetType, RemoteWorker worker)
@@ -127,7 +129,7 @@ namespace CCF
 
             waiters.TryAdd(message.Id, new WaitPair { ResetEvent = resetEvent });
 
-            transporter.SendMessage(message);
+            transporter.SendMessage(message).Wait();
 
             while(!resetEvent.WaitOne(TimeSpan.FromSeconds(0.5)))
             {

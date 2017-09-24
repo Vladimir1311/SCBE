@@ -1,16 +1,16 @@
-﻿using CCF.Handle;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System;
+using System.Threading.Tasks;
 
 namespace CCF.Transport
 {
     interface ITransporter
     {
-        event Action<InvokeMessage> OnReceiveMessge;
-        event Action<InvokeResult> OnReceiveResult;
+        event Func<InvokeMessage, Task> OnReceiveMessge;
+        event Func<InvokeResult, Task> OnReceiveResult;
+        event Func<Guid, Task> OnNeedNewService;
         event Action OnConnectionLost;
-        void SendMessage(InvokeMessage result);
-        void SendResult(InvokeResult result);
+        Task SendMessage(InvokeMessage result);
+        Task SendResult(InvokeResult result);
+        Task SetupNewService(Guid id, int serviceId);
     }
 }

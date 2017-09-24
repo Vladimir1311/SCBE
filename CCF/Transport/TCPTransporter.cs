@@ -9,14 +9,17 @@ using System.Threading.Tasks;
 using CCF.Extensions;
 using Microsoft.Extensions.Logging;
 using CCF.Shared;
+using System.Threading;
 
 namespace CCF.Transport
 {
 
     class TCPTransporter : ITransporter
     {
-        public event Action<InvokeMessage> OnReceiveMessge;
-        public event Action<InvokeResult> OnReceiveResult;
+        private SemaphoreSlim semaphoreSlim = new SemaphoreSlim(1, 1);
+        public event Func<InvokeMessage, Task> OnReceiveMessge;
+        public event Func<InvokeResult, Task> OnReceiveResult;
+        public event Func<Guid, Task> OnNeedNewService;
         public event Action OnConnectionLost;
 
         private object locker = new object();
@@ -45,25 +48,72 @@ namespace CCF.Transport
             this.logger = logger;
         }
 
-        public void SendMessage(InvokeMessage message)
+        public async Task SendMessage(InvokeMessage message)
         {
-            lock (locker)
+            await semaphoreSlim.WaitAsync();
+            try
             {
                 logger.LogDebug($"sending message {message.Id}");
                 var streamToOut = EncodeMessage(message);
                 streamToOut.Position = 0;
-                streamToOut.CopyTo(tcpClient.GetStream());
+                await streamToOut.CopyToAsync(tcpClient.GetStream());
+            }
+            finally
+            {
+                semaphoreSlim.Release();
             }
         }
 
-        public void SendResult(InvokeResult result)
+        public async Task SendResult(InvokeResult result)
         {
-            lock (locker)
+            await semaphoreSlim.WaitAsync();
+            try
             {
                 logger.LogDebug($"sending result {result.Id}");
                 var streamToOut = EncodeResult(result);
                 streamToOut.Position = 0;
-                streamToOut.CopyTo(tcpClient.GetStream());
+                await streamToOut.CopyToAsync(tcpClient.GetStream());
+            }
+            finally
+            {
+                semaphoreSlim.Release();
+            }
+        }
+
+        public async Task SetupNewService(Guid packId, int serviceId)
+        {
+            await semaphoreSlim.WaitAsync();
+            try
+            {
+                using (var writer = new BinaryWriter(tcpClient.GetStream(), Encoding.Unicode, true))
+                {
+                    writer.Write((long)(16 + 1));
+                    writer.Write(packId.ToByteArray());
+                    writer.Write((byte)MessageType.ServiceCreateResponse);
+                    writer.Write(serviceId);
+                }
+            }
+            finally
+            {
+                semaphoreSlim.Release();
+            }
+        }
+
+        private async Task SendPingResponse(Guid id)
+        {
+            await semaphoreSlim.WaitAsync();
+            try
+            {
+                using (var writer = new BinaryWriter(tcpClient.GetStream(), Encoding.Unicode, true))
+                {
+                    writer.Write((long)(16 + 1));
+                    writer.Write(id.ToByteArray());
+                    writer.Write((byte)MessageType.PingResponse);
+                }
+            }
+            finally
+            {
+                semaphoreSlim.Release();
             }
         }
 
@@ -94,35 +144,26 @@ namespace CCF.Transport
                 {
                     case MessageType.Message:
                         InvokeMessage message = DecodeMessage(contentStream, id);
-                        OnReceiveMessge?.Invoke(message);
+                        await OnReceiveMessge?.Invoke(message);
                         logger.LogDebug($"invoked message handler for {id}, go to new iteration");
                         break;
                     case MessageType.Result:
                         InvokeResult result = DecodeResult(contentStream, id);
-                        OnReceiveResult?.Invoke(result);
+                        await OnReceiveResult?.Invoke(result);
                         logger.LogDebug($"invoked result handler for {id}, go to new iteration");
                         break;
                     case MessageType.PingRequest:
                         logger.LogDebug($"Request for ping");
-                        SendPingResponse(id);
+                        await SendPingResponse(id);
                         logger.LogDebug($"Sended ping response");
+                        break;
+                    case MessageType.ServiceCreateRequest:
+                        logger.LogDebug("need new service instance");
+                        await OnNeedNewService?.Invoke(id);
                         break;
                     default:
                         logger.LogWarning($"incorrect message type {type}");
                         break;
-                }
-            }
-        }
-       
-        private void SendPingResponse(Guid id)
-        {
-            lock (locker)
-            {
-                using (var writer = new BinaryWriter(tcpClient.GetStream(), Encoding.Unicode, true))
-                {
-                    writer.Write((long)(16 + 1));
-                    writer.Write(id.ToByteArray());
-                    writer.Write((byte)MessageType.PingResponse);
                 }
             }
         }
@@ -221,5 +262,6 @@ namespace CCF.Transport
             writer.Write(stream.Length);
             stream.CopyTo(writer.BaseStream);
         }
+
     }
 }

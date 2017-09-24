@@ -1,20 +1,5 @@
-﻿using Castle.DynamicProxy;
-using Common;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+﻿using CCF;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Net.Sockets;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using CCF;
-using SituationCenterBackServer.Interfaces;
 
 namespace UDPTester
 {
@@ -22,11 +7,13 @@ namespace UDPTester
     {
         private static void Main(string[] args)
         {
-            //CCFServicesManager.RegisterService(new lol() as ILOL);
-
-            var service = CCFServicesManager.GetService<IAccessValidator>();
-            Console.WriteLine(service.CanAccessToFolder("TOKENA", "what the fuck"));
-            Console.WriteLine("-------");
+            Func<ILOL> lolcreater = () => new lol();
+            CCFServicesManager.RegisterService(lolcreater);
+            Console.WriteLine("i register new service!! Yeah!!");
+            var loler = CCFServicesManager.GetService<ILOL>();
+            Console.WriteLine("Yey! I recieve service ILOL!");
+            Console.WriteLine($"string length from iloler is {loler.StrLength("12345")}, must be 5 ^)");
+            Console.WriteLine("Happy end!)");
         }
     }
 

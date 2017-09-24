@@ -24,7 +24,7 @@ namespace IPResolver.Models
 
         public TcpClient Connection { get; set; }
 
-        public async Task SendMessage(int packLength, Guid packId, MessageType type, Stream from)
+        public async Task SendMessage(long packLength, Guid packId, MessageType type, Stream from)
         {
             var stream = Connection.GetStream();
             await semaphoreSlim.WaitAsync();
@@ -33,7 +33,9 @@ namespace IPResolver.Models
                 stream.Write(BitConverter.GetBytes(packLength));
                 stream.Write(packId.ToByteArray());
                 stream.Write(new byte[] { (byte)type });
-                from.CopyPart(stream, packLength - 17).Wait();
+                if (packLength - 17 == 0)
+                    return;
+                await from?.CopyPart(stream, (int)packLength - 17);
             }
             finally
             {

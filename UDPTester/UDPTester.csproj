@@ -14,7 +14,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CCF\CCF.csproj" />
-    <ProjectReference Include="..\Common\Common.csproj" />
     <ProjectReference Include="..\SituationCenterBackServer.Interfaces\SituationCenterBackServer.Interfaces.csproj" />
   </ItemGroup>
 

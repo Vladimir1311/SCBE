@@ -25,7 +25,12 @@ namespace CCF
             var port = obj["port"].ToObject<int>();
             var transporter = new TCPTransporter(SITE_IP, port, password, new ConsoleLogger());
             transporter.OnConnectionLost += () => Console.WriteLine($"connection aborted!!!!!");
-            ServiceCode code = ServiceCode.Create(transporter, serviceInvoker());
+            ServiceCode.Create<T>(transporter);
+            transporter.OnNeedNewService += async G =>
+            {
+                var invokerId = ServiceCode.RegisterInvoker(serviceInvoker(), typeof(T));
+                await transporter.SetupNewService(G, invokerId);
+            };
         }
 
 
@@ -38,8 +43,9 @@ namespace CCF
                 throw new ServiceUnavailableException();
             var password = obj["password"].ToObject<string>();
             var port = obj["port"].ToObject<int>();
+            var serviceId = obj["id"].ToObject<int>();
             var transporter = new TCPTransporter(SITE_IP, port, password, new ConsoleLogger());
-            T worker = RemoteWorker.Create<T>(transporter);
+            T worker = RemoteWorker.Create<T>(transporter, serviceId);
             return worker;
         }
 

@@ -29,11 +29,9 @@ namespace CCF
         private static ConcurrentDictionary<int, ServiceCode> subWorkers
             = new ConcurrentDictionary<int, ServiceCode>();
 
-        internal static ServiceCode Create<T>(ITransporter transporter, T serviceInvoker)
+        internal static void Create<T>(ITransporter transporter)
         {
-            var code = new ServiceCode(serviceInvoker, typeof(T));
-            transporter.OnReceiveMessge += M => transporter.SendResult(code.Handle(M));
-            return code;
+            transporter.OnReceiveMessge += M => transporter.SendResult(Handle(M));
         }
 
         private ServiceCode(object targetObject, Type objectType)
@@ -43,14 +41,24 @@ namespace CCF
         }
 
 
-        private InvokeResult Handle(InvokeMessage invokeMessage)
+        private static InvokeResult Handle(InvokeMessage invokeMessage)
         {
 
             if (subWorkers.TryGetValue(invokeMessage.SubObjectId, out var handler))
             {
                 return handler.HardWork(invokeMessage);
             }
-            return HardWork(invokeMessage);
+            return new InvokeResult { Id = invokeMessage.Id, IsPrimitive = false, StreamValue = null, SubObjectId = -1, Value = null };
+        }
+
+        internal static int RegisterInvoker(object invoker, Type objectType)
+        {
+            lock (subWorkers)
+            {
+                var subWorkerKey = lastSubWorkerId++;
+                subWorkers[subWorkerKey] = new ServiceCode(invoker, objectType);
+                return subWorkerKey;
+            }
         }
 
         private InvokeResult HardWork(InvokeMessage message)
@@ -93,15 +101,22 @@ namespace CCF
                     IsPrimitive = false,
                     StreamValue = streamResult
                 };
-            var subWorkerKey = lastSubWorkerId++;
-            subWorkers[subWorkerKey] = new ServiceCode(result, targetMethod.ReturnType);
-            return new InvokeResult
+            lock (subWorkers)
             {
-                Id = message.Id,
-                IsPrimitive = false,
-                SubObjectId = subWorkerKey
-            };
+                var subWorkerKey = lastSubWorkerId++;
+                subWorkers[subWorkerKey] = new ServiceCode(result, targetMethod.ReturnType);
+
+                return new InvokeResult
+                {
+                    Id = message.Id,
+                    IsPrimitive = false,
+                    SubObjectId = subWorkerKey
+                };
+            }
         }
+
+
+
 
         private MethodInfo GetTargetMethod(string methodName)
         {

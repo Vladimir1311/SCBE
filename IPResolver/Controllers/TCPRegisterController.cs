@@ -28,15 +28,13 @@ namespace IPResolver.Controllers
             return new Response { Password = password, Port = remoteServices.Port };
         }
 
-        public Response UseService(string interfaceName)
+        public async Task<Response> UseService(string interfaceName)
         {
             var password = CreatePassword();
-            if(!remoteServices.HasService(interfaceName))
-            {
+            var serviceId = await remoteServices.AddServiceUser(interfaceName, password);
+            if (serviceId == -1)
                 return new Response { Success = false };
-            }
-            remoteServices.AddServiceUser(interfaceName, password);
-            return new Response { Password = password, Port = remoteServices.Port };
+            return new Response {  Password = password, Port = remoteServices.Port, Id = serviceId };
         }
 
         private string CreatePassword()
@@ -51,5 +49,6 @@ namespace IPResolver.Controllers
         public bool Success { get; set; } = true;
         public string Password { get; set; }
         public int Port { get; set; }
+        public int Id { get; set; }
     }
 }

@@ -11,8 +11,8 @@ namespace IPResolver.Models
         public HashSet<TCPServiceUser> Listeners { get; set; } = new HashSet<TCPServiceUser>();
 
 
-        private HashSet<(Guid id, int serviceId, ManualResetEvent msEvent)> servicesIds =
-            new HashSet<(Guid id, int serviceId, ManualResetEvent msEvent)>();
+            new HashSet<(Guid packId, int serviceId, ManualResetEvent msEvent)>();
+        private HashSet<(Guid packId, int serviceId, ManualResetEvent msEvent)> servicesIds =
         internal async Task<int> CreateInstanse()
         {
             var msEvent = new ManualResetEvent(false);
@@ -26,7 +26,7 @@ namespace IPResolver.Models
 
         internal void SetInstaceCreating(Guid id, int serviceId)
         {
-            var tuple = servicesIds.FirstOrDefault(T => T.id == id);
+            var tuple = servicesIds.FirstOrDefault(T => T.packId == id);
             if (tuple.msEvent == null) return;
             tuple.serviceId = serviceId;
             tuple.msEvent.Set();

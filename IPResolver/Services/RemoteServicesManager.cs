@@ -23,9 +23,6 @@ namespace IPResolver.Services
         private ConcurrentDictionary<string, TCPService> services = new ConcurrentDictionary<string, TCPService>();
         private List<TCPServiceUser> users = new List<TCPServiceUser>();
 
-        private HashSet<(Guid guid, int serviceId, ManualResetEvent resetEvent)> servicesIds =
-            new HashSet<(Guid, int, ManualResetEvent)>();
-
         private readonly ILogger<RemoteServicesManager> logger;
 
         public RemoteServicesManager(int port, ILogger<RemoteServicesManager> logger)
@@ -232,14 +229,7 @@ namespace IPResolver.Services
                             case MessageType.ServiceCreateResponse:
                                 logger.LogDebug("get new service instanse id");
                                 var readedInt = reader.ReadInt32();
-                                var tuple = servicesIds.FirstOrDefault(T => T.guid == packId);
-                                if (tuple.resetEvent == null)
-                                {
-                                    logger.LogWarning($"Read packet for instance Id, but waited tuple was not foud");
-                                    continue;
-                                }
-                                tuple.serviceId = readedInt;
-                                tuple.resetEvent.Set();
+                                service.SetInstaceCreating(packId, readedInt);
                                 continue;
                             default: break;
                         }

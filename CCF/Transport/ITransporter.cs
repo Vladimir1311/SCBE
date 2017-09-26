@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace CCF.Transport
 {
-    interface ITransporter
+    interface ITransporter : IDisposable
     {
         event Func<InvokeMessage, Task> OnReceiveMessge;
         event Func<InvokeResult, Task> OnReceiveResult;

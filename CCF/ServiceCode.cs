@@ -55,7 +55,9 @@ namespace CCF
         {
             lock (subWorkers)
             {
+                Console.WriteLine($"RegisterInvoker {objectType.FullName} interface, object has type {invoker?.GetType().FullName}");
                 var subWorkerKey = lastSubWorkerId++;
+                Console.WriteLine($"new key is {subWorkerKey}");
                 subWorkers[subWorkerKey] = new ServiceCode(invoker, objectType);
                 return subWorkerKey;
             }

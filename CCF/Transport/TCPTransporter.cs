@@ -140,30 +140,37 @@ namespace CCF.Transport
                 await clientStream.CopyPart(contentStream, (int)size - 17);
 
                 contentStream.Position = 0;
-                switch (type)
+                try
                 {
-                    case MessageType.Message:
-                        InvokeMessage message = DecodeMessage(contentStream, id);
-                        await OnReceiveMessge?.Invoke(message);
-                        logger.LogDebug($"invoked message handler for {id}, go to new iteration");
-                        break;
-                    case MessageType.Result:
-                        InvokeResult result = DecodeResult(contentStream, id);
-                        await OnReceiveResult?.Invoke(result);
-                        logger.LogDebug($"invoked result handler for {id}, go to new iteration");
-                        break;
-                    case MessageType.PingRequest:
-                        logger.LogDebug($"Request for ping");
-                        await SendPingResponse(id);
-                        logger.LogDebug($"Sended ping response");
-                        break;
-                    case MessageType.ServiceCreateRequest:
-                        logger.LogDebug("need new service instance");
-                        await OnNeedNewService?.Invoke(id);
-                        break;
-                    default:
-                        logger.LogWarning($"incorrect message type {type}");
-                        break;
+                    switch (type)
+                    {
+                        case MessageType.Message:
+                            InvokeMessage message = DecodeMessage(contentStream, id);
+                            await OnReceiveMessge?.Invoke(message);
+                            logger.LogDebug($"invoked message handler for {id}, go to new iteration");
+                            break;
+                        case MessageType.Result:
+                            InvokeResult result = DecodeResult(contentStream, id);
+                            await OnReceiveResult?.Invoke(result);
+                            logger.LogDebug($"invoked result handler for {id}, go to new iteration");
+                            break;
+                        case MessageType.PingRequest:
+                            logger.LogDebug($"Request for ping");
+                            await SendPingResponse(id);
+                            logger.LogDebug($"Sended ping response");
+                            break;
+                        case MessageType.ServiceCreateRequest:
+                            logger.LogDebug("need new service instance");
+                            await OnNeedNewService?.Invoke(id);
+                            break;
+                        default:
+                            logger.LogWarning($"incorrect message type {type}");
+                            break;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"EXCEPTION {ex.Message}");
                 }
             }
         }
@@ -263,5 +270,9 @@ namespace CCF.Transport
             stream.CopyTo(writer.BaseStream);
         }
 
+        public void Dispose()
+        {
+            tcpClient.Dispose();
+        }
     }
 }

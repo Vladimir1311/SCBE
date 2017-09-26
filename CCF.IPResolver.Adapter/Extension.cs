@@ -2,6 +2,8 @@
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Linq;
+using System.Reflection;
+using System.Reflection.Emit;
 
 namespace CCF.IPResolver.Adapter
 {
@@ -14,10 +16,14 @@ namespace CCF.IPResolver.Adapter
             return services;
         }
 
-        public static IServiceCollection UseAsServise<T, I>(this IServiceCollection app) where T : class where I : class, T =>
+        public static IServiceCollection UseAsServise<T, I>(this IServiceCollection app) 
+            where T : class 
+            where I : class, T =>
             UseAsTransientServise<T, I>(app);
 
-        public static IServiceCollection UseAsTransientServise<T, I>(this IServiceCollection services) where T : class where I : class, T
+        public static IServiceCollection UseAsTransientServise<T, I>(this IServiceCollection services)
+            where T : class 
+            where I : class, T
         {
             services.AddTransient<T, I>();
             var provider = services.BuildServiceProvider();
@@ -28,14 +34,17 @@ namespace CCF.IPResolver.Adapter
         }
 
 
-        public static IServiceCollection UseAsSingletonServise<T, I>(this IServiceCollection services) where T : class where I : class, T
+        public static IServiceCollection UseAsSingletonServise<T, I>(this IServiceCollection services) 
+            where T : class 
+            where I : class, T
         {
             services.AddSingleton<T, I>();
             var service = services.BuildServiceProvider().GetService<T>();
             return services.UseInstanceAsServise(service);
         }
 
-        public static IServiceCollection AddCCFService<T>(this IServiceCollection services) where T : class
+        public static IServiceCollection AddCCFService<T>(this IServiceCollection services) 
+            where T : class
         {
             services.AddTransient(SP => CCFServicesManager.GetService<T>());
             return services;

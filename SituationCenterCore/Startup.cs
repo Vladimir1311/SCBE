@@ -22,6 +22,9 @@ using Storage.Interfaces;
 using SituationCenterCore.Models.Rooms;
 using SituationCenterCore.Models.Rooms.Security;
 using SituationCenterBackServer.Interfaces;
+using Castle.DynamicProxy;
+using System.Reflection;
+using System.Dynamic;
 
 namespace SituationCenterCore
 {

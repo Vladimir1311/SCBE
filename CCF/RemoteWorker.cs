@@ -15,10 +15,10 @@ using System.Threading.Tasks;
 
 namespace CCF
 {
-    public class RemoteWorker : IInterceptor
+    public class RemoteWorker : IInterceptor, IDisposable
     {
         private static IProxyGenerator proxyGenerator = new ProxyGenerator();
-
+        
         private class WaitPair
         {
             public ManualResetEvent ResetEvent { get; set; }
@@ -38,12 +38,14 @@ namespace CCF
         private ConcurrentDictionary<Guid, WaitPair> waiters
             = new ConcurrentDictionary<Guid, WaitPair>();
         private bool aborted = false;
+        private bool wrapped;
 
 
-        private RemoteWorker(ITransporter transporter, int objectId)
+        private RemoteWorker(ITransporter transporter, int objectId, bool wrapped)
         {
             this.transporter = transporter;
             this.objectId = objectId;
+            this.wrapped = wrapped;
             transporter.OnReceiveResult += Transporter_OnReceiveResult;
             transporter.OnConnectionLost += () =>
                  {
@@ -62,12 +64,12 @@ namespace CCF
             return Task.CompletedTask;
         }
 
-        internal static T Create<T>(ITransporter transporter, int serviceId)
+        internal static object Create(Type workerType, ITransporter transporter, int serviceId, bool disposeWrapped = false)
         {
-            CheckType(typeof(T));
-            return (T)proxyGenerator.CreateInterfaceProxyWithoutTarget(
-                typeof(T),
-                new RemoteWorker(transporter, serviceId));
+            CheckType(workerType);
+            return proxyGenerator.CreateInterfaceProxyWithoutTarget(
+                workerType,
+                new RemoteWorker(transporter, serviceId, disposeWrapped));
         }
 
         private static object Create(Type targetType, RemoteWorker worker)
@@ -85,6 +87,7 @@ namespace CCF
                     worker);
             }
         }
+
 
         private static void CheckType(Type type)
         {
@@ -108,6 +111,12 @@ namespace CCF
                 MethodName = invocation.Method.Name,
                 SubObjectId = objectId
             };
+
+            if (invocation.Method.Name == "Dispose" && wrapped)
+            {
+                Dispose();
+                return;
+            }
 
             int i = 0;
             foreach (var param in invocation.Method.GetParameters())
@@ -143,7 +152,7 @@ namespace CCF
             if (result.SubObjectId != -1)
             {
                 Console.WriteLine($"Hard object, id: {result.SubObjectId} for request {message.MethodName}");
-                var worker = new RemoteWorker(transporter, result.SubObjectId);
+                var worker = new RemoteWorker(transporter, result.SubObjectId, false);
                 invocation.ReturnValue = Create(invocation.Method.ReturnType, worker);
                 return;
             }
@@ -175,6 +184,12 @@ namespace CCF
                 return;
             }
 
+        }
+
+        public void Dispose()
+        {
+            transporter.Dispose();
+            aborted = true;
         }
     }
 }

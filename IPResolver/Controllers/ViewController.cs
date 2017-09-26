@@ -21,7 +21,8 @@ namespace IPResolver.Controllers
         {
             ViewModel data = new ViewModel
             {
-                Services = manager.GetServices()
+                Services = manager.GetServices(),
+                Users = manager.GetUsers()
             };
             
             return View(data);
@@ -30,6 +31,7 @@ namespace IPResolver.Controllers
         public class ViewModel
         {
             public List<TCPService> Services { get; internal set; }
+            public List<TCPServiceUser> Users { get; internal set; }
         }
     }
 }

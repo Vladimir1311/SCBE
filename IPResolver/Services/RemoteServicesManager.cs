@@ -23,6 +23,8 @@ namespace IPResolver.Services
         private ConcurrentDictionary<string, TCPService> services = new ConcurrentDictionary<string, TCPService>();
         private List<TCPServiceUser> users = new List<TCPServiceUser>();
 
+        
+
         private readonly ILogger<RemoteServicesManager> logger;
 
         public RemoteServicesManager(int port, ILogger<RemoteServicesManager> logger)
@@ -134,6 +136,9 @@ namespace IPResolver.Services
 
         internal List<TCPService> GetServices() =>
             services.Select(S => S.Value).ToList();
+        internal List<TCPServiceUser> GetUsers() =>
+            users;
+
 
         private async Task HandleClient(TcpClient client)
         {

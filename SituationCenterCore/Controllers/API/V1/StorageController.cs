@@ -57,7 +57,8 @@ namespace SituationCenterCore.Controllers.API.V1
             var userId = userManager.GetUserId(User);
             try
             {
-                var stream = storageManager.GetDocumentPageContent("some token", userId, pathToFile, pageNum);
+                var (owner, path) = FillFields(pathToFile);
+                var stream = storageManager.GetDocumentPageContent("some token", userId, path, pageNum);
                 return File(stream, "application/octet-stream");
             }
             catch
@@ -103,5 +104,14 @@ namespace SituationCenterCore.Controllers.API.V1
         //        return BadRequest();
         //    }
         //}
+
+
+        private (string owner, string path) FillFields(string folderPath)
+        {
+            var owner = folderPath.Substring(0, folderPath.IndexOf("/") == -1 ? folderPath.Length : folderPath.IndexOf("/"));
+            var path = folderPath.Substring(owner.Length);
+            owner = owner == "self" ? userManager.GetUserId(User) : owner;
+            return (owner, path);
+        }
     }
 }

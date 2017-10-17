@@ -40,17 +40,15 @@ namespace IPResolver.Controllers
             return Json(new
             {
                 ip = servicesDb.ServiseRows.First(R => R.ServiceType == "Core").IP.ToString()
-            }
-                        
-            );
+            });
         }
 
         public JsonResult EndPoints()
         {
             return Json(new
             {
-                coreIp = servicesDb.ServiseRows.FirstOrDefault(R => R.ServiceType == "Core")?.IP.ToString(),
-                storageIp = servicesDb.ServiseRows.FirstOrDefault(R => R.ServiceType == "Storage")?.IP.ToString()
+                core = servicesDb.ServiseRows.FirstOrDefault(R => R.ServiceType == "Core")?.IP.ToString(),
+                storage = servicesDb.ServiseRows.FirstOrDefault(R => R.ServiceType == "Storage")?.IP.ToString()
             }
             );
         }

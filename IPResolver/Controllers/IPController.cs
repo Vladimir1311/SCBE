@@ -49,8 +49,8 @@ namespace IPResolver.Controllers
         {
             return Json(new
             {
-                coreIp = servicesDb.ServiseRows.FirstOrDefault(R => R.ServiceType == "Core").IP.ToString(),
-                storageIp = servicesDb.ServiseRows.FirstOrDefault(R => R.ServiceType == "Storage").IP.ToString()
+                coreIp = servicesDb.ServiseRows.FirstOrDefault(R => R.ServiceType == "Core")?.IP.ToString(),
+                storageIp = servicesDb.ServiseRows.FirstOrDefault(R => R.ServiceType == "Storage")?.IP.ToString()
             }
             );
         }

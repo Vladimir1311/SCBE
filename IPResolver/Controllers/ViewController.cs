@@ -16,6 +16,7 @@ namespace IPResolver.Controllers
         public ViewController(RemoteServicesManager manager)
         {
             this.manager = manager;
+            var id = Guid.Parse("3b307812-416e-4abf-a889-2eea295cec18");
         }
         public IActionResult Index()
         {

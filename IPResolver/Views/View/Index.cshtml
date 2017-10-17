@@ -3,6 +3,7 @@
     ViewData["Title"] = "Index";
 }
 @model IPResolver.Controllers.ViewController.ViewModel
+<h1>TEST HEADER</h1>
 <h1>CCF Status</h1>
 <h2>Services</h2>
 <table>
@@ -13,6 +14,8 @@
         <th>last ping ago</th>
         <th>last ping time</th>
 
+
+		
     </tr>
     @foreach(var service in Model.Services)
     {

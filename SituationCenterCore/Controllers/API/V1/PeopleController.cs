@@ -11,6 +11,7 @@ using SituationCenterCore.Filters;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using URSA.Respose;
 
 namespace SSituationCenterCore.Controllers.API.V1
 {
@@ -27,14 +28,14 @@ namespace SSituationCenterCore.Controllers.API.V1
             this.repository = repository;
         }
 
-        public async Task<ResponseBase> Me()
+        public async Task<URespose<Guid>> Me()
         {
             var user = await repository.FindUser(User) ?? throw new ArgumentException();
-            return MeResponse.Create(user.RoomId);
+            return user.RoomId;
         }
 
         [HttpPost]
-        public async Task<ResponseBase> SelectContacts([FromBody]SelectContactsInfo selectInfo)
+        public async Task<URespose<UsersList>> SelectContacts([FromBody]SelectContactsInfo selectInfo)
         {
             var currentUser = await repository.FindUser(User);
             var usersPresents = repository
@@ -43,7 +44,7 @@ namespace SSituationCenterCore.Controllers.API.V1
                 .Where(U => selectInfo.PhoneNumbers.Contains(U.PhoneNumber))
                 .Select(U => U.ToPresent())
                 .ToArray();
-            return UsersListResponse.Create(usersPresents);
+            return UsersList.Create(usersPresents);
         }
     }
 }

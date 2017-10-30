@@ -29,7 +29,7 @@ namespace SituationCenterCore.Models.Rooms
             this.roomSecyrityManager = roomSecyrityManager;
         }
 
-        public Room CreateNewRoom(Guid createrId, CreateRoomRequest createRoomInfo)
+        public Room CreateNewRoom(Guid createrId, CreateRoom createRoomInfo)
         {
             var creater = dataBase.Users
                 .Include(U => U.Room)
@@ -50,13 +50,12 @@ namespace SituationCenterCore.Models.Rooms
                     break;
 
                 case SituationCenter.Shared.Models.Rooms.PrivacyRoomType.Password:
-                    var password = createRoomInfo.Args.ToObject<PasswordArgs>().Password;
+                    var password = createRoomInfo.Password;
                     roomSecyrityManager.CreatePasswordRule(newRoom, password);
                     break;
 
                 case SituationCenter.Shared.Models.Rooms.PrivacyRoomType.InvationPrivate:
-                    var phoneNumbers = createRoomInfo.Args.ToObject<InvationArgs>()
-                        .Phones
+                    var phoneNumbers = createRoomInfo.Phones
                         .Append(creater.PhoneNumber)
                         .Distinct()
                         .ToArray();
@@ -171,7 +170,7 @@ namespace SituationCenterCore.Models.Rooms
             return dataBase.Users.FirstOrDefault(U => U.Id == userId.ToString());
         }
 
-        private void CheckCreatingRoomParams(CreateRoomRequest createRoomInfo, ApplicationUser creater)
+        private void CheckCreatingRoomParams(CreateRoom createRoomInfo, ApplicationUser creater)
         {
             var errorcodes = new List<StatusCode>();
 

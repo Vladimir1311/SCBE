@@ -19,6 +19,7 @@ using SituationCenter.Shared.ResponseObjects;
 using SituationCenterCore.Pages.Account;
 using SituationCenter.Shared.ResponseObjects.Account;
 using SituationCenterCore.Filters;
+using URSA.Respose;
 
 namespace SituationCenterCore.Controllers.API.V1
 {
@@ -44,7 +45,7 @@ namespace SituationCenterCore.Controllers.API.V1
 
         [HttpPost]
         [AllowAnonymous]
-        public async Task<ResponseBase> Authorize([FromBody]LoginModel.InputModel model)
+        public async Task<URespose<Authorize>> Authorize([FromBody]LoginModel.InputModel model)
         {
             if (!ModelState.IsValid)
                 throw new StatusCodeException(SituationCenter.Shared.Exceptions.StatusCode.ArgumentsIncorrect);
@@ -70,12 +71,12 @@ namespace SituationCenterCore.Controllers.API.V1
                         signingCredentials: new SigningCredentials(MockAuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
             var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
             logger.LogDebug($"Send token for {user.Email}");
-            return AuthorizeResponse.Create(encodedJwt);
+            return SituationCenter.Shared.ResponseObjects.Account.Authorize.Create(encodedJwt);
         }
 
         [HttpPost]
         [AllowAnonymous]
-        public async Task<ResponseBase> Registration([FromBody]RegisterModel.InputModel model)
+        public async Task<URespose> Registration([FromBody]RegisterModel.InputModel model)
         {
             if (ModelState.IsValid)
             {
@@ -102,7 +103,7 @@ namespace SituationCenterCore.Controllers.API.V1
                     //await _emailSender.SendEmailAsync(model.Email, "Confirm your account",
                     //    $"Please confirm your account by clicking this link: <a href='{callbackUrl}'>link</a>");
                     logger.LogInformation(3, "User created a new account with password.");
-                    return ResponseBase.GoodResponse();
+                    return URespose.GoodResponse();
                 }
                 logger.LogWarning(string.Join(" ", result.Errors.Select(E => $"{E.Code}---{E.Description}")));
                 logger.LogWarning("Model valid but error");
@@ -113,11 +114,11 @@ namespace SituationCenterCore.Controllers.API.V1
             logger.LogWarning("Model not valid");
             logger.LogWarning(JsonConvert.SerializeObject(ModelState, Formatting.Indented));
             logger.LogWarning(JsonConvert.SerializeObject(model, Formatting.Indented));
-            return ResponseBase.BadResponse("What?!");
+            return URespose.BadResponse();
         }
 
         [HttpGet]
-        public async Task<ResponseBase> Search(string firstName, string lastName, string phone)
+        public async Task<URespose<Search>> Search(string firstName, string lastName, string phone)
         {
             var users = await repository.FindUsers(U => U.PhoneNumber.Contains(phone));
             return SituationCenter.Shared.ResponseObjects.Account.Search.Create(users.Select(U => new UserPresent { Phone = U.PhoneNumber }));

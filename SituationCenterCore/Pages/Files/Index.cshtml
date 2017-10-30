@@ -12,12 +12,20 @@
 </ul>
 <h2>Files</h2>
 <form method="post" enctype="multipart/form-data" accept=".doc,.docx">
-    <input type="file" name="files"  />
+    <input type="file" name="files" />
     <input type="submit" />
 </form>
 <ul>
 
     @foreach (var file in Model.CurrentDirectory.Files)
+    {
+        <li>@file.Name</li>
+    }
+</ul>
+
+<h2>Documents</h2>
+<ul>
+    @foreach (var file in Model.CurrentDirectory.Documents)
     {
         <li>@file.Name</li>
     }

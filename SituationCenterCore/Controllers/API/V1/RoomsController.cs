@@ -16,6 +16,7 @@ using SituationCenterCore.Models.Rooms.Security;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using URSA.Respose;
 using Exceptions = SituationCenter.Shared.Exceptions;
 
 namespace SituationCenterCore.Controllers.API.V1
@@ -38,57 +39,59 @@ namespace SituationCenterCore.Controllers.API.V1
             this.roomSecyrityManager = roomSecyrityManager;
         }
 
-        public ResponseBase List()
+        public URespose<RoomsList> List()
         {
             var userId = repository.GetUserId(User);
             var roomsPresent = roomsManager
                 .Rooms(userId)
                 .Select(R => R.ToRoomPresent());
-            return RoomsListResponse.Create(roomsPresent);
+            return RoomsList.Create(roomsPresent);
         }
 
         [HttpPost]
-        public ResponseBase Create([FromBody]CreateRoomRequest info)
+        public URespose<RoomCreate> Create([FromBody] CreateRoom info)
         {
             var room = roomsManager.CreateNewRoom(repository.GetUserId(User), info);
             return RoomCreate.Create(room.Id);
         }
 
-        public ResponseBase Join(Guid roomId, string data = null)
+        public URespose Join(Guid roomId, string data = null)
         {
             roomsManager.JoinToRoom(repository.GetUserId(User), roomId, data);
-            return ResponseBase.GoodResponse();
+            return URespose.GoodResponse();
         }
 
-        public ResponseBase Leave()
+        public URespose Leave()
         {
             var userId = repository.GetUserId(User);
             roomsManager.LeaveFromRoom(userId);
-            return ResponseBase.GoodResponse();
+            return URespose.GoodResponse();
         }
 
-        public ResponseBase Delete(Guid roomId)
+        public URespose Delete(Guid roomId)
         {
             var userId = repository.GetUserId(User);
             roomsManager.DeleteRoom(userId, roomId);
-            return ResponseBase.GoodResponse();
+            return URespose.GoodResponse();
         }
 
-        public ResponseBase Info(Guid roomId)
+        public URespose<RoomInfo> Info(Guid roomId)
         {
-            var room = roomsManager.FindRoom(roomId) ?? throw new StatusCodeException(Exceptions.StatusCode.DontExistRoom);
-            return RoomInfoResponse.Create(room.ToRoomPresent());
+            var room = roomsManager.FindRoom(roomId) ??
+                       throw new StatusCodeException(Exceptions.StatusCode.DontExistRoom);
+            return RoomInfo.Create(room.ToRoomPresent());
         }
 
-        public async Task<ResponseBase> Current()
+        public async Task<URespose<UsersList>> Current()
         {
             var user = await repository.FindUser(User);
-            var room = roomsManager.FindRoom(user.RoomId ?? Guid.Empty) ?? throw new StatusCodeException(Exceptions.StatusCode.YouAreNotInRoom);
-            return UsersListResponse.Create(
+            var room = roomsManager.FindRoom(user.RoomId ?? Guid.Empty) ??
+                       throw new StatusCodeException(Exceptions.StatusCode.YouAreNotInRoom);
+            return UsersList.Create(
                 room
-                .Users
-                .Where(U => U.Id != user.Id)
-                .Select(U => U.ToPresent()));
+                    .Users
+                    .Where(U => U.Id != user.Id)
+                    .Select(U => U.ToPresent()));
         }
 
     }

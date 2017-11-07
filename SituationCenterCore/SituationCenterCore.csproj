@@ -8,6 +8,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="2.0.0" PrivateAssets="All" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.0.0" PrivateAssets="All" />
     <PackageReference Include="Storage.Interfaces" Version="2.0.8" />
+    <PackageReference Include="URSA" Version="1.0.0" />
   </ItemGroup>
   <ItemGroup>
     <DotNetCliToolReference Include="Microsoft.EntityFrameworkCore.Tools.DotNet" Version="2.0.0" />
@@ -18,7 +19,6 @@
     <ProjectReference Include="..\CCF.IPResolver.Adapter\CCF.IPResolver.Adapter.csproj" />
     <ProjectReference Include="..\SituationCenter.Shared\SituationCenter.Shared.csproj" />
     <ProjectReference Include="..\SituationCenterBackServer.Interfaces\SituationCenterBackServer.Interfaces.csproj" />
-    <ProjectReference Include="C:\Users\vladi\OneDrive\Документы\Visual Studio 2017\Projects\URSA\URSA\URSA.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Content Update="appsettings.jwt.json">

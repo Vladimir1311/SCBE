@@ -37,7 +37,7 @@ namespace SituationCenterCore.Controllers.API.V1
             {
                 var directoryDescription = storageManager
                     .GetDirectoryInfo("Moq token", userId, pathToFolder ?? "");
-                DirectoryContentResponse content = DirectoryContentResponse.Create
+                var content = DirectoryContentResponse.Create
                 (
                     directoryDescription.Directories.ToList(),
                     directoryDescription.Files.ToList(),

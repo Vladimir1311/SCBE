@@ -35,7 +35,7 @@ namespace SSituationCenterCore.Controllers.API.V1
         }
 
         [HttpPost]
-        public async Task<URespose<UsersList>> SelectContacts([FromBody]SelectContactsInfo selectInfo)
+        public async Task<URespose<UsersListResponse>> SelectContacts([FromBody]SelectContactsInfo selectInfo)
         {
             var currentUser = await repository.FindUser(User);
             var usersPresents = repository
@@ -44,7 +44,7 @@ namespace SSituationCenterCore.Controllers.API.V1
                 .Where(U => selectInfo.PhoneNumbers.Contains(U.PhoneNumber))
                 .Select(U => U.ToPresent())
                 .ToArray();
-            return UsersList.Create(usersPresents);
+            return UsersListResponse.Create(usersPresents);
         }
     }
 }

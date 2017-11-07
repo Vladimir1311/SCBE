@@ -39,17 +39,17 @@ namespace SituationCenterCore.Controllers.API.V1
             this.roomSecyrityManager = roomSecyrityManager;
         }
 
-        public URespose<RoomsList> List()
+        public URespose<RoomsListResponse> List()
         {
             var userId = repository.GetUserId(User);
             var roomsPresent = roomsManager
                 .Rooms(userId)
                 .Select(R => R.ToRoomPresent());
-            return RoomsList.Create(roomsPresent);
+            return RoomsListResponse.Create(roomsPresent);
         }
 
         [HttpPost]
-        public URespose<RoomCreate> Create([FromBody] CreateRoom info)
+        public URespose<RoomCreate> Create([FromBody] CreateRoomRequest info)
         {
             var room = roomsManager.CreateNewRoom(repository.GetUserId(User), info);
             return RoomCreate.Create(room.Id);
@@ -75,19 +75,19 @@ namespace SituationCenterCore.Controllers.API.V1
             return URespose.GoodResponse();
         }
 
-        public URespose<RoomInfo> Info(Guid roomId)
+        public URespose<RoomInfoResponse> Info(Guid roomId)
         {
             var room = roomsManager.FindRoom(roomId) ??
                        throw new StatusCodeException(Exceptions.StatusCode.DontExistRoom);
-            return RoomInfo.Create(room.ToRoomPresent());
+            return RoomInfoResponse.Create(room.ToRoomPresent());
         }
 
-        public async Task<URespose<UsersList>> Current()
+        public async Task<URespose<UsersListResponse>> Current()
         {
             var user = await repository.FindUser(User);
             var room = roomsManager.FindRoom(user.RoomId ?? Guid.Empty) ??
                        throw new StatusCodeException(Exceptions.StatusCode.YouAreNotInRoom);
-            return UsersList.Create(
+            return UsersListResponse.Create(
                 room
                     .Users
                     .Where(U => U.Id != user.Id)

@@ -15,7 +15,9 @@ namespace Common.Requests.Room.CreateRoom
         public PrivacyRoomType PrivacyType { get; set; }
         [JsonProperty("peopleCountLimit")]
         public int UsersCountMax { get; set; } = 6;
-        [JsonProperty("args")]
-        public JObject Args { get; set; }
+        [JsonProperty("password")]
+        public string Password { get; set; }
+        [JsonProperty("phones")]
+        public string[] Phones { get; set; }
     }
 }

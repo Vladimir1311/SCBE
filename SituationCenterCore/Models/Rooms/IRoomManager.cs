@@ -6,7 +6,7 @@ namespace SituationCenterCore.Models.Rooms
 {
     public interface IRoomManager
     {
-        Room CreateNewRoom(Guid createrId, CreateRoom createRoomInfo);
+        Room CreateNewRoom(Guid createrId, CreateRoomRequest createRoomInfo);
 
         void JoinToRoom(Guid userId, Guid roomId, string securityData);
 

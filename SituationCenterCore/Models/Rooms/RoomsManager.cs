@@ -29,7 +29,7 @@ namespace SituationCenterCore.Models.Rooms
             this.roomSecyrityManager = roomSecyrityManager;
         }
 
-        public Room CreateNewRoom(Guid createrId, CreateRoom createRoomInfo)
+        public Room CreateNewRoom(Guid createrId, CreateRoomRequest createRoomInfo)
         {
             var creater = dataBase.Users
                 .Include(U => U.Room)
@@ -170,7 +170,7 @@ namespace SituationCenterCore.Models.Rooms
             return dataBase.Users.FirstOrDefault(U => U.Id == userId.ToString());
         }
 
-        private void CheckCreatingRoomParams(CreateRoom createRoomInfo, ApplicationUser creater)
+        private void CheckCreatingRoomParams(CreateRoomRequest createRoomInfo, ApplicationUser creater)
         {
             var errorcodes = new List<StatusCode>();
 

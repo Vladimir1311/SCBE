@@ -45,7 +45,7 @@ namespace SituationCenterCore.Controllers.API.V1
 
         [HttpPost]
         [AllowAnonymous]
-        public async Task<URespose<Authorize>> Authorize([FromBody]LoginModel.InputModel model)
+        public async Task<URespose<AuthorizeResponse>> Authorize([FromBody]LoginModel.InputModel model)
         {
             if (!ModelState.IsValid)
                 throw new StatusCodeException(SituationCenter.Shared.Exceptions.StatusCode.ArgumentsIncorrect);
@@ -71,7 +71,7 @@ namespace SituationCenterCore.Controllers.API.V1
                         signingCredentials: new SigningCredentials(MockAuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
             var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
             logger.LogDebug($"Send token for {user.Email}");
-            return SituationCenter.Shared.ResponseObjects.Account.Authorize.Create(encodedJwt);
+            return AuthorizeResponse.Create(encodedJwt);
         }
 
         [HttpPost]

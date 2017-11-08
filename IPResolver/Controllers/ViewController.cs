@@ -16,12 +16,14 @@ namespace IPResolver.Controllers
         public ViewController(RemoteServicesManager manager)
         {
             this.manager = manager;
+            var id = Guid.Parse("3b307812-416e-4abf-a889-2eea295cec18");
         }
         public IActionResult Index()
         {
             ViewModel data = new ViewModel
             {
-                Services = manager.GetServices()
+                Services = manager.GetServices(),
+                Users = manager.GetUsers()
             };
             
             return View(data);
@@ -30,6 +32,7 @@ namespace IPResolver.Controllers
         public class ViewModel
         {
             public List<TCPService> Services { get; internal set; }
+            public List<TCPServiceUser> Users { get; internal set; }
         }
     }
 }

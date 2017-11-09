@@ -7,7 +7,7 @@ namespace SituationCenter.Shared.ResponseObjects.Rooms
         [JsonProperty("room")]
         public RoomPresent RoomPresent { get; set; }
 
-        protected RoomInfoResponse(RoomPresent present) : base() =>
+        protected RoomInfoResponse(RoomPresent present) =>
             RoomPresent = present;
 
         public static RoomInfoResponse Create(RoomPresent present) =>

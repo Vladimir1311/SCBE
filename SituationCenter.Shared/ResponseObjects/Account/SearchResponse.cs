@@ -5,14 +5,14 @@ using System.Text;
 
 namespace SituationCenter.Shared.ResponseObjects.Account
 {
-    public class Search : ResponseBase
+    public class SearchResponse : ResponseBase
     {
-        public IEnumerable<UserPresent> Users;
-        private Search(IEnumerable<UserPresent> list) =>
+        public IEnumerable<UserPresent> Users { get; }
+        private SearchResponse(IEnumerable<UserPresent> list) =>
             Users = list;
 
-        public static Search Create(IEnumerable<UserPresent> list)
-            => new Search(list);
+        public static SearchResponse Create(IEnumerable<UserPresent> list)
+            => new SearchResponse(list);
     }
 
     public class UserPresent
@@ -22,6 +22,8 @@ namespace SituationCenter.Shared.ResponseObjects.Account
         [JsonProperty("lastName")]
         public string LastName { get; set; } = "No info";
         [JsonProperty("phone")]
-        public string Phone { get; set; } = "Np info";
+        public string Phone { get; set; } = "No info";
+        [JsonProperty("email")]
+        public string Email { get; set; } = "No info";
     }
 }

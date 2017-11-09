@@ -14,7 +14,6 @@ namespace CCF
 {
     public class CCFServicesManager
     {
-        private static int assemblyVal;
 
         private const string SITE_IP = "52.163.250.253";
         private const string SITE_PORT = "80";

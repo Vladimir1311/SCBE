@@ -45,7 +45,7 @@ namespace SituationCenterCore.Controllers.API.V1
 
         [HttpPost]
         [AllowAnonymous]
-        public async Task<URespose<AuthorizeResponse>> Authorize([FromBody]LoginModel.InputModel model)
+        public async Task<AuthorizeResponse> Authorize([FromBody]LoginModel.InputModel model)
         {
             if (!ModelState.IsValid)
                 throw new StatusCodeException(SituationCenter.Shared.Exceptions.StatusCode.ArgumentsIncorrect);
@@ -76,7 +76,7 @@ namespace SituationCenterCore.Controllers.API.V1
 
         [HttpPost]
         [AllowAnonymous]
-        public async Task<URespose> Registration([FromBody]RegisterModel.InputModel model)
+        public async Task<ResponseBase> Registration([FromBody]RegisterModel.InputModel model)
         {
             if (ModelState.IsValid)
             {
@@ -103,7 +103,7 @@ namespace SituationCenterCore.Controllers.API.V1
                     //await _emailSender.SendEmailAsync(model.Email, "Confirm your account",
                     //    $"Please confirm your account by clicking this link: <a href='{callbackUrl}'>link</a>");
                     logger.LogInformation(3, "User created a new account with password.");
-                    return URespose.GoodResponse();
+                    return ResponseBase.OKResponse;
                 }
                 logger.LogWarning(string.Join(" ", result.Errors.Select(E => $"{E.Code}---{E.Description}")));
                 logger.LogWarning("Model valid but error");
@@ -114,14 +114,14 @@ namespace SituationCenterCore.Controllers.API.V1
             logger.LogWarning("Model not valid");
             logger.LogWarning(JsonConvert.SerializeObject(ModelState, Formatting.Indented));
             logger.LogWarning(JsonConvert.SerializeObject(model, Formatting.Indented));
-            return URespose.BadResponse();
+            throw new ArgumentException();
         }
-
+        //TODO what the fuck this shit?
         [HttpGet]
-        public async Task<URespose<Search>> Search(string firstName, string lastName, string phone)
+        public async Task<SearchResponse> Search(string firstName, string lastName, string phone)
         {
             var users = await repository.FindUsers(U => U.PhoneNumber.Contains(phone));
-            return SituationCenter.Shared.ResponseObjects.Account.Search.Create(users.Select(U => new UserPresent { Phone = U.PhoneNumber }));
+            return SearchResponse.Create(users.Select(U => new UserPresent { Phone = U.PhoneNumber }));
         }
 
         private async Task CheckRegistrationsArgs(RegisterModel.InputModel model)

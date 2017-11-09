@@ -7,6 +7,7 @@ using SituationCenter.Shared.ResponseObjects.Storage;
 using SituationCenterCore.Data;
 using Storage.Interfaces;
 using System.Linq;
+using SituationCenter.Shared.Exceptions;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -30,7 +31,7 @@ namespace SituationCenterCore.Controllers.API.V1
 
         [HttpGet]
         [Route("{*pathToFolder}")]
-        public ResponseBase DirectoryContent(string pathToFolder)
+        public DirectoryContentResponse DirectoryContent(string pathToFolder)
         {
             var userId = userManager.GetUserId(User);
             try
@@ -47,7 +48,8 @@ namespace SituationCenterCore.Controllers.API.V1
             }
             catch
             {
-                return ResponseBase.BadResponse();
+                throw new StatusCodeException(
+                    SituationCenter.Shared.Exceptions.StatusCode.UnknownError);
             }
         }
 

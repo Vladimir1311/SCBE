@@ -27,7 +27,7 @@ namespace SituationCenterCore.Pages.Files
             this.storage = storage;
             this.userManager = userManager;
         }
-        public async Task<IActionResult> OnGetAsync(string folderPath = "self")
+        public IActionResult OnGet(string folderPath = "self")
         {
             try
             {
@@ -42,7 +42,7 @@ namespace SituationCenterCore.Pages.Files
 
 
         public List<string> lols { get; set; }
-        public async Task<IActionResult> OnPostAsync(List<IFormFile> files, string folderPath = "self")
+        public IActionResult OnPost(List<IFormFile> files, string folderPath = "self")
         {
             var (owner, path) = FillFields(folderPath);
             if (files.Count == 0)

@@ -28,14 +28,14 @@ namespace SSituationCenterCore.Controllers.API.V1
             this.repository = repository;
         }
 
-        public async Task<URespose<Guid>> Me()
+        public async Task<MeResponse> Me()
         {
             var user = await repository.FindUser(User) ?? throw new ArgumentException();
-            return user.RoomId;
+            return MeResponse.Create(user.RoomId);
         }
 
         [HttpPost]
-        public async Task<URespose<UsersListResponse>> SelectContacts([FromBody]SelectContactsInfo selectInfo)
+        public async Task<UsersListResponse> SelectContacts([FromBody]SelectContactsInfo selectInfo)
         {
             var currentUser = await repository.FindUser(User);
             var usersPresents = repository

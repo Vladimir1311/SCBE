@@ -5,30 +5,18 @@ namespace SituationCenter.Shared.ResponseObjects
 {
     public class ResponseBase
     {
-        [JsonProperty("success")]
-        public bool Success { get; set; }
-
-        [JsonProperty("message", NullValueHandling = NullValueHandling.Ignore)]
-        public string Message { get; set; }
-
         [JsonProperty("status")]
-        public StatusCode StatusCode { get; set; }
+        public StatusCode StatusCode { get; }
 
         [JsonProperty("errors", NullValueHandling = NullValueHandling.Ignore)]
-        public StatusCode[] Errors { get; set; }
+        public StatusCode[] Errors { get; }
 
         protected ResponseBase()
         {
-            Success = true; StatusCode = StatusCode.OK;
+            StatusCode = StatusCode.OK;
         }
 
-        protected ResponseBase(string message)
-        {
-            Success = false;
-            Message = message;
-        }
-
-        protected ResponseBase(StatusCode[] statusCodes, string message = null)
+        protected ResponseBase(StatusCode[] statusCodes)
         {
             switch (statusCodes.Length)
             {
@@ -47,14 +35,10 @@ namespace SituationCenter.Shared.ResponseObjects
             }
         }
 
-        public static ResponseBase BadResponse(string message, params StatusCode[] statusCodes) =>
-            new ResponseBase(statusCodes, message);
+        public static ResponseBase BadResponse(params StatusCode[] statusCodes) =>
+            new ResponseBase(statusCodes);
 
-        public static ResponseBase BadResponse(params StatusCode[] statusCodes)
-        {
-            return new ResponseBase(statusCodes);
-        }
-
-        public static ResponseBase GoodResponse() => new ResponseBase();
+        private static readonly ResponseBase goodResponse = new ResponseBase();
+        public static ResponseBase OKResponse => goodResponse;
     }
 }

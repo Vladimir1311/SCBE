@@ -20,6 +20,7 @@ using SituationCenterCore.Pages.Account;
 using SituationCenter.Shared.ResponseObjects.Account;
 using SituationCenterCore.Filters;
 using URSA.Respose;
+using SituationCenterCore.Extensions;
 
 namespace SituationCenterCore.Controllers.API.V1
 {
@@ -121,7 +122,7 @@ namespace SituationCenterCore.Controllers.API.V1
         public async Task<SearchResponse> Search(string firstName, string lastName, string phone)
         {
             var users = await repository.FindUsers(U => U.PhoneNumber.Contains(phone));
-            return SearchResponse.Create(users.Select(U => new UserPresent { Phone = U.PhoneNumber }));
+            return SearchResponse.Create(users.Select(U => U.ToPresent()));
         }
 
         private async Task CheckRegistrationsArgs(RegisterModel.InputModel model)

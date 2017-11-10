@@ -35,7 +35,7 @@ namespace SSituationCenterCore.Controllers.API.V1
         }
 
         [HttpPost]
-        public async Task<UsersListResponse> SelectContacts([FromBody]SelectContactsInfo selectInfo)
+        public async Task<UsersSelectionResponse> SelectContacts([FromBody]SelectContactsInfo selectInfo)
         {
             var currentUser = await repository.FindUser(User);
             var usersPresents = repository
@@ -44,7 +44,7 @@ namespace SSituationCenterCore.Controllers.API.V1
                 .Where(U => selectInfo.PhoneNumbers.Contains(U.PhoneNumber))
                 .Select(U => U.ToPresent())
                 .ToArray();
-            return UsersListResponse.Create(usersPresents);
+            return UsersSelectionResponse.Create(usersPresents);
         }
     }
 }

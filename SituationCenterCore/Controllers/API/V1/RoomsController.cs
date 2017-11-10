@@ -39,7 +39,7 @@ namespace SituationCenterCore.Controllers.API.V1
             this.roomSecyrityManager = roomSecyrityManager;
         }
 
-        public URespose<RoomsListResponse> List()
+        public RoomsListResponse List()
         {
             var userId = repository.GetUserId(User);
             var roomsPresent = roomsManager
@@ -82,16 +82,12 @@ namespace SituationCenterCore.Controllers.API.V1
             return RoomInfoResponse.Create(room.ToRoomPresent());
         }
 
-        public async Task<UsersListResponse> Current()
+        public async Task<RoomPresent> Current()
         {
             var user = await repository.FindUser(User);
             var room = roomsManager.FindRoom(user.RoomId ?? Guid.Empty) ??
                        throw new StatusCodeException(Exceptions.StatusCode.YouAreNotInRoom);
-            return UsersListResponse.Create(
-                room
-                    .Users
-                    .Where(U => U.Id != user.Id)
-                    .Select(U => U.ToPresent()));
+            return room.ToRoomPresent();
         }
 
         

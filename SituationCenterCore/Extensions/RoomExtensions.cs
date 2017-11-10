@@ -1,5 +1,7 @@
 ﻿
+using System.Linq;
 using SituationCenter.Shared.ResponseObjects.Rooms;
+using SituationCenterCore.Extensions;
 using SituationCenterCore.Models.Rooms;
 
 namespace SituationCenterBackServer.Extensions
@@ -12,7 +14,8 @@ namespace SituationCenterBackServer.Extensions
                 name: room.Name,
                 userCount: room.Users.Count,
                 privacy: room.SecurityRule.PrivacyRule,
-                peopleCountLimit: room.PeopleCountLimit
-                );
+                peopleCountLimit: room.PeopleCountLimit,
+            users: room.Users.Select(U => U.ToPresent() )
+        );
     }
 }

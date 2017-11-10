@@ -9,4 +9,7 @@
     <PackageReference Include="Storage.Interfaces" Version="2.0.8" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Models\People\" />
+  </ItemGroup>
 </Project>

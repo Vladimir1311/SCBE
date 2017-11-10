@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace SituationCenter.Shared.People
+namespace SituationCenter.Shared.Models.People
 {
     public class PersonPresent
     {

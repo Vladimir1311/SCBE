@@ -1,5 +1,5 @@
 ﻿
-using SituationCenter.Shared.People;
+using SituationCenter.Shared.Models.People;
 using SituationCenterCore.Data;
 
 namespace SituationCenterCore.Extensions

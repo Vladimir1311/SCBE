@@ -94,5 +94,6 @@ namespace SituationCenterCore.Controllers.API.V1
                     .Select(U => U.ToPresent()));
         }
 
+        
     }
 }

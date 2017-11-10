@@ -64,7 +64,7 @@ namespace SituationCenterCore.Models.Rooms.Security
         public void Validate(ApplicationUser user, Room room, string data)
         {
             logger.LogDebug($"user {user.Email} try to join room {room.Id}, with {data}");
-            var rule = room.SecurityRule ?? repository.GetRulesAsync().Result.FirstOrDefault(R => R.Id == room.RoomSecurityRuleId);
+            var rule = room.SecurityRule ?? repository.GetRuleAsync(room.RoomSecurityRuleId).Result;
             logger.LogDebug($"room {room.Id} have privacy rule {rule.PrivacyRule}");
             switch (rule.PrivacyRule)
             {

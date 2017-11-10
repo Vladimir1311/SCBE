@@ -63,5 +63,8 @@ namespace SituationCenterCore.Data.DatabaseAbstraction
 
         public Guid GetUserId(ClaimsPrincipal user) =>
             Guid.Parse(userManager.GetUserId(user));
+
+        public async Task<RoomSecurityRule> GetRuleAsync(Guid ruleId) =>
+            await Rules.FirstOrDefaultAsync(R => R.Id == ruleId);
     }
 }

@@ -68,7 +68,7 @@ namespace SituationCenterCore.Models.Rooms
                     roomSecyrityManager.CreateInvationRule(newRoom, userIds);
                     break;
                 default:
-                    throw new NotImplementedException();
+                    throw new ArgumentOutOfRangeException();
             }
             dataBase.Add(newRoom);
             roomSecyrityManager.AddAdminRole(creater, newRoom);

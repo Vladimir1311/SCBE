@@ -11,6 +11,7 @@ namespace SituationCenterCore.Data.DatabaseAbstraction
     public interface IRepository
     {
         Task<RoomSecurityRule[]> GetRulesAsync();
+        Task<RoomSecurityRule> GetRuleAsync(Guid ruleId);
         Task<IdentityResult> CreateRoleAsync(IdentityRole role);
         Task<IdentityRole> FindRoleByNameAsync(string name);
         Task<IdentityResult> DeleteRoleAsync(IdentityRole identityRole);

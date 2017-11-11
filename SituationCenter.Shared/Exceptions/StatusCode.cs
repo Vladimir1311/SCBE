@@ -83,6 +83,9 @@ namespace SituationCenter.Shared.Exceptions
         YouAreNotInRoom,
 
         [Description("Попытка выполнения операции над комнатой не того типа")]
-        IncrorrecrTargetRoomType
+        IncrorrecrTargetRoomType,
+
+        [Description]
+        TooLongRoomName
     }
 }

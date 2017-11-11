@@ -33,6 +33,8 @@ namespace SituationCenterCore.Models.Rooms
 
         public Room CreateNewRoom(Guid createrId, CreateRoomRequest createRoomInfo)
         {
+            if (createRoomInfo.Name.Length > 32)
+                throw new StatusCodeException(StatusCode.TooLongRoomName);
             var creater = dataBase.Users
                 .Include(U => U.Room)
                 .FirstOrDefault(U => U.Id == createrId.ToString())

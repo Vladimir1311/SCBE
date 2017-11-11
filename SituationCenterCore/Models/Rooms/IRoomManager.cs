@@ -1,6 +1,7 @@
 ﻿using Common.Requests.Room.CreateRoom;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace SituationCenterCore.Models.Rooms
 {
@@ -19,5 +20,6 @@ namespace SituationCenterCore.Models.Rooms
         Room FindRoom(Guid roomId);
 
         void DeleteRoom(Guid userId, Guid roomId);
+        Task InviteUsersByPhoneToRoom(Guid currentRoomId, List<string> phones);
     }
 }

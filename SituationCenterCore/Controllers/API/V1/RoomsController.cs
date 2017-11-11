@@ -18,6 +18,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using URSA.Respose;
 using Exceptions = SituationCenter.Shared.Exceptions;
+using System.Collections.Generic;
 
 namespace SituationCenterCore.Controllers.API.V1
 {
@@ -90,6 +91,13 @@ namespace SituationCenterCore.Controllers.API.V1
             return room.ToRoomPresent();
         }
 
-        
+        public async Task<ResponseBase> InvitePerson(List<string> phones)
+        {
+            var user = await repository.FindUser(User);
+            var currentRoomId = user.RoomId ?? 
+                        throw new StatusCodeException(Exceptions.StatusCode.YouAreNotInRoom);
+            await roomsManager.InviteUsersByPhoneToRoom(currentRoomId, phones);
+            return ResponseBase.OKResponse;
+        }
     }
 }

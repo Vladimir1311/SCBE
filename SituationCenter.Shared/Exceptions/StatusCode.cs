@@ -80,6 +80,9 @@ namespace SituationCenter.Shared.Exceptions
         EmptyInvationRoom,
 
         [Description("Попытка сделать что-то с текущей комнатой, хотя клиент в комнате не находится")]
-        YouAreNotInRoom
+        YouAreNotInRoom,
+
+        [Description("Попытка выполнения операции над комнатой не того типа")]
+        IncrorrecrTargetRoomType
     }
 }

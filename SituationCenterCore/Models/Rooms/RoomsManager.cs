@@ -9,6 +9,8 @@ using SituationCenterCore.Models.Rooms.VoiceChatModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using SituationCenter.Shared.Models.Rooms;
 
 namespace SituationCenterCore.Models.Rooms
 {
@@ -202,5 +204,20 @@ namespace SituationCenterCore.Models.Rooms
             return peopleCount;
         }
 
+        public async Task InviteUsersByPhoneToRoom(Guid currentRoomId, List<string> phones)
+        {
+            var rule = await dataBase.Rules
+                                     .FirstOrDefaultAsync(R => R.PrivacyRule == PrivacyRoomType.InvationPrivate
+                                                     && R.Id == dataBase.Rooms.FirstOrDefault(Room => Room.Id == currentRoomId).Id);
+            if (rule.PrivacyRule != PrivacyRoomType.InvationPrivate)
+                throw new StatusCodeException(StatusCode.IncrorrecrTargetRoomType);
+            rule.Data = string.Join('\n', rule.Data
+                .Split('\n')
+                .Union(dataBase
+                       .Users
+                       .Where(U => phones.Contains(U.PhoneNumber))
+                       .Select(U => U.Id)));
+            await dataBase.SaveChangesAsync();
+        }
     }
 }

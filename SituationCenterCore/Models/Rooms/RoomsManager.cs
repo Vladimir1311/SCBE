@@ -49,16 +49,16 @@ namespace SituationCenterCore.Models.Rooms
             };
             switch (createRoomInfo.PrivacyType)
             {
-                case SituationCenter.Shared.Models.Rooms.PrivacyRoomType.Public:
+                case PrivacyRoomType.Public:
                     roomSecyrityManager.CreatePublicRule(newRoom);
                     break;
 
-                case SituationCenter.Shared.Models.Rooms.PrivacyRoomType.Password:
+                case PrivacyRoomType.Password:
                     var password = createRoomInfo.Password;
                     roomSecyrityManager.CreatePasswordRule(newRoom, password);
                     break;
 
-                case SituationCenter.Shared.Models.Rooms.PrivacyRoomType.InvationPrivate:
+                case PrivacyRoomType.InvationPrivate:
                     var phoneNumbers = createRoomInfo.Phones
                         .Append(creater.PhoneNumber)
                         .Distinct()

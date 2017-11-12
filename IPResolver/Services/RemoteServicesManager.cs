@@ -57,10 +57,19 @@ namespace IPResolver.Services
 
         private async Task PingSending()
         {
+            var maxTimeOut = TimeSpan.FromSeconds(10);
             while (true)
             {
                 await PingAll();
-                await Task.Delay(TimeSpan.FromSeconds(10));
+                var now = DateTime.Now;
+                await Task.Delay(TimeSpan.FromMinutes(1));
+                foreach(var endPoint in services.Cast<RemotePoint>()
+                        .Concat(users))
+                {
+                    if (endPoint.LastPing - now > maxTimeOut)
+                        endPoint.Connection.Dispose();
+                }
+                
             }
         }
 

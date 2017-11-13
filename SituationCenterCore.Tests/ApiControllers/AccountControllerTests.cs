@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using SituationCenter.Shared.Exceptions;
 using SituationCenterCore.Controllers.API.V1;
 using SituationCenterCore.Data;
 using SituationCenterCore.Data.DatabaseAbstraction;
@@ -38,7 +39,7 @@ namespace SituationCenterCore.Tests.ApiControllers
                 Birthday = "25/03/1995"
             };
             var result = controller.Registration(registerModel).Result;
-            Assert.IsTrue(result.Success);
+            Assert.AreEqual(StatusCode.OK, result.StatusCode);
             repoMock.Verify(R => R.CreateUserAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()), Times.Once);
             Assert.AreEqual(registerModel.Email, createdUser.Email);
             Assert.AreEqual(registerModel.Password, UsedPassword);

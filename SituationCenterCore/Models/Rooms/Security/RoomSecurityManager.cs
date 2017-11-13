@@ -30,6 +30,8 @@ namespace SituationCenterCore.Models.Rooms.Security
         public void CreateInvationRule(Room room, Guid[] usersIds)
         {
             logger.LogDebug($"creating invation rule");
+            if ((usersIds?.Length ?? 0) == 0)
+                throw new StatusCodeException(StatusCode.EmptyInvationRoom);
             var inviteRule = new RoomSecurityRule() { PrivacyRule = PrivacyRoomType.InvationPrivate };
 
             var userIdsString = string.Join("\n", usersIds.Select(I => I.ToString()));
@@ -56,7 +58,7 @@ namespace SituationCenterCore.Models.Rooms.Security
             RoomSecurityRule rule = new RoomSecurityRule()
             {
                 PrivacyRule = PrivacyRoomType.Password,
-                Data = password //Использовать хеш!!!
+                Data = password //TODO Использовать хеш!!!
             };
             room.SecurityRule = rule;
         }

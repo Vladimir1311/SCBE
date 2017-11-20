@@ -21,17 +21,23 @@ namespace SituationCenterCore.Pages.Files
 
         public IDirectoryDesc CurrentDirectory { get; private set; }
 
+        [BindProperty(SupportsGet = true)]
+        public string FolderPath { get; set; }
+
+        [BindProperty(SupportsGet = true)]
+        public string Owner { get; set; }
 
         public IndexModel(IStorage storage, UserManager<ApplicationUser> userManager)
         {
             this.storage = storage;
             this.userManager = userManager;
         }
-        public async Task<IActionResult> OnGetAsync(string folderPath = "self")
+        
+        public async Task<IActionResult> OnGetAsync()
         {
             try
             {
-                var (owner, path) = FillFields(folderPath);
+                FillFields();
                 return Page();
             }
             catch
@@ -40,31 +46,26 @@ namespace SituationCenterCore.Pages.Files
             }
         }
 
-
-        public List<string> lols { get; set; }
         public async Task<IActionResult> OnPostAsync(List<IFormFile> files, string folderPath = "self")
         {
-            var (owner, path) = FillFields(folderPath);
+            FillFields();
             if (files.Count == 0)
                 return Page();
             var file = files[0];
             var success = storage.CreateFile(
                 "sample token",
-                owner,
-                Path.Combine(path, Path.GetFileName(file.FileName)),
+                Owner,
+                Path.Combine(FolderPath, Path.GetFileName(file.FileName)),
                 file.OpenReadStream()
                 );
             return LocalRedirect("/Files?folderPath=" + folderPath);
         }
 
 
-        private (string owner, string path) FillFields(string folderPath)
+        private void FillFields()
         {
-            var owner = folderPath.Substring(0, folderPath.IndexOf("/") == -1 ? folderPath.Length : folderPath.IndexOf("/"));
-            var path = folderPath.Substring(owner.Length);
-            owner = owner == "self" ? userManager.GetUserId(User) : owner;
-            CurrentDirectory = storage.GetDirectoryInfo("sample token", owner, path);
-            return (owner, path);
+            Owner = Owner == "self" ? userManager.GetUserId(User) : Owner;
+            CurrentDirectory = storage.GetDirectoryInfo("sample token", Owner, FolderPath);
         }
     }
 }

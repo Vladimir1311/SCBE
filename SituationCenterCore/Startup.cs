@@ -86,6 +86,7 @@ namespace SituationCenterCore
                 {
                     options.Conventions.AuthorizeFolder("/Account/Manage");
                     options.Conventions.AuthorizePage("/Account/Logout");
+                    //options.Conventions.AddPageRoute("/Files", "Files/{owner=self}/{folderPath=l}");
                 });
 
             // Register no-op EmailSender used by account confirmation and password reset during development
@@ -120,6 +121,10 @@ namespace SituationCenterCore
                 routes.MapRoute(
                     name: "default",
                     template: "{controller}/{action=Index}/{id?}");
+                
+                //routes.MapRoute(
+                //    name: "files",
+                //    template: "files/{controller}/{action=Index}/{owner=self}/{*path}");
             });
         }
     }

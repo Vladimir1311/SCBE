@@ -1,4 +1,4 @@
-﻿@page
+﻿@page "{owner=self}/{*folderPath}"
 @model IndexModel
 @{
     ViewData["Title"] = "Files storage";
@@ -10,16 +10,22 @@
         <li>@dir.Name</li>
     }
 </ul>
+
+<h2>Folders</h2>
+<ul>
+
+    @foreach (var folder in Model.CurrentDirectory.Directories)
+    {
+        <li>@folder.Name</li>
+    }
+</ul>
+
 <h2>Files</h2>
-<form method="post" enctype="multipart/form-data" accept=".doc,.docx">
-    <input type="file" name="files" />
-    <input type="submit" />
-</form>
 <ul>
 
     @foreach (var file in Model.CurrentDirectory.Files)
     {
-        <li>@file.Name</li>
+        <li><a href="/">@file.Name</a></li>
     }
 </ul>
 
@@ -30,3 +36,8 @@
         <li>@file.Name</li>
     }
 </ul>
+
+<form method="post" enctype="multipart/form-data" accept=".doc,.docx">
+    <input type="file" name="files" />
+    <input type="submit" />
+</form>

@@ -14,27 +14,12 @@ using System.IO;
 namespace SituationCenterCore.Pages.Files
 {
     [Authorize]
-    public class IndexModel : PageModel
+    public class IndexModel : FilesPage
     {
-        private readonly IStorage storage;
-        private readonly UserManager<ApplicationUser> userManager;
-
         public IDirectoryDesc CurrentDirectory { get; private set; }
 
-        [BindProperty(SupportsGet = true)]
-        public string FolderPath { get; set; }
-
-        [BindProperty(SupportsGet = true)]
-        public string Owner { get; set; }
-
-        private string ownerId;
-        public string OwnerId => ownerId ?? 
-            (Owner == "self" ? ownerId = userManager.GetUserId(User) : ownerId = Owner);
-
-        public IndexModel(IStorage storage, UserManager<ApplicationUser> userManager)
+        public IndexModel(IStorage storage, UserManager<ApplicationUser> userManager) : base(storage, userManager)
         {
-            this.storage = storage;
-            this.userManager = userManager;
         }
         
         public async Task<IActionResult> OnGetAsync()
@@ -59,7 +44,7 @@ namespace SituationCenterCore.Pages.Files
             var success = storage.CreateFile(
                 "sample token",
                 OwnerId,
-                Path.Combine(FolderPath, Path.GetFileName(file.FileName)),
+                Path.Combine(EndPath, Path.GetFileName(file.FileName)),
                 file.OpenReadStream()
                 );
             return LocalRedirect("/Files?folderPath=" + folderPath);
@@ -68,7 +53,7 @@ namespace SituationCenterCore.Pages.Files
 
         private void FillFields()
         {
-            CurrentDirectory = storage.GetDirectoryInfo("sample token", OwnerId, FolderPath);
+            CurrentDirectory = storage.GetDirectoryInfo("sample token", OwnerId, EndPath);
         }
     }
 }

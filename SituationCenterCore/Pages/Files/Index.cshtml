@@ -1,4 +1,4 @@
-﻿@page "{owner=self}/{*folderPath}"
+﻿@page "{owner=self}/{*endPath}"
 @model IndexModel
 @{
     ViewData["Title"] = "Files storage";
@@ -8,7 +8,7 @@
 
     @foreach (var folder in Model.CurrentDirectory.Directories)
     {
-        <li><a asp-route-owner="@Model.Owner" asp-route-folderPath="@folder.FullPath">@folder.Name</a></li>
+        <li><a asp-route-owner="@Model.Owner" asp-route-endPath="@folder.FullPath">@folder.Name</a></li>
     }
 </ul>
 
@@ -17,7 +17,7 @@
 
     @foreach (var file in Model.CurrentDirectory.Files)
     {
-        <li><a asp-route-filePath="@file.FullPath" 
+        <li><a asp-route-endPath="@file.FullPath" 
                asp-route-owner="@Model.Owner"
                asp-page="./Download"
                >@file.Name</a></li>

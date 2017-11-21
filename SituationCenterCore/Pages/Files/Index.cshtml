@@ -3,29 +3,24 @@
 @{
     ViewData["Title"] = "Files storage";
 }
-<h2>Dirs</h2>
-<ul>
-    @foreach (var dir in Model.CurrentDirectory.Directories)
-    {
-        <li>@dir.Name</li>
-    }
-</ul>
-
 <h2>Folders</h2>
 <ul>
 
     @foreach (var folder in Model.CurrentDirectory.Directories)
     {
-        <li>@folder.Name</li>
+        <li><a asp-route-owner="@Model.Owner" asp-route-folderPath="@folder.FullPath">@folder.Name</a></li>
     }
 </ul>
 
-<h2>Files</h2>
+<h2>Files</h2><h5>@Model.Owner</h5>
 <ul>
 
     @foreach (var file in Model.CurrentDirectory.Files)
     {
-        <li><a href="/">@file.Name</a></li>
+        <li><a asp-route-filePath="@file.FullPath" 
+               asp-route-owner="@Model.Owner"
+               asp-page="./Download"
+               >@file.Name</a></li>
     }
 </ul>
 

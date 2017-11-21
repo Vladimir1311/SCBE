@@ -27,6 +27,10 @@ namespace SituationCenterCore.Pages.Files
         [BindProperty(SupportsGet = true)]
         public string Owner { get; set; }
 
+        private string ownerId;
+        public string OwnerId => ownerId ?? 
+            (Owner == "self" ? ownerId = userManager.GetUserId(User) : ownerId = Owner);
+
         public IndexModel(IStorage storage, UserManager<ApplicationUser> userManager)
         {
             this.storage = storage;
@@ -54,7 +58,7 @@ namespace SituationCenterCore.Pages.Files
             var file = files[0];
             var success = storage.CreateFile(
                 "sample token",
-                Owner,
+                OwnerId,
                 Path.Combine(FolderPath, Path.GetFileName(file.FileName)),
                 file.OpenReadStream()
                 );
@@ -64,8 +68,7 @@ namespace SituationCenterCore.Pages.Files
 
         private void FillFields()
         {
-            Owner = Owner == "self" ? userManager.GetUserId(User) : Owner;
-            CurrentDirectory = storage.GetDirectoryInfo("sample token", Owner, FolderPath);
+            CurrentDirectory = storage.GetDirectoryInfo("sample token", OwnerId, FolderPath);
         }
     }
 }

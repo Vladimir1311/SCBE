@@ -94,9 +94,10 @@ namespace SituationCenterCore
             services.AddSingleton<IEmailSender, EmailSender>();
 
 
-            services.AddCCFService<IStorage>();
+            //services.AddCCFService<IStorage>();
+            services.AddSingleton<IStorage, MockStorage>();
 
-            services.UseAsServise<IAccessValidator, AlwaysTrueAccessValidator>();
+            //services.UseAsServise<IAccessValidator, AlwaysTrueAccessValidator>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

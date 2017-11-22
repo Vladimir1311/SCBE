@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace SituationCenterCore.Pages.Files
 {
@@ -25,6 +26,7 @@ namespace SituationCenterCore.Pages.Files
             set
             {
                 endPath = value ?? "";
+                endPath = HttpUtility.UrlDecode(endPath);
             }
         }
 

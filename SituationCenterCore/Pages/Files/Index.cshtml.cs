@@ -47,7 +47,7 @@ namespace SituationCenterCore.Pages.Files
                 Path.Combine(EndPath, Path.GetFileName(file.FileName)),
                 file.OpenReadStream()
                 );
-            return LocalRedirect("/Files?folderPath=" + folderPath);
+            return RedirectToPage(new { folderPath = folderPath, owner = Owner });
         }
 
 

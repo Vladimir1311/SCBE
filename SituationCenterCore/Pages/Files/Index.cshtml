@@ -3,32 +3,50 @@
 @{
     ViewData["Title"] = "Files storage";
 }
+@functions
+{
+    string Path(string fullPath) => fullPath.Substring(fullPath.IndexOf('/') < 0 ? 0 : fullPath.IndexOf('/'));
+}
 <h2>Folders</h2>
 <ul>
 
     @foreach (var folder in Model.CurrentDirectory.Directories)
     {
-        <li><a asp-route-owner="@Model.Owner" asp-route-endPath="@folder.FullPath">@folder.Name</a></li>
+    <li><a asp-route-owner="@Model.Owner" asp-route-endPath="@folder.FullPath">@folder.Name</a></li>
     }
 </ul>
 
-<h2>Files</h2><h5>@Model.Owner</h5>
+<h2>Files</h2>
+<h5>@Model.Owner</h5>
 <ul>
 
     @foreach (var file in Model.CurrentDirectory.Files)
     {
-        <li><a asp-route-endPath="@file.FullPath" 
-               asp-route-owner="@Model.Owner"
-               asp-page="./Download"
-               >@file.Name</a></li>
+    <li>
+        <a asp-route-endPath="@file.FullPath"
+           asp-route-owner="@Model.Owner"
+           asp-page="./Download">@file.Name</a>
+    </li>
     }
 </ul>
 
 <h2>Documents</h2>
 <ul>
-    @foreach (var file in Model.CurrentDirectory.Documents)
+    @foreach (var document in Model.CurrentDirectory.Documents)
     {
-        <li>@file.Name</li>
+    <li>
+        <ul>
+            <li>
+                @document.Name
+            </li>
+            <li>@document.FullPath</li>
+            <li>
+                <a asp-route-endPath="@Path(document.FullPath)"
+                   asp-route-owner="@Model.Owner"
+                   asp-page="./Download">Download</a>
+            </li>
+        </ul>
+    </li>
     }
 </ul>
 

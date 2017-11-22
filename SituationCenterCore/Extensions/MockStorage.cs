@@ -98,7 +98,7 @@ namespace SituationCenterCore.Extensions
 
         public Stream GetFileContent(string Token, string Owner, string Path)
         {
-            throw new NotImplementedException();
+            return File.OpenRead(@"D:\Users\maksa\Desktop\IAccessValidator.cs");
         }
 
         public IFileDesc GetFileInfo(string Token, string Owner, string Path)

@@ -14,9 +14,19 @@ namespace SituationCenterCore.Pages.Files
     {
         protected readonly IStorage storage;
         protected readonly UserManager<ApplicationUser> userManager;
-
+        private string endPath;
         [BindProperty(SupportsGet = true)]
-        public string EndPath { get; set; }
+        public string EndPath
+        {
+            get
+            {
+                return endPath;
+            }
+            set
+            {
+                endPath = value ?? "";
+            }
+        }
 
         [BindProperty(SupportsGet = true)]
         public string Owner { get; set; }

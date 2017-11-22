@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using SituationCenterCore.Data;
 using Storage.Interfaces;
+using System.IO;
 
 namespace SituationCenterCore.Pages.Files
 {
@@ -16,9 +17,9 @@ namespace SituationCenterCore.Pages.Files
         {
         }
 
-        public void OnGet()
+        public FileStreamResult OnGet()
         {
-            File(storage.GetFileContent("some token", OwnerId, EndPath), "octet-stream");
+            return File(storage.GetFileContent("some token", OwnerId, EndPath), "application/octet-stream", Path.GetFileNameWithoutExtension(EndPath));
         }
     }
 }

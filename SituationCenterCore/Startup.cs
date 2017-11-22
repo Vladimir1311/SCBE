@@ -62,21 +62,18 @@ namespace SituationCenterCore
                         options.RequireHttpsMetadata = false;
                         options.TokenValidationParameters = new TokenValidationParameters
                         {
-                            // ��������, ����� �� �������������� �������� ��� ��������� ������
                             ValidateIssuer = true,
-                            // ������, �������������� ��������
+
                             ValidIssuer = MockAuthOptions.ISSUER,
 
-                            // ����� �� �������������� ����������� ������
                             ValidateAudience = true,
-                            // ��������� ����������� ������
+                            
                             ValidAudience = MockAuthOptions.AUDIENCE,
-                            // ����� �� �������������� ����� �������������
+                            
                             ValidateLifetime = true,
-
-                            // �������� �� ����� ������������
+                            
                             IssuerSigningKey = MockAuthOptions.GetSymmetricSecurityKey(),
-                            // ��������� ����� ������������
+                            
                             ValidateIssuerSigningKey = true,
                         };
                     });
@@ -86,7 +83,6 @@ namespace SituationCenterCore
                 {
                     options.Conventions.AuthorizeFolder("/Account/Manage");
                     options.Conventions.AuthorizePage("/Account/Logout");
-                    //options.Conventions.AddPageRoute("/Files", "Files/{owner=self}/{folderPath=l}");
                 });
 
             // Register no-op EmailSender used by account confirmation and password reset during development
@@ -94,8 +90,8 @@ namespace SituationCenterCore
             services.AddSingleton<IEmailSender, EmailSender>();
 
 
-            //services.AddCCFService<IStorage>();
-            services.AddSingleton<IStorage, MockStorage>();
+            services.AddCCFService<IStorage>();
+            // services.AddSingleton<IStorage, MockStorage>();
 
             //services.UseAsServise<IAccessValidator, AlwaysTrueAccessValidator>();
         }
@@ -122,10 +118,6 @@ namespace SituationCenterCore
                 routes.MapRoute(
                     name: "default",
                     template: "{controller}/{action=Index}/{id?}");
-                
-                //routes.MapRoute(
-                //    name: "files",
-                //    template: "files/{controller}/{action=Index}/{owner=self}/{*path}");
             });
         }
     }

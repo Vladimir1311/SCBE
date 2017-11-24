@@ -1,4 +1,5 @@
 ﻿using Common.Requests.Room.CreateRoom;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -22,7 +23,7 @@ using System.Collections.Generic;
 
 namespace SituationCenterCore.Controllers.API.V1
 {
-    [Authorize(AuthenticationSchemes = "Bearer")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("api/v1/[controller]/[action]/{*pathToFolder}")]
     [TypeFilter(typeof(JsonExceptionsFilterAttribute))]
     public class RoomsController : Controller

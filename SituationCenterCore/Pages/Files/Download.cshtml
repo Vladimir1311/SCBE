@@ -1,0 +1,11 @@
+﻿@page "{owner=self}/{*endPath}"
+@model SituationCenterCore.Pages.Files.DownloadModel
+@{
+    ViewData["Title"] = "Download";
+}
+
+<h2>Download</h2>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

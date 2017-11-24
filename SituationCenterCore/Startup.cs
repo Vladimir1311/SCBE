@@ -67,21 +67,18 @@ namespace SituationCenterCore
                         options.RequireHttpsMetadata = false;
                         options.TokenValidationParameters = new TokenValidationParameters
                         {
-                            // ��������, ����� �� �������������� �������� ��� ��������� ������
                             ValidateIssuer = true,
-                            // ������, �������������� ��������
+
                             ValidIssuer = MockAuthOptions.ISSUER,
 
-                            // ����� �� �������������� ����������� ������
                             ValidateAudience = true,
-                            // ��������� ����������� ������
+                            
                             ValidAudience = MockAuthOptions.AUDIENCE,
-                            // ����� �� �������������� ����� �������������
+                            
                             ValidateLifetime = true,
-
-                            // �������� �� ����� ������������
+                            
                             IssuerSigningKey = MockAuthOptions.GetSymmetricSecurityKey(),
-                            // ��������� ����� ������������
+                            
                             ValidateIssuerSigningKey = true,
                         };
                     });
@@ -99,6 +96,7 @@ namespace SituationCenterCore
 
 
             services.AddCCFService<IStorage>();
+            // services.AddSingleton<IStorage, MockStorage>();
 
             services.UseAsServise<IAccessValidator, AlwaysTrueAccessValidator>();
         }

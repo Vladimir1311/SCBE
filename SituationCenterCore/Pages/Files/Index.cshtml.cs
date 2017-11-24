@@ -10,28 +10,26 @@ using SituationCenterCore.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Http;
 using System.IO;
+using SituationCenterCore.Data.DatabaseAbstraction;
 
 namespace SituationCenterCore.Pages.Files
 {
     [Authorize]
-    public class IndexModel : PageModel
+    public class IndexModel : FilesPage
     {
-        private readonly IStorage storage;
-        private readonly UserManager<ApplicationUser> userManager;
-
         public IDirectoryDesc CurrentDirectory { get; private set; }
 
-
-        public IndexModel(IStorage storage, UserManager<ApplicationUser> userManager)
+        public IndexModel(IStorage storage, IRepository repository) : base(storage, repository)
         {
-            this.storage = storage;
-            this.userManager = userManager;
         }
-        public IActionResult OnGet(string folderPath = "self")
+
+        [BindProperty]
+        public string NewFolderName { get; set; }
+        public IActionResult OnGet()
         {
             try
             {
-                var (owner, path) = FillFields(folderPath);
+                FillFields();
                 return Page();
             }
             catch
@@ -40,31 +38,28 @@ namespace SituationCenterCore.Pages.Files
             }
         }
 
-
-        public List<string> lols { get; set; }
-        public IActionResult OnPost(List<IFormFile> files, string folderPath = "self")
+        public IActionResult OnPost(List<IFormFile> files)
         {
-            var (owner, path) = FillFields(folderPath);
+            FillFields();
             if (files.Count == 0)
                 return Page();
             var file = files[0];
             var success = storage.CreateFile(
                 "sample token",
-                owner,
-                Path.Combine(path, Path.GetFileName(file.FileName)),
+                OwnerId,
+                Path.Combine(EndPath, Path.GetFileName(file.FileName)),
                 file.OpenReadStream()
                 );
-            return LocalRedirect("/Files?folderPath=" + folderPath);
+            return RedirectToPage(new { folderPath = EndPath, owner = Owner });
+        }
+        private void UploadFile(List<IFormFile> files)
+        {
+
         }
 
-
-        private (string owner, string path) FillFields(string folderPath)
+        private void FillFields()
         {
-            var owner = folderPath.Substring(0, folderPath.IndexOf("/") == -1 ? folderPath.Length : folderPath.IndexOf("/"));
-            var path = folderPath.Substring(owner.Length);
-            owner = owner == "self" ? userManager.GetUserId(User) : owner;
-            CurrentDirectory = storage.GetDirectoryInfo("sample token", owner, path);
-            return (owner, path);
+            CurrentDirectory = storage.GetDirectoryInfo("sample token", OwnerId, EndPath);
         }
     }
 }

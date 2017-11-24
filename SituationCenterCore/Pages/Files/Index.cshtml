@@ -1,32 +1,71 @@
-﻿@page
+﻿@page "{owner=self}/{*endPath}"
 @model IndexModel
 @{
     ViewData["Title"] = "Files storage";
 }
-<h2>Dirs</h2>
-<ul>
-    @foreach (var dir in Model.CurrentDirectory.Directories)
-    {
-        <li>@dir.Name</li>
-    }
-</ul>
-<h2>Files</h2>
+@functions
+{
+    string PathWithOutOwner(string fullPath) => fullPath.Substring(fullPath.IndexOf('/') < 0 ? 0 : fullPath.IndexOf('/'));
+}
+<h3>Add file</h3>
 <form method="post" enctype="multipart/form-data" accept=".doc,.docx">
     <input type="file" name="files" />
     <input type="submit" />
 </form>
+
+<h3>Create Folder</h3>
+<form method="post">
+    <div class="form-group">
+        <label asp-for="NewFolderName"></label>
+        <input asp-for="NewFolderName" class="form-control" />
+        <span asp-validation-for="NewFolderName" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-default">Log in</button>
+    </div>
+</form>
+
+
+<h2>Folders</h2>
+<ul>
+
+    @foreach (var folder in Model.CurrentDirectory.Directories)
+    {
+        <li><a asp-route-owner="@Model.Owner" asp-route-endPath="@folder.FullPath">@folder.Name</a></li>
+    }
+</ul>
+
+<h2>Files</h2>
+<h5>@Model.Owner</h5>
 <ul>
 
     @foreach (var file in Model.CurrentDirectory.Files)
     {
-        <li>@file.Name</li>
+        <li>
+            <a asp-route-endPath="@file.FullPath"
+               asp-route-owner="@Model.Owner"
+               asp-page="./Download">@file.Name</a>
+        </li>
     }
 </ul>
 
 <h2>Documents</h2>
 <ul>
-    @foreach (var file in Model.CurrentDirectory.Documents)
+    @foreach (var document in Model.CurrentDirectory.Documents)
     {
-        <li>@file.Name</li>
+        <li>
+            <ul>
+                <li>
+                    @document.Name
+                </li>
+                <li>@document.FullPath</li>
+                <li>
+                    <a asp-route-endPath="@PathWithOutOwner(document.FullPath)"
+                       asp-route-owner="@Model.Owner"
+                       asp-page="./Download">Download</a>
+                </li>
+            </ul>
+        </li>
     }
 </ul>
+

@@ -122,6 +122,11 @@ namespace CCF
             foreach (var param in invocation.Method.GetParameters())
             {
                 var argument = invocation.Arguments[i++];
+                if(argument == null)
+                {
+                    message.Args[param.Name] = JValue.CreateNull();
+                }
+                else
                 if (argument is Stream stream)
                 {
                     message.Streams[param.Name] = stream;

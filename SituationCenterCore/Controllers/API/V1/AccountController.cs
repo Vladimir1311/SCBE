@@ -20,13 +20,14 @@ using SituationCenterCore.Pages.Account;
 using SituationCenter.Shared.ResponseObjects.Account;
 using SituationCenterCore.Filters;
 using URSA.Respose;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using SituationCenterCore.Extensions;
 
 namespace SituationCenterCore.Controllers.API.V1
 {
     [Produces("application/json")]
     [Route("api/v1/Account/[action]")]
-    [Authorize(AuthenticationSchemes = "Bearer")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [TypeFilter(typeof(JsonExceptionsFilterAttribute))]
     public class AccountController : Controller
     {

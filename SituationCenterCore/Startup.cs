@@ -1,10 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -13,20 +8,16 @@ using SituationCenterCore.Data;
 using SituationCenterCore.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
 using SituationCenterCore.Data.DatabaseAbstraction;
-using SituationCenterCore.Extensions;
 using SituationCenterCore.Models.TokenAuthModels;
 using CCF.IPResolver.Adapter;
 using Storage.Interfaces;
 using SituationCenterCore.Models.Rooms;
 using SituationCenterCore.Models.Rooms.Security;
 using SituationCenterBackServer.Interfaces;
-using Castle.DynamicProxy;
-using System.Reflection;
-using System.Dynamic;
 using URSA;
-using URSA.Collector;
+using SituationCenterCore.Models.Multiplayer.Interfaces;
+using SituationCenterCore.Models.Multiplayer.Server;
 
 namespace SituationCenterCore
 {
@@ -93,7 +84,7 @@ namespace SituationCenterCore
             // Register no-op EmailSender used by account confirmation and password reset during development
             // For more information on how to enable account confirmation and password reset please visit https://go.microsoft.com/fwlink/?LinkID=532713
             services.AddSingleton<IEmailSender, EmailSender>();
-
+            services.AddSingleton<IMultiplayerManager, MultiplayerManager>();
 
             services.AddCCFService<IStorage>();
             // services.AddSingleton<IStorage, MockStorage>();
@@ -117,6 +108,8 @@ namespace SituationCenterCore
             app.UseStaticFiles();
 
             app.UseAuthentication();
+
+            app.UseWebSockets();
 
             app.UseMvc(routes =>
             {

@@ -1,0 +1,11 @@
+﻿@page
+@model SituationCenterCore.Pages.Center.WebSocketModel
+@{
+    ViewData["Title"] = "WebSocket";
+}
+
+<h2>@Model.Message</h2>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

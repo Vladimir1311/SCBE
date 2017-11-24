@@ -13,9 +13,9 @@ namespace SituationCenterCore.Pages
     {
         protected readonly IRepository repository;
 
-        public AuthorizedPage(IRepository userManager)
+        public AuthorizedPage(IRepository repositoey)
         {
-            this.repository = userManager;
+            this.repository = repositoey;
         }
         public string UserId => repository.GetUserId(User).ToString();
     }

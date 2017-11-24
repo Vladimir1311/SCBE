@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using SituationCenterCore.Data;
 using SituationCenterCore.Data.DatabaseAbstraction;
@@ -9,13 +10,14 @@ using System.Threading.Tasks;
 
 namespace SituationCenterCore.Pages
 {
+    [Authorize]
     public class AuthorizedPage : PageModel
     {
         protected readonly IRepository repository;
 
-        public AuthorizedPage(IRepository repositoey)
+        public AuthorizedPage(IRepository repository)
         {
-            this.repository = repositoey;
+            this.repository = repository;
         }
         public string UserId => repository.GetUserId(User).ToString();
     }

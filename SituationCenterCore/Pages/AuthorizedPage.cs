@@ -14,11 +14,13 @@ namespace SituationCenterCore.Pages
     public class AuthorizedPage : PageModel
     {
         protected readonly IRepository repository;
+        private ApplicationUser user;
 
         public AuthorizedPage(IRepository repository)
         {
             this.repository = repository;
         }
         public string UserId => repository.GetUserId(User).ToString();
+        public ApplicationUser SignedUser => user ?? (user = repository.FindUser(User).Result);
     }
 }

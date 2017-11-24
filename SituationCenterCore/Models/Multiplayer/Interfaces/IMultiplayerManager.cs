@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SituationCenterCore.Data;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.WebSockets;
@@ -8,6 +9,6 @@ namespace SituationCenterCore.Models.Multiplayer.Interfaces
 {
     public interface IMultiplayerManager
     {
-        Task AddClient(WebSocket webSocket, string userId);
+        Task AddClient(WebSocket webSocket, ApplicationUser userId);
     }
 }

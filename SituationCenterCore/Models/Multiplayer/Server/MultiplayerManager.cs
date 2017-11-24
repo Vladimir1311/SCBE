@@ -7,31 +7,29 @@ using System.Threading.Tasks;
 using System.Net.WebSockets;
 using System.Threading;
 using System.Text;
+using SituationCenterCore.Data;
+using SituationCenterCore.Models.Multiplayer.Messages;
+using SituationCenterCore.Extensions;
 
 namespace SituationCenterCore.Models.Multiplayer.Server
 {
     public class MultiplayerManager : IMultiplayerManager
     {
-        private List<WebSocket> endPoints = new List<WebSocket>();
+        private HashSet<EndPoint> endPoints = new HashSet<EndPoint>();
         
-        public async Task AddClient(WebSocket webSocket, string userId)
+        public async Task AddClient(WebSocket webSocket, ApplicationUser user)
         {
-            endPoints.Add(webSocket);
+            var endpoint = new EndPoint(webSocket, user);
+            endPoints.Add(endpoint);
             while (true)
             {
-                var message = await ReadMessageFrom(webSocket);
-                await webSocket.SendAsync(new ArraySegment<byte>(message), WebSocketMessageType.Text, true, CancellationToken.None);
+                var message = await endpoint.ReadMessageAsync();
+                foreach (var point in endPoints.Except(endpoint))
+                {
+                    await point.SendMessageAsync(message);
+                }
             }
         }
-
-        private async static Task<byte[]> ReadMessageFrom(WebSocket socket)
-        {
-            var buffer = new byte[1024 * 4];
-            WebSocketReceiveResult result = await socket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
-            return buffer;
-
-        }
-
         
     }
 }

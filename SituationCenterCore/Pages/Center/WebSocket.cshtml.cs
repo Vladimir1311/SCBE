@@ -27,7 +27,7 @@ namespace SituationCenterCore.Pages.Center
                 return;
             }
             var webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync();
-            await multiplayerManager.AddClient(webSocket, UserId);
+            await multiplayerManager.AddClient(webSocket, SignedUser);
             Message = "OK";
         }
     }

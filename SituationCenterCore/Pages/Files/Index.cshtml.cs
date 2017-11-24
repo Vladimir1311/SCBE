@@ -10,6 +10,7 @@ using SituationCenterCore.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Http;
 using System.IO;
+using SituationCenterCore.Data.DatabaseAbstraction;
 
 namespace SituationCenterCore.Pages.Files
 {
@@ -18,11 +19,13 @@ namespace SituationCenterCore.Pages.Files
     {
         public IDirectoryDesc CurrentDirectory { get; private set; }
 
-        public IndexModel(IStorage storage, UserManager<ApplicationUser> userManager) : base(storage, userManager)
+        public IndexModel(IStorage storage, IRepository repository) : base(storage, repository)
         {
         }
-        
-        public async Task<IActionResult> OnGetAsync()
+
+        [BindProperty]
+        public string NewFolderName { get; set; }
+        public IActionResult OnGet()
         {
             try
             {
@@ -35,7 +38,7 @@ namespace SituationCenterCore.Pages.Files
             }
         }
 
-        public async Task<IActionResult> OnPostAsync(List<IFormFile> files, string folderPath = "self")
+        public IActionResult OnPost(List<IFormFile> files)
         {
             FillFields();
             if (files.Count == 0)
@@ -47,9 +50,12 @@ namespace SituationCenterCore.Pages.Files
                 Path.Combine(EndPath, Path.GetFileName(file.FileName)),
                 file.OpenReadStream()
                 );
-            return RedirectToPage(new { folderPath = folderPath, owner = Owner });
+            return RedirectToPage(new { folderPath = EndPath, owner = Owner });
         }
+        private void UploadFile(List<IFormFile> files)
+        {
 
+        }
 
         private void FillFields()
         {

@@ -16,7 +16,7 @@ namespace CCF
     {
         private static int assemblyVal;
 
-        private const string SITE_IP = "52.163.250.253";
+        private const string SITE_IP = "52.163.114.252";
         private const string SITE_PORT = "80";
 
         //private const string SITE_IP = "127.0.0.1";

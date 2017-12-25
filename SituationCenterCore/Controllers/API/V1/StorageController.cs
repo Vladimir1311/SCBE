@@ -110,6 +110,8 @@ namespace SituationCenterCore.Controllers.API.V1
         {
             var owner = folderPath.Substring(0, folderPath.IndexOf("/") == -1 ? folderPath.Length : folderPath.IndexOf("/"));
             var path = folderPath.Substring(owner.Length);
+            if (path.StartsWith("/") || path.StartsWith("\\"))
+                path = path.Substring(1);
             owner = owner == "self" ? userManager.GetUserId(User) : owner;
             return (owner, path);
         }

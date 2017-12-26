@@ -42,6 +42,8 @@ namespace IPResolver
 
             services.AddSingleton(SP => new RemoteServicesManager(5476, SP.GetService<ILogger<RemoteServicesManager>>()));
             services.AddTransient<IConfigsManager, FileConfigsManager>();
+
+            services.AddSignalR();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -49,6 +51,12 @@ namespace IPResolver
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
+
+            app.UseStaticFiles();
+            app.UseSignalR(route =>
+            {
+                route.MapHub<Views.View.IndexHub>("indexhub");
+            });
 
             app.UseMvc();
         }

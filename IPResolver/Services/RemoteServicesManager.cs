@@ -23,9 +23,10 @@ namespace IPResolver.Services
         private ConcurrentDictionary<string, TCPService> services = new ConcurrentDictionary<string, TCPService>();
         private List<TCPServiceUser> users = new List<TCPServiceUser>();
 
-        
-
         private readonly ILogger<RemoteServicesManager> logger;
+
+        public event Action<string> ServiceAdded = delegate { };
+        public event Action<string> ServiceClientAdded = delegate { };
 
         public RemoteServicesManager(int port, ILogger<RemoteServicesManager> logger)
         {
@@ -194,6 +195,7 @@ namespace IPResolver.Services
         {
             try
             {
+                ServiceClientAdded(targetService.InterfaceName);
                 targetService.Listeners.Add(user);
                 using (var reader = new BinaryReader(user.Connection.GetStream(), Encoding.Unicode, true))
                 {

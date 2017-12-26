@@ -3,6 +3,33 @@
     ViewData["Title"] = "Index";
 }
 @model IPResolver.Controllers.ViewController.ViewModel
+<script src="~/js/signalr-client-1.0.0-alpha2-final.min.js"></script>
+<script>
+    let hubUrl = window.location.origin + '/indexhub';
+    let httpConnection = new signalR.HttpConnection(hubUrl);
+    let hubConnection = new signalR.HubConnection(httpConnection);
+
+    hubConnection.on("newClient", function (data) {
+        var row = document.createElement("tr");
+        var name = document.createElement("td")
+        name.innerText = data;
+        var status = document.createElement("td")
+        status.innerText = "True";
+        var connectionTime = document.createElement("td")
+        connectionTime.innerText = "MOCK";
+        row.appendChild(name);
+        row.appendChild(status);
+        row.appendChild(connectionTime);
+        document.getElementById("clientsTable")
+            .appendChild(row);
+    });
+
+    let f = function(message) {
+        hubConnection.invoke("Some", message);
+    }
+
+    hubConnection.start();
+</script>
 <h1>TEST HEADER</h1>
 <h1>CCF Status</h1>
 <h2>Services</h2>
@@ -29,7 +56,7 @@
     }
 </table>
 <h2>Clients</h2>
-<table>
+<table id="clientsTable">
     <tr>
         <th>InterfaceName</th>
         <th>Status</th>

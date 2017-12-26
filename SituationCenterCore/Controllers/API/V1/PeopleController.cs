@@ -31,7 +31,7 @@ namespace SSituationCenterCore.Controllers.API.V1
         public async Task<MeResponse> Me()
         {
             var user = await repository.FindUser(User) ?? throw new ArgumentException();
-            return MeResponse.Create(user.RoomId);
+            return MeResponse.Create(user.RoomId, user.ToPresent());
         }
 
         [HttpPost]

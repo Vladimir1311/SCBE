@@ -91,5 +91,12 @@ namespace DocsToPictures.Models
                 }
             }
         }
+
+        public IEnumerable<string> GetSupportedExtensions()
+        {
+            return handlers
+                .Select(H => H.SupportedFormats)
+                .Aggregate((F, S) => F.Concat(S));
+        }
     }
 }

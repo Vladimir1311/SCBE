@@ -24,9 +24,20 @@
 </ul>
 
 <h2>Documents</h2>
-<ul>
-    @foreach (var file in Model.CurrentDirectory.Documents)
+<table>
+    <tr>
+        <th>Name</th>
+        <th>Size</th>
+        <th>Total pages</th>
+        <th>Ready pages</th>
+    </tr>
+    @foreach (var document in Model.CurrentDirectory.Documents)
     {
-        <li>@file.Name</li>
+    <tr>
+        <td>@document.Name</td>
+        <td>@document.Size</td>
+        <td>@document.PageCount</td>
+        <td>@document.ReadyCount</td>
+    </tr>
     }
-</ul>
+</table>

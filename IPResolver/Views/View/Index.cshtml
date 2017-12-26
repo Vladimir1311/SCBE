@@ -41,11 +41,11 @@
     @foreach (var client in Model.Users)
     {
         <tr>
-            <th>@client.InterfaceName</th>
-            <th>@client.Connection.Connected</th>
-            <th>@(DateTime.Now - client.ConnectionTime)</th>
-            <th>@(DateTime.Now - client.LastPing)</th>
-            <th>@(client.PingTime)</th>
+            <th>@client?.InterfaceName</th>
+            <th>@client?.Connection.Connected</th>
+            <th>@(DateTime.Now - client?.ConnectionTime)</th>
+            <th>@(DateTime.Now - client?.LastPing)</th>
+            <th>@(client?.PingTime)</th>
         </tr>
     }
 </table>

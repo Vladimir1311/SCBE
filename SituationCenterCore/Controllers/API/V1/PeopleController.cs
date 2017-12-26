@@ -28,10 +28,10 @@ namespace SSituationCenterCore.Controllers.API.V1
             this.repository = repository;
         }
 
-        public async Task<URespose<Guid>> Me()
+        public async Task<MeResponse> Me()
         {
             var user = await repository.FindUser(User) ?? throw new ArgumentException();
-            return user.RoomId;
+            return MeResponse.Create(user.RoomId, user.ToPresent());
         }
 
         [HttpPost]

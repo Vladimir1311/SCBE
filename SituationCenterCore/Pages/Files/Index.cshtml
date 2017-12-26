@@ -3,41 +3,46 @@
 @{
     ViewData["Title"] = "Files storage";
 }
-<h2>Dirs</h2>
-<ul>
-    @foreach (var dir in Model.CurrentDirectory.Directories)
-    {
-        <li>@dir.Name</li>
-    }
-</ul>
-<h2>Files</h2>
-<form method="post" enctype="multipart/form-data" accept=".doc,.docx">
-    <input type="file" name="files" />
-    <input type="submit" />
-</form>
-<ul>
+<dir class="row">
+    <div class="col-lg-6">
+    <h2>Dirs</h2>
+    <ul>
+        @foreach (var dir in Model.CurrentDirectory.Directories)
+        {
+            <li>@dir.Name</li>
+        }
+    </ul>
+    <h2>Files</h2>
+    <form method="post" enctype="multipart/form-data" accept=".doc,.docx">
+        <input type="file" name="files" />
+        <input type="submit" />
+    </form>
+    <ul>
 
-    @foreach (var file in Model.CurrentDirectory.Files)
-    {
-        <li>@file.Name</li>
-    }
-</ul>
-
-<h2>Documents</h2>
-<table>
-    <tr>
-        <th>Name</th>
-        <th>Size</th>
-        <th>Total pages</th>
-        <th>Ready pages</th>
-    </tr>
-    @foreach (var document in Model.CurrentDirectory.Documents)
-    {
-    <tr>
-        <td>@document.Name</td>
-        <td>@document.Size</td>
-        <td>@document.PageCount</td>
-        <td>@document.ReadyCount</td>
-    </tr>
-    }
-</table>
+        @foreach (var file in Model.CurrentDirectory.Files)
+        {
+            <li>@file.Name</li>
+        }
+    </ul>
+    </div>
+    <div class="col-lg-6">
+        <h2>Documents</h2>
+        <table class="table-bordered table-hover">
+            <tr>
+                <th>Name</th>
+                <th>Size</th>
+                <th>Total pages</th>
+                <th>Ready pages</th>
+            </tr>
+            @foreach (var document in Model.CurrentDirectory.Documents)
+            {
+                <tr>
+                    <td>@document.Name</td>
+                    <td>@document.Size</td>
+                    <td>@document.PageCount</td>
+                    <td>@document.ReadyCount</td>
+                </tr>
+            }
+        </table>
+    </div>
+</dir>

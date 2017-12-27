@@ -195,7 +195,7 @@ namespace IPResolver.Services
         {
             try
             {
-                ServiceClientAdded(targetService.InterfaceName);
+                //ServiceClientAdded(targetService.InterfaceName);
                 targetService.Listeners.Add(user);
                 using (var reader = new BinaryReader(user.Connection.GetStream(), Encoding.Unicode, true))
                 {

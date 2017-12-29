@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -21,7 +22,17 @@ namespace IPResolver
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            string connection = Configuration.GetConnectionString("DefaultConnection");
+            
+            //services.AddDbContext<ServicesContext>(options =>
+              //  options.UseSqlServer(connection));
+
             services.AddMvc();
+
+         //   services.AddSingleton(SP => new RemoteServicesManager(5476, SP.GetService<ILogger<RemoteServicesManager>>()));
+            //services.AddTransient<IConfigsManager, FileConfigsManager>();
+            
+            services.AddSignalR();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -38,6 +49,11 @@ namespace IPResolver
             }
 
             app.UseStaticFiles();
+
+            app.UseSignalR(route =>
+            {
+                //route.MapHub<Pages.View.IndexHub>("indexhub");
+            });
 
             app.UseMvc(routes =>
             {

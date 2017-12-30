@@ -20,7 +20,7 @@ namespace IPResolver.Models
         private TcpListener listener;
 
         private List<RemotePoint> points = new List<RemotePoint>();
-
+        private ConcurrentDictionary<Guid, RemotePoint> waitedMessages = new ConcurrentDictionary<Guid, RemotePoint>();
 
         private readonly ILogger<RemoteServicesManager> logger;
         private readonly ILoggerFactory loggerFactory;
@@ -182,7 +182,7 @@ namespace IPResolver.Models
             }
         }
 
-        private async Task HandleClientLogic(TCPServiceUser user, TCPService targetService)
+        private async Task HandleClientLogic(RemotePoint user, RemotePoint targetService)
         {
             try
             {
@@ -192,16 +192,14 @@ namespace IPResolver.Models
                 {
                     while (true)
                     {
-                        long packLength = reader.ReadInt64();
-                        Guid packId = new Guid(reader.ReadBytes(16));
-                        MessageType type = (MessageType)reader.ReadByte();
+                        var (packLength, packId, type) = user.ReadHeader();
                         if (type == MessageType.PingResponse)
                         {
                             logger.LogDebug($"read ping response, wait for normal code");
-                            user.SetPing(packId);
+                            user.Pinger.SetPing(packId);
                             continue;
                         }
-                        logger.LogInformation($"read packet {packId} type {type} to service {targetService.InterfaceName}");
+                        logger.LogTrace($"read packet {packId} type {type} to service {targetService.SelfInterfaceName}");
                         user.WaitedPacks.Add(packId);
 
                         await targetService.SendMessage((int)packLength, packId, type, reader.BaseStream);

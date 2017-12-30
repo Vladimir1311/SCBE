@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -25,6 +26,7 @@ namespace IPResolver.Models
 
         private TcpClient connection { get; set; }
         private HashSet<CreateInstanceSet> instanceCreating =new HashSet<CreateInstanceSet>();
+        private BinaryReader reader;
 
         public RemotePoint(ILoggerFactory factory)
         {
@@ -53,6 +55,15 @@ namespace IPResolver.Models
             }
         }
 
+        public (long length, Guid packId, MessageType messageType) ReadHeader()
+        {
+            long length = reader.ReadInt64();
+            Guid packId = new Guid(reader.ReadBytes(16));
+            MessageType type = (MessageType)reader.ReadByte();
+            return (length, packId, type);
+        }
+
+
         public async Task<int> CreateInstanse()
         {
             if (SelfInterfaceName == null)
@@ -80,6 +91,7 @@ namespace IPResolver.Models
         internal void InitConnection(TcpClient client)
         {
             connection = client;
+            reader = new BinaryReader(connection.GetStream(), Encoding.UTF8, true);
         }
     }
 

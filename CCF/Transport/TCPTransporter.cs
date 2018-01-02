@@ -89,7 +89,7 @@ namespace CCF.Transport
                 {
                     writer.Write((long)(16 + 1));
                     writer.Write(packId.ToByteArray());
-                    writer.Write((byte)MessageType.ServiceCreateResponse);
+                    writer.Write((byte)MessageType.CreateInstanceResponse);
                     writer.Write(serviceId);
                 }
             }
@@ -159,7 +159,7 @@ namespace CCF.Transport
                             await SendPingResponse(id);
                             logger.LogDebug($"Sended ping response");
                             break;
-                        case MessageType.ServiceCreateRequest:
+                        case MessageType.CreateInstanceRequest:
                             logger.LogDebug("need new service instance");
                             await OnNeedNewService?.Invoke(id);
                             break;

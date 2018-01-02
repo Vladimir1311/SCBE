@@ -14,27 +14,27 @@ namespace IPResolver.Controllers
     public class TCPRegisterController : Controller
     {
 
-        private readonly RemoteServicesManager remoteServices;
+        private readonly RemoteServicesManager servicesManager;
 
         public TCPRegisterController(RemoteServicesManager remoteServices)
         {
-            this.remoteServices = remoteServices;
+            servicesManager = remoteServices;
         }
 
-        public Response RegisterService(string interfaceName)
+        public Response RegisterServiceProvider(string interfaceName)
         {
             var password = CreatePassword();
-            remoteServices.AddService(interfaceName, password);
-            return new Response { Password = password, Port = remoteServices.Port };
+            servicesManager.AddServiceProviderQueue(interfaceName, password);
+            return new Response { Password = password, Port = servicesManager.Port };
         }
 
-        public async Task<Response> UseService(string interfaceName)
+        public Response ConnectoToService(string interfaceName)
         {
             var password = CreatePassword();
-            var serviceId = await remoteServices.AddServiceUser(interfaceName, password);
-            if (serviceId == -1)
+            if (!servicesManager.HasService(interfaceName))
                 return new Response { Success = false };
-            return new Response { Password = password, Port = remoteServices.Port, Id = serviceId };
+            servicesManager.AddToClientsQueue(password, interfaceName);
+            return new Response { Password = password, Port = servicesManager.Port};
         }
 
         private string CreatePassword()
@@ -49,6 +49,5 @@ namespace IPResolver.Controllers
         public bool Success { get; set; } = true;
         public string Password { get; set; }
         public int Port { get; set; }
-        public int Id { get; set; }
     }
 }

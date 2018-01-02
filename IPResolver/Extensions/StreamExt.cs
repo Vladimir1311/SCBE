@@ -1,4 +1,5 @@
-﻿using System;
+﻿using IPResolver.Models.Network;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -22,6 +23,11 @@ namespace IPResolver.Extensions
                 await target.WriteAsync(buffer, 0, readed);
                 length -= readed;
             }
+        }
+
+        public static Stream Partial(this Stream stream, long length)
+        {
+            return new PartialStream(stream, length);
         }
     }
 }

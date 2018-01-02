@@ -12,6 +12,7 @@ using System.Threading;
 using System.Collections.Concurrent;
 using CCF.Shared.Exceptions;
 using System.Threading.Tasks;
+using CCF.Messages;
 
 namespace CCF
 {

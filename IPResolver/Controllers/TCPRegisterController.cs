@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CCF.Shared.Http;
 using IPResolver.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -20,7 +21,7 @@ namespace IPResolver.Controllers
         {
             servicesManager = remoteServices;
         }
-
+        [Route("{interfaceName}")]
         public Response RegisterServiceProvider(string interfaceName)
         {
             var password = CreatePassword();
@@ -44,10 +45,5 @@ namespace IPResolver.Controllers
             return Encoding.ASCII.GetString(bytes);
         }
     }
-    public class Response
-    {
-        public bool Success { get; set; } = true;
-        public string Password { get; set; }
-        public int Port { get; set; }
-    }
+    
 }

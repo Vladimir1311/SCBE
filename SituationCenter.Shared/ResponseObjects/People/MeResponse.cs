@@ -1,5 +1,5 @@
 ﻿using Newtonsoft.Json;
-using SituationCenter.Shared.People;
+using SituationCenter.Shared.Models.People;
 using System;
 
 namespace SituationCenter.Shared.ResponseObjects.People

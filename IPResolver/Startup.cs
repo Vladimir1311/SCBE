@@ -2,11 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using IPResolver.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace IPResolver
 {
@@ -29,7 +31,7 @@ namespace IPResolver
 
             services.AddMvc();
 
-         //   services.AddSingleton(SP => new RemoteServicesManager(5476, SP.GetService<ILogger<RemoteServicesManager>>()));
+          services.AddSingleton(SP => new RemoteServicesManager(5476, SP.GetService<ILoggerFactory>()));
             //services.AddTransient<IConfigsManager, FileConfigsManager>();
             
             services.AddSignalR();

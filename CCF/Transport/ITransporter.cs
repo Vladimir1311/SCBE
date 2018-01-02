@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CCF.Messages;
+using System;
 using System.Threading.Tasks;
 
 namespace CCF.Transport
@@ -7,10 +8,9 @@ namespace CCF.Transport
     {
         event Func<InvokeMessage, Task> OnReceiveMessge;
         event Func<InvokeResult, Task> OnReceiveResult;
-        event Func<Guid, Task> OnNeedNewService;
+        event Func<string, Task> OnNeedNewService;
         event Action OnConnectionLost;
         Task SendMessage(InvokeMessage result);
         Task SendResult(InvokeResult result);
-        Task SetupNewService(Guid id, int serviceId);
     }
 }

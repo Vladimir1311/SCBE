@@ -27,7 +27,7 @@ namespace IPResolver.Models.Points
 
         public async Task<RemotePoint> GetServiceInstance(string instancePassword)
         {
-            var passwordBytes = Encoding.UTF8.GetBytes(instancePassword);
+            var passwordBytes = Encoding.ASCII.GetBytes(instancePassword);
             var waiter = new WaitClientPack
             {
                 password = instancePassword,

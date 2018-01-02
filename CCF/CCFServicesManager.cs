@@ -9,6 +9,7 @@ using CCF.Shared.Exceptions;
 using System.Reflection.Emit;
 using System.Reflection;
 using System.Linq;
+using CCF.Shared.Http;
 
 namespace CCF
 {
@@ -23,19 +24,11 @@ namespace CCF
 
         public static void RegisterService<T>(Func<T> serviceInvoker)
         {
-            var result = new HttpClient().GetStringAsync($"http://{SITE_IP}:{SITE_PORT}/ip/TCPRegister/registerService?interfaceName={typeof(T).Name}").Result;
-            var obj = JObject.Parse(result);
-            var password = obj["password"].ToObject<string>();
-            var port = obj["port"].ToObject<int>();
-            var transporter = new TCPTransporter(SITE_IP, port, password, new ConsoleLogger());
-            transporter.OnConnectionLost += () => Console.WriteLine($"connection aborted!!!!!");
-            ServiceCode.Create<T>(transporter);
-            transporter.OnNeedNewService += async G =>
-            {
-                Console.WriteLine("Try get new instance");
-                var invokerId = ServiceCode.RegisterInvoker(serviceInvoker(), typeof(T));
-                await transporter.SetupNewService(G, invokerId);
-            };
+            var result = new HttpClient().GetStringAsync($"http://{SITE_IP}:{SITE_PORT}/ip/TCPRegister/RegisterServiceProvider/{typeof(T).Name}").Result;
+            var data = JObject.Parse(result).ToObject<Response>();
+
+            var providerTransporter = new TCPTransporter(SITE_IP, data.Port, data.Password, new ConsoleLogger());
+            var serviceProvider = new ServiceProvider<T>(serviceInvoker, providerTransporter);
         }
 
 

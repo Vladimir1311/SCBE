@@ -2,7 +2,7 @@
 using System;
 using System.IO;
 
-namespace CCF
+namespace CCF.Messages
 {
     internal class InvokeResult
     {

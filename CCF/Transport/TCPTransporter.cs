@@ -10,6 +10,7 @@ using CCF.Extensions;
 using Microsoft.Extensions.Logging;
 using CCF.Shared;
 using System.Threading;
+using CCF.Messages;
 
 namespace CCF.Transport
 {
@@ -19,7 +20,7 @@ namespace CCF.Transport
         private SemaphoreSlim semaphoreSlim = new SemaphoreSlim(1, 1);
         public event Func<InvokeMessage, Task> OnReceiveMessge;
         public event Func<InvokeResult, Task> OnReceiveResult;
-        public event Func<Guid, Task> OnNeedNewService;
+        public event Func<string, Task> OnNeedNewService;
         public event Action OnConnectionLost;
 
         private object locker = new object();
@@ -85,7 +86,7 @@ namespace CCF.Transport
             await semaphoreSlim.WaitAsync();
             try
             {
-                using (var writer = new BinaryWriter(tcpClient.GetStream(), Encoding.Unicode, true))
+                using (var writer = new BinaryWriter(tcpClient.GetStream(), Encoding.UTF8, true))
                 {
                     writer.Write((long)(16 + 1));
                     writer.Write(packId.ToByteArray());
@@ -104,7 +105,7 @@ namespace CCF.Transport
             await semaphoreSlim.WaitAsync();
             try
             {
-                using (var writer = new BinaryWriter(tcpClient.GetStream(), Encoding.Unicode, true))
+                using (var writer = new BinaryWriter(tcpClient.GetStream(), Encoding.UTF8, true))
                 {
                     writer.Write((long)(16 + 1));
                     writer.Write(id.ToByteArray());
@@ -161,7 +162,8 @@ namespace CCF.Transport
                             break;
                         case MessageType.CreateInstanceRequest:
                             logger.LogDebug("need new service instance");
-                            await OnNeedNewService?.Invoke(id);
+                            var password = await ReadPassword(contentStream, (int)size - 17);
+                            await OnNeedNewService?.Invoke(password);
                             break;
                         default:
                             logger.LogWarning($"incorrect message type {type}");
@@ -175,10 +177,18 @@ namespace CCF.Transport
             }
         }
 
+        private async Task<string> ReadPassword(Stream stream, int length)
+        {
+            var bytes = new byte[length];
+            await stream.ReadAsync(bytes, 0, length);
+            //ASCII FOR PASSWORD!!!
+            return Encoding.ASCII.GetString(bytes);
+        }
+
         private InvokeMessage DecodeMessage(MemoryStream contentStream, Guid id)
         {
             InvokeMessage message = new InvokeMessage();
-            using (var reader = new BinaryReader(contentStream, Encoding.Unicode))
+            using (var reader = new BinaryReader(contentStream, Encoding.UTF8))
             {
                 message.Id = id;
                 message.SubObjectId = reader.ReadInt32();
@@ -201,7 +211,7 @@ namespace CCF.Transport
         private Stream EncodeMessage(InvokeMessage message)
         {
             var outStream = new MemoryStream();
-            using (BinaryWriter writer = new BinaryWriter(outStream, Encoding.Unicode, true))
+            using (BinaryWriter writer = new BinaryWriter(outStream, Encoding.UTF8, true))
             {
                 writer.Write(long.MaxValue);
                 writer.Write(message.Id.ToByteArray());
@@ -226,7 +236,7 @@ namespace CCF.Transport
         private InvokeResult DecodeResult(MemoryStream contentStream, Guid id)
         {
             InvokeResult result = new InvokeResult();
-            using (var reader = new BinaryReader(contentStream, Encoding.Unicode))
+            using (var reader = new BinaryReader(contentStream, Encoding.UTF8))
             {
                 result.Id = id;
                 result.SubObjectId = reader.ReadInt32();
@@ -247,7 +257,7 @@ namespace CCF.Transport
         private Stream EncodeResult(InvokeResult result)
         {
             var outStream = new MemoryStream();
-            using (BinaryWriter writer = new BinaryWriter(outStream, Encoding.Unicode, true))
+            using (BinaryWriter writer = new BinaryWriter(outStream, Encoding.UTF8, true))
             {
                 writer.Write(long.MaxValue);
                 writer.Write(result.Id.ToByteArray());

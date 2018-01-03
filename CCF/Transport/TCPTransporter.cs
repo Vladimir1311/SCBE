@@ -193,7 +193,7 @@ namespace CCF.Transport
                 message.Id = id;
                 message.SubObjectId = reader.ReadInt32();
                 message.MethodName = reader.ReadString();
-                message.Args = JsonConvert.DeserializeObject<Dictionary<string, JToken>>(reader.ReadString());
+                message.Args = JsonConvert.DeserializeObject<Dictionary<string, Value>>(reader.ReadString());
                 message.Streams = new Dictionary<string, Stream>();
                 while (contentStream.Position != contentStream.Length)
                 {

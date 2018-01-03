@@ -8,6 +8,7 @@ namespace CCF.Messages
     {
         Primitive,
         HardObject,
-        Stream
+        Stream,
+        Null
     }
 }

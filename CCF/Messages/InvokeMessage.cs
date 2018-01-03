@@ -10,7 +10,9 @@ namespace CCF.Messages
     {
         public Guid Id { get; set; }
         public string MethodName { get; set; }
-        public Dictionary<string, Value> Args { get; set; } = new Dictionary<string, Value>();
+        public Dictionary<string, Value> Args { get; set; }
+        [JsonIgnore]
+        public Dictionary<string, Stream> Streams { get; set; }
         public int SubObjectId { get; set; } = -1;
     }
 }

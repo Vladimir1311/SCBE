@@ -30,7 +30,7 @@ namespace CCF
                 if (message.Args.TryGetValue(param.Name, out var token))
                     parameters.Add(token.Data);
                 else
-                    throw new Exception($"Parameter {param.Name} was nott found in InvokeMessage");
+                    throw new Exception($"Parameter {param.Name} was not found in InvokeMessage");
             }
             return targetMethod.Invoke(instance, parameters.ToArray());
         }

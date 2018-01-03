@@ -129,7 +129,7 @@ namespace CCF
                 }
                 else
                 {
-                    message.Args[param.Name] = JToken.FromObject(argument);
+                    message.Args[param.Name] = Value.FromObject(argument);
                 }
             }
             var data = JsonConvert.SerializeObject(message, Formatting.Indented);

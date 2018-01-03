@@ -31,6 +31,7 @@ namespace CCF
         {
             subWrappers[0] = this;
             transporter.OnReceiveMessge += RecieveMessage;
+            this.transporter = transporter;
         }
 
         private InstanceWrapper(CodeInvoker invoker, long id, ConcurrentDictionary<long, InstanceWrapper> wrappersCollection)

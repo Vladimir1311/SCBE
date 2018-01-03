@@ -18,7 +18,7 @@ namespace CCF
             instanceCreater = serviceInvoker ?? throw new ArgumentNullException(nameof(serviceInvoker));
             this.transporterCreator = transporterCreator ?? throw new ArgumentNullException(nameof(transporterCreator));
             transporter.OnNeedNewInstance += NeedNewInstance;
-            this.transporter = transporterCreator(password);
+            transporter = transporterCreator(password);
         }
 
         private Task NeedNewInstance(string password)

@@ -28,7 +28,7 @@ namespace IPResolver.Controllers
             servicesManager.AddServiceProviderQueue(interfaceName, password);
             return new Response { Password = password, Port = servicesManager.Port };
         }
-
+        [Route("{interfaceName}")]
         public Response ConnectoToService(string interfaceName)
         {
             var password = CreatePassword();

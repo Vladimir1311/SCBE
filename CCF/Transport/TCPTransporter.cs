@@ -20,7 +20,7 @@ namespace CCF.Transport
         private SemaphoreSlim semaphoreSlim = new SemaphoreSlim(1, 1);
         public event Func<InvokeMessage, Task> OnReceiveMessge;
         public event Func<InvokeResult, Task> OnReceiveResult;
-        public event Func<string, Task> OnNeedNewService;
+        public event Func<string, Task> OnNeedNewInstance;
         public event Action OnConnectionLost;
 
         private object locker = new object();
@@ -163,7 +163,7 @@ namespace CCF.Transport
                         case MessageType.CreateInstanceRequest:
                             logger.LogDebug("need new service instance");
                             var password = await ReadPassword(contentStream, (int)size - 17);
-                            await OnNeedNewService?.Invoke(password);
+                            await OnNeedNewInstance?.Invoke(password);
                             break;
                         default:
                             logger.LogWarning($"incorrect message type {type}");
@@ -235,13 +235,12 @@ namespace CCF.Transport
         }
         private InvokeResult DecodeResult(MemoryStream contentStream, Guid id)
         {
-            InvokeResult result = new InvokeResult();
+            InvokeResult result;
             using (var reader = new BinaryReader(contentStream, Encoding.UTF8))
             {
+
+                result = JsonConvert.DeserializeObject<InvokeResult>(reader.ReadString());
                 result.Id = id;
-                result.SubObjectId = reader.ReadInt32();
-                result.IsPrimitive = reader.ReadBoolean();
-                result.Value = JToken.Parse(reader.ReadString());
                 if (contentStream.Position != contentStream.Length)
                 {
                     var size = (int)reader.ReadInt64();
@@ -262,9 +261,11 @@ namespace CCF.Transport
                 writer.Write(long.MaxValue);
                 writer.Write(result.Id.ToByteArray());
                 writer.Write((byte)MessageType.Result);
-                writer.Write(result.SubObjectId);
-                writer.Write(result.IsPrimitive);
-                writer.Write(result.Value?.ToString(Formatting.Indented) ?? JValue.CreateNull().ToString(Formatting.Indented));
+                writer.Write(JsonConvert.SerializeObject(result, new JsonSerializerSettings
+                {
+                    NullValueHandling = NullValueHandling.Ignore
+                }));
+
                 if (result.StreamValue != null)
                     WriteStream(writer, result.StreamValue);
                 outStream.Position = 0;

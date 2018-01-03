@@ -26,9 +26,9 @@ namespace CCF
         {
             var result = new HttpClient().GetStringAsync($"http://{SITE_IP}:{SITE_PORT}/ip/TCPRegister/RegisterServiceProvider/{typeof(T).Name}").Result;
             var data = JObject.Parse(result).ToObject<Response>();
-
-            var providerTransporter = new TCPTransporter(SITE_IP, data.Port, data.Password, new ConsoleLogger());
-            var serviceProvider = new ServiceProvider<T>(serviceInvoker, providerTransporter);
+            ITransporter transporterCreating(string S) =>
+                new TCPTransporter(SITE_IP, data.Port, S, new ConsoleLogger());
+            var serviceProvider = new ServiceProvider<T>(serviceInvoker, data.Password, transporterCreating);
         }
 
 

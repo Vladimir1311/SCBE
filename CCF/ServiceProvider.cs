@@ -9,21 +9,25 @@ namespace CCF
 {
     internal class ServiceProvider<T>
     {
-        private readonly Func<T> serviceInvoker;
+        private readonly Func<T> instanceCreater;
+        private readonly Func<string, ITransporter> transporterCreator;
         private readonly ITransporter transporter;
 
-        public ServiceProvider(Func<T> serviceInvoker, ITransporter transporter)
+        public ServiceProvider(Func<T> serviceInvoker, string password, Func<string, ITransporter> transporterCreator)
         {
-            this.serviceInvoker = serviceInvoker;
-            this.transporter = transporter;
-            transporter.OnReceiveMessge += Transporter_OnReceiveMessge;
+            instanceCreater = serviceInvoker ?? throw new ArgumentNullException(nameof(serviceInvoker));
+            this.transporterCreator = transporterCreator ?? throw new ArgumentNullException(nameof(transporterCreator));
+            transporter.OnNeedNewInstance += NeedNewInstance;
+            this.transporter = transporterCreator(password);
         }
 
-        private async Task Transporter_OnReceiveMessge(InvokeMessage arg)
+        private Task NeedNewInstance(string password)
         {
-            await Task.CompletedTask;
-            var service = serviceInvoker();
-
+            var instanceTransporter = transporterCreator(password);
+            var instance = instanceCreater();
+            var codeInvoker = new CodeInvoker(instance, typeof(T));
+            InstanceWrapper rootWrapper = new InstanceWrapper(codeInvoker, instanceTransporter);
+            return Task.CompletedTask;
         }
     }
 }

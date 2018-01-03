@@ -8,7 +8,7 @@ namespace CCF.Transport
     {
         event Func<InvokeMessage, Task> OnReceiveMessge;
         event Func<InvokeResult, Task> OnReceiveResult;
-        event Func<string, Task> OnNeedNewService;
+        event Func<string, Task> OnNeedNewInstance;
         event Action OnConnectionLost;
         Task SendMessage(InvokeMessage result);
         Task SendResult(InvokeResult result);

@@ -20,7 +20,7 @@ namespace IPResolver
         public static IWebHost BuildWebHost(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
                 .UseStartup<Startup>()
-                .UseUrls("http://localhost:5100")
+                .UseUrls("http://*:5100")
                 .Build();
     }
 }

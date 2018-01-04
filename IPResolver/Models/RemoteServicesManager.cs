@@ -119,48 +119,47 @@ namespace IPResolver.Models
 
         private async Task HandleTcpConnection(TcpClient client)
         {
-            using (client)
+
+            string password;
+
+            using (BinaryReader reader = new BinaryReader(client.GetStream(), Encoding.ASCII, true))
             {
-                string password;
-
-                using (BinaryReader reader = new BinaryReader(client.GetStream(), Encoding.ASCII, true))
-                {
-                    password = reader.ReadString();
-                }
-                var remotePoint = new RemotePoint(client, loggerFactory);
-                remotePoint.Password = password;
-                if (serviceProviders.Any(P => P.WaitedClient(remotePoint)))
-                    return;
-
-                if (serviceProvidersQueue.TryGet(P => P.password == password, out var providerPair))
-                {
-
-                    var provider = new ServiceProvider(
-                        remotePoint,
-                        providerPair.interfaceName,
-                        loggerFactory);
-                    serviceProviders.Add(provider);
-                    serviceProvidersQueue.Remove(providerPair);
-                    logger.LogDebug($"Registered serviceProvider with interface {providerPair.interfaceName}");
-                    await ProviderWork(provider);
-                    return;
-                }
-
-                if (clientsQueue.TryGet(C => C.password == password, out var clientPair))
-                {
-                    if (!serviceProviders.TryGet(P => P.InterfaceName == clientPair.interfaceName,
-                        out var serviceProvider))
-                    {
-                        client.Dispose();
-                        logger.LogWarning($"Service is not exist {clientPair.interfaceName}");
-                        return;
-                    }
-                    var instance = await serviceProvider.GetServiceInstance(password);
-                    var link = new PointsLinker(remotePoint, instance, loggerFactory.CreateLogger<PointsLinker>());
-                    await link.StartConnection();
-                }
-
+                password = reader.ReadString();
             }
+            var remotePoint = new RemotePoint(client, loggerFactory);
+            remotePoint.Password = password;
+            if (serviceProviders.Any(P => P.WaitedClient(remotePoint)))
+                return;
+
+            if (serviceProvidersQueue.TryGet(P => P.password == password, out var providerPair))
+            {
+
+                var provider = new ServiceProvider(
+                    remotePoint,
+                    providerPair.interfaceName,
+                    loggerFactory);
+                serviceProviders.Add(provider);
+                serviceProvidersQueue.Remove(providerPair);
+                logger.LogDebug($"Registered serviceProvider with interface {providerPair.interfaceName}");
+                await ProviderWork(provider);
+                return;
+            }
+
+            if (clientsQueue.TryGet(C => C.password == password, out var clientPair))
+            {
+                if (!serviceProviders.TryGet(P => P.InterfaceName == clientPair.interfaceName,
+                    out var serviceProvider))
+                {
+                    client.Dispose();
+                    logger.LogWarning($"Service is not exist {clientPair.interfaceName}");
+                    return;
+                }
+                var instance = await serviceProvider.GetServiceInstance(password);
+                var link = new PointsLinker(remotePoint, instance, loggerFactory.CreateLogger<PointsLinker>());
+                await link.StartConnection();
+            }
+
+
         }
 
         private async Task ProviderWork(ServiceProvider provider)

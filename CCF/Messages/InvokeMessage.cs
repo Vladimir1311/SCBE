@@ -13,6 +13,6 @@ namespace CCF.Messages
         public Dictionary<string, Value> Args { get; set; }
         [JsonIgnore]
         public Dictionary<string, Stream> Streams { get; set; }
-        public int SubObjectId { get; set; } = -1;
+        public long SubObjectId { get; set; } = -1;
     }
 }

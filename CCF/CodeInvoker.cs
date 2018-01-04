@@ -20,19 +20,45 @@ namespace CCF
             this.instanceType = instanceType ?? throw new ArgumentNullException(nameof(instanceType));
         }
 
-        public object Invoke(InvokeMessage message)
+
+
+        public object Invoke(InvokeMessage message, Func<long, Type, object> hardbjectFor)
         {
-            var targetMethod = GetTargetMethod(message.MethodName) 
+            var targetMethod = GetTargetMethod(message.MethodName)
                 ?? throw new Exception($"Method {message.MethodName} was not found");
-            var parameters = new List<object>();
-            foreach (var param in targetMethod.GetParameters())
+            var parameters = GetArguments(message, hardbjectFor, targetMethod);
+
+            return targetMethod.Invoke(instance, parameters);
+        }
+
+        private object[] GetArguments(InvokeMessage message, Func<long, Type, object> hardbjectFor, MethodInfo methodInfo)
+        {
+            var args = new List<object>();
+            foreach (var param in methodInfo.GetParameters())
             {
                 if (message.Args.TryGetValue(param.Name, out var token))
-                    parameters.Add(token.Data);
+                {
+                    switch (token.Type)
+                    {
+                        case Messages.ValueType.Null:
+                            args.Add(null);
+                            break;
+                        case Messages.ValueType.Primitive:
+                            args.Add(token.Data.ToObject(param.ParameterType));
+                            break;
+                        case Messages.ValueType.HardObject:
+                            args.Add(hardbjectFor(token.Data.ToObject<long>(),
+                                param.ParameterType));
+                            break;
+                    }
+                }
+                else
+                if (message.Streams.TryGetValue(param.Name, out var stream))
+                    args.Add(stream);
                 else
                     throw new Exception($"Parameter {param.Name} was not found in InvokeMessage");
             }
-            return targetMethod.Invoke(instance, parameters.ToArray());
+            return args.ToArray();
         }
 
         private MethodInfo GetTargetMethod(string methodName)

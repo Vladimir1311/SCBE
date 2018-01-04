@@ -16,11 +16,14 @@ namespace CCF
     public class CCFServicesManager
     {
 
-        private const string SITE_IP = "52.163.114.252";
-        private const string SITE_PORT = "80";
+        //private const string SITE_IP = "52.163.114.252";
+        //private const string SITE_PORT = "80";
 
-        //private const string SITE_IP = "127.0.0.1";
-        //private const string SITE_PORT = "5100";
+        private static string SITE_IP = "127.0.0.1";
+        private static string SITE_PORT = "5100";
+
+        public static void SetHostPort(string host, string port)
+            => (SITE_IP, SITE_PORT) = (host, port);
 
         public static void RegisterService<T>(Func<T> serviceInvoker)
         {

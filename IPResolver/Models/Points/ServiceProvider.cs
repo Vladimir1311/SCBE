@@ -24,6 +24,15 @@ namespace IPResolver.Models.Points
             logger = factory.CreateLogger<ServiceProvider>();
         }
 
+        public async Task HaveConnection()
+        {
+            await Task.CompletedTask;
+            while (true)
+            {
+                var data = providerPoint.ReadMessage();
+                logger.LogError("WTF?! Service provider send a message!");
+            }
+        }
 
         public async Task<RemotePoint> GetServiceInstance(string instancePassword)
         {
@@ -31,7 +40,7 @@ namespace IPResolver.Models.Points
             var waiter = new WaitClientPack
             {
                 password = instancePassword,
-                semaphore = new SemaphoreSlim(1, 1)
+                semaphore = new SemaphoreSlim(0, 1)
             };
             waitPacks.Add(waiter);
             await providerPoint.SendMessage(
@@ -53,6 +62,8 @@ namespace IPResolver.Models.Points
             targetWaitPack.semaphore.Release();
             return true;
         }
+
+        public async Task Ping() => await providerPoint.Pinger.SendPing();
 
 
         private class WaitClientPack

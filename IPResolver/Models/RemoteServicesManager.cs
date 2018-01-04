@@ -49,6 +49,33 @@ namespace IPResolver.Models
                 }
             }
             Task.Run(HandleTcpConnectionAccept);
+            Task.Run(PingAll);
+        }
+
+        private async Task PingAll()
+        {
+            while (true)
+            {
+                await Task.Delay(TimeSpan.FromMinutes(15));
+                try
+                {
+                    foreach (var provider in serviceProviders.ToArray())
+                        try
+                        {
+                            await provider.Ping();
+                        }
+                        catch (Exception ex)
+                        {
+                            serviceProviders.Remove(provider);
+                            logger.LogWarning($"Can't send ping to {provider.InterfaceName}", ex);
+                        }
+                }
+                catch (Exception ex)
+                {
+                    logger.LogWarning("Error while sending Ping", ex);
+                }
+            }
+
         }
 
         internal int Port { get; private set; }
@@ -101,7 +128,7 @@ namespace IPResolver.Models
                     password = reader.ReadString();
                 }
                 var remotePoint = new RemotePoint(client, loggerFactory);
-
+                remotePoint.Password = password;
                 if (serviceProviders.Any(P => P.WaitedClient(remotePoint)))
                     return;
 
@@ -115,12 +142,13 @@ namespace IPResolver.Models
                     serviceProviders.Add(provider);
                     serviceProvidersQueue.Remove(providerPair);
                     logger.LogDebug($"Registered serviceProvider with interface {providerPair.interfaceName}");
+                    await ProviderWork(provider);
                     return;
                 }
 
                 if (clientsQueue.TryGet(C => C.password == password, out var clientPair))
                 {
-                    if (!serviceProviders.TryGet(P => P.InterfaceName == clientPair.interfaceName, 
+                    if (!serviceProviders.TryGet(P => P.InterfaceName == clientPair.interfaceName,
                         out var serviceProvider))
                     {
                         client.Dispose();
@@ -135,5 +163,17 @@ namespace IPResolver.Models
             }
         }
 
+        private async Task ProviderWork(ServiceProvider provider)
+        {
+            try
+            {
+                await provider.HaveConnection();
+            }
+            catch
+            {
+                serviceProviders.Remove(provider);
+                logger.LogInformation($"Service Provider disconnected");
+            }
+        }
     }
 }

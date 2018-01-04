@@ -110,7 +110,9 @@ namespace CCF
             {
                 Id = Guid.NewGuid(),
                 MethodName = invocation.Method.Name,
-                SubObjectId = objectId
+                SubObjectId = objectId,
+                Args = new Dictionary<string, Value>(),
+                Streams = new Dictionary<string, Stream>()
             };
 
             if (invocation.Method.Name == "Dispose" && wrapped)

@@ -22,10 +22,15 @@ namespace IPResolver.Models.Points
         public DateTime ConnectionTime { get; set; }
         public Pinger Pinger { get; }
         public string Password { get; set; }
+        public event Action ConnectionLost = delegate {};
+
 
         private readonly TcpClient tcpClient;
         private readonly ILogger<RemotePoint> logger;
         private readonly BinaryReader reader;
+
+        public string Ip => (tcpClient.Client.RemoteEndPoint as IPEndPoint).Address.ToString();
+        public string Port => (tcpClient.Client.RemoteEndPoint as IPEndPoint).Port.ToString();
 
         public RemotePoint(TcpClient client, ILoggerFactory factory)
         {
@@ -55,6 +60,7 @@ namespace IPResolver.Models.Points
             catch(Exception ex)
             {
                 logger.LogWarning(ex, "Error while sending");
+                ConnectionLost();
                 throw;
             }
             finally
@@ -82,6 +88,7 @@ namespace IPResolver.Models.Points
             catch (Exception ex)
             {
                 logger.LogWarning(ex, "Error while reading");
+                ConnectionLost();
                 throw;
             }
             finally

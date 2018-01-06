@@ -4,3 +4,23 @@
     ViewData["Title"] = "Home page";
 }
 
+<div class="row">
+    <h2>Service Providers</h2>
+    <table id="services">
+        <tr>
+            <th>Service Name</th>
+            <th>IP</th>
+            <th>Port</th>
+            <th>Port</th>
+        </tr>
+        @foreach(var provider in Model.Providers)
+        {
+            <tr>
+                <td>@provider.InterfaceName</td>
+                <td>@provider.providerPoint.Ip</td>
+                <td>@provider.providerPoint.Port</td>
+                <td>@provider.InterfaceName</td>
+            </tr>
+        }
+    </table>
+</div>

@@ -191,7 +191,7 @@ namespace CCF.Transport
             using (var reader = new BinaryReader(contentStream, Encoding.UTF8))
             {
                 message.Id = id;
-                message.SubObjectId = reader.ReadInt32();
+                message.SubObjectId = reader.ReadInt64();
                 message.MethodName = reader.ReadString();
                 message.Args = JsonConvert.DeserializeObject<Dictionary<string, Value>>(reader.ReadString());
                 message.Streams = new Dictionary<string, Stream>();

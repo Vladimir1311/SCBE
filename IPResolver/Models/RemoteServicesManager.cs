@@ -126,8 +126,10 @@ namespace IPResolver.Models
             {
                 password = reader.ReadString();
             }
-            var remotePoint = new RemotePoint(client, loggerFactory);
-            remotePoint.Password = password;
+            var remotePoint = new RemotePoint(client, loggerFactory)
+            {
+                Password = password
+            };
             if (serviceProviders.Any(P => P.WaitedClient(remotePoint)))
                 return;
 

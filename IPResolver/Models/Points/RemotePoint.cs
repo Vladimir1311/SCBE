@@ -17,19 +17,22 @@ namespace IPResolver.Models.Points
     public class RemotePoint : IDisposable
     {
         private SemaphoreSlim sendingMessageSemaphore = new SemaphoreSlim(1, 1);
+        private SemaphoreSlim readindMessageSemaphore = new SemaphoreSlim(1, 1);
 
         public DateTime ConnectionTime { get; set; }
         public Pinger Pinger { get; }
         public string Password { get; set; }
 
-        private TcpClient tcpClient;
-        private BinaryReader reader;
+        private readonly TcpClient tcpClient;
+        private readonly ILogger<RemotePoint> logger;
+        private readonly BinaryReader reader;
 
         public RemotePoint(TcpClient client, ILoggerFactory factory)
         {
             Pinger = new Pinger(SendMessage, factory.CreateLogger<Pinger>());
+            reader = new BinaryReader(client.GetStream(), Encoding.UTF8, true);
             tcpClient = client;
-            reader = new BinaryReader(tcpClient.GetStream(), Encoding.UTF8, true);
+            logger = factory.CreateLogger<RemotePoint>();
         }
 
         public string IPAddress => (tcpClient.Client.RemoteEndPoint as IPEndPoint)?.Address.MapToIPv4().ToString()
@@ -44,9 +47,15 @@ namespace IPResolver.Models.Points
                 stream.Write(BitConverter.GetBytes(packLength));
                 stream.Write(packId.ToByteArray());
                 stream.WriteByte((byte)type);
+                logger.LogDebug($"WRITE ID : {packId} Type : {type}");
                 if (packLength - 17 == 0)
                     return;
                 await from?.CopyPart(stream, (int)packLength - 17);
+            }
+            catch(Exception ex)
+            {
+                logger.LogWarning(ex, "Error while sending");
+                throw;
             }
             finally
             {
@@ -54,17 +63,31 @@ namespace IPResolver.Models.Points
             }
         }
 
-        public (long length, Guid packId, MessageType messageType, Stream data) ReadMessage()
+        public async Task<(long length, Guid packId, MessageType messageType, Stream data)> ReadMessage()
         {
-            long length = reader.ReadInt64();
-            Guid packId = new Guid(reader.ReadBytes(16));
-            MessageType type = (MessageType)reader.ReadByte();
-            if (type == MessageType.PingResponse)
+            await readindMessageSemaphore.WaitAsync();
+            try
             {
-                Pinger.SetPing(packId);
-                return ReadMessage();
+                long length = reader.ReadInt64();
+                Guid packId = new Guid(reader.ReadBytes(16));
+                MessageType type = (MessageType)reader.ReadByte();
+                logger.LogDebug($"READ ID : {packId} Type : {type}");
+                if (type == MessageType.PingResponse)
+                {
+                    Pinger.SetPing(packId);
+                    return await ReadMessage();
+                }
+                return (length, packId, type, tcpClient.GetStream().Partial(length));
             }
-            return (length, packId, type, reader.BaseStream.Partial(length));
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Error while reading");
+                throw;
+            }
+            finally
+            {
+                readindMessageSemaphore.Release();
+            }
         }
 
 

@@ -30,14 +30,15 @@ namespace IPResolver.Models.Points
 
         public async Task StartConnection()
         {
-            readFirst = Task.Factory.StartNew(async () => await SetPipe(first, second));
-            readSecond = Task.Factory.StartNew(async () => await SetPipe(second, first));
-            logger.LogTrace($"{id} started tasks");
-            await Task.WhenAll(readFirst, readSecond);
-            logger.LogTrace($"{id} tasks ended");
+            readFirst = Task.Factory.StartNew(() => SetPipe(first, second).Wait());
+            readSecond = Task.Factory.StartNew(() => SetPipe(second, first).Wait());
+            logger.LogDebug($"{id} started tasks");
+            var res = Task.WhenAll(readFirst, readSecond);
+            await res;
+            logger.LogDebug($"{id} tasks ended");
             first.Dispose();
             second.Dispose();
-            logger.LogTrace($"{id} done work");
+            logger.LogDebug($"{id} done work");
         }
 
 
@@ -45,7 +46,7 @@ namespace IPResolver.Models.Points
         {
             while (true)
             {
-                var data = from.ReadMessage();
+                var data = await from.ReadMessage();
                 await to.SendMessage(
                     data.length,
                     data.packId,

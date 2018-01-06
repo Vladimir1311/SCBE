@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using CCF.Shared;
+using IPResolver.Extensions;
 using Microsoft.Extensions.Logging;
 
 namespace IPResolver.Models.Points
@@ -45,8 +47,8 @@ namespace IPResolver.Models.Points
             waitPacks.Add(waiter);
             await providerPoint.SendMessage(
                 passwordBytes.Length + 17,
-                Guid.Empty, 
-                CCF.Shared.MessageType.CreateInstanceRequest, 
+                Guid.Empty,
+                MessageType.CreateInstanceRequest,
                 new MemoryStream(passwordBytes));
             await waiter.semaphore.WaitAsync();
             return waiter.point;
@@ -55,8 +57,9 @@ namespace IPResolver.Models.Points
 
         public bool WaitedClient(RemotePoint point)
         {
-            var targetWaitPack = waitPacks.FirstOrDefault(P => P.password == point.Password);
-            if (targetWaitPack == null) return false;
+            if (!waitPacks.TryGet(P => P.password == point.Password, out var targetWaitPack))
+                return false;
+
             targetWaitPack.point = point;
             waitPacks.Remove(targetWaitPack);
             targetWaitPack.semaphore.Release();

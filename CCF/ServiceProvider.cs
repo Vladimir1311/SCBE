@@ -19,6 +19,12 @@ namespace CCF
             this.transporterCreator = transporterCreator ?? throw new ArgumentNullException(nameof(transporterCreator));
             transporter = transporterCreator(password);
             transporter.OnNeedNewInstance += NeedNewInstance;
+            transporter.OnConnectionLost += OnConnectionLost;
+        }
+
+        private void OnConnectionLost()
+        {
+            Console.WriteLine("CONNECTION LOST :(");
         }
 
         private Task NeedNewInstance(string password)

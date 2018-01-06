@@ -147,7 +147,7 @@ namespace CCF.Transport
                     {
                         case MessageType.Message:
                             InvokeMessage message = DecodeMessage(contentStream, id);
-                            await OnReceiveMessge?.Invoke(message);
+                            Task.Factory.StartNew(() => OnReceiveMessge?.Invoke(message));
                             logger.LogDebug($"invoked message handler for {id}, go to new iteration");
                             break;
                         case MessageType.Result:
@@ -172,7 +172,7 @@ namespace CCF.Transport
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"EXCEPTION {ex.Message}");
+                    logger.LogInformation(ex, $"EXCEPTION {ex.Message}");
                 }
             }
         }

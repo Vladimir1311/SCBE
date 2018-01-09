@@ -25,10 +25,14 @@ namespace IPResolver.Models
 
         private List<RemotePoint> points = new List<RemotePoint>();
         private List<PointsLinker> linkedPairs = new List<PointsLinker>();
+        
         private List<ServiceProvider> serviceProviders = new List<ServiceProvider>();
         private readonly ILogger<RemoteServicesManager> logger;
         private readonly ILoggerFactory loggerFactory;
 
+        public event Action<ServiceProvider> ServiceProviderAdded = delegate {};
+
+        public ServiceProvider[] ServiceProviders => serviceProviders.ToArray();
         public RemoteServicesManager(int port, ILoggerFactory loggerFactory)
         {
             logger = loggerFactory.CreateLogger<RemoteServicesManager>();
@@ -141,8 +145,12 @@ namespace IPResolver.Models
                     providerPair.interfaceName,
                     loggerFactory);
                 serviceProviders.Add(provider);
+                provider.providerPoint.ConnectionLost += () => {
+                    serviceProviders.Remove(provider);
+                };
                 serviceProvidersQueue.Remove(providerPair);
                 logger.LogDebug($"Registered serviceProvider with interface {providerPair.interfaceName}");
+                ServiceProviderAdded(provider);
                 await ProviderWork(provider);
                 return;
             }

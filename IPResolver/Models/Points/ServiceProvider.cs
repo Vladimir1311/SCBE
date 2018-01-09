@@ -13,7 +13,7 @@ namespace IPResolver.Models.Points
 {
     public class ServiceProvider
     {
-        private RemotePoint providerPoint;
+        public RemotePoint providerPoint;
         private ILogger<ServiceProvider> logger;
 
         private HashSet<WaitClientPack> waitPacks = new HashSet<WaitClientPack>();

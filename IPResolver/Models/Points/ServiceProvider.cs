@@ -28,10 +28,9 @@ namespace IPResolver.Models.Points
 
         public async Task HaveConnection()
         {
-            await Task.CompletedTask;
-            while (true)
+            while (providerPoint.Connected)
             {
-                var data = providerPoint.ReadMessage();
+                var data = await providerPoint.ReadMessage();
                 logger.LogError("WTF?! Service provider send a message!");
             }
         }

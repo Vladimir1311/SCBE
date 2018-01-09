@@ -1,5 +1,7 @@
 ﻿using Castle.DynamicProxy;
 using CCF;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Dynamic;
 using System.IO;
@@ -11,13 +13,25 @@ namespace UDPTester
 {
     public class Program
     {
+        static IServiceProvider provider;
+        static Program()
+        {
+            var serviceCollection = new ServiceCollection();
+            serviceCollection.AddSingleton(new LoggerFactory()
+                .AddConsole());
+            serviceCollection.AddLogging();
+            serviceCollection.AddSingleton(CCFServicesManager.Params.LocalHost);
+            serviceCollection.AddSingleton<CCFServicesManager>();
+            provider = serviceCollection.BuildServiceProvider();
+        }
         private static void Main(string[] args)
         {
+            var ccfManager = provider.GetService<CCFServicesManager>();
             var inp = Console.ReadLine();
             if (inp == "SP")
             {
 
-                CCFServicesManager.RegisterService<IRemoteWorker>(() => new RemoteWorker());
+                ccfManager.RegisterService<IRemoteWorker>(() => new RemoteWorker());
                 Console.WriteLine("Registered...");
                 Console.ReadLine();
             }
@@ -25,7 +39,7 @@ namespace UDPTester
             if (inp == "C")
             {
 
-                var client = CCFServicesManager.GetService<IRemoteWorker>();
+                var client = ccfManager.GetService<IRemoteWorker>();
                 //Console.WriteLine("Getted invoker");
                 //Console.ReadLine();
 

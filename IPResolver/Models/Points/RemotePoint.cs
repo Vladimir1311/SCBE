@@ -23,7 +23,7 @@ namespace IPResolver.Models.Points
         public Pinger Pinger { get; }
         public string Password { get; set; }
         public event Action ConnectionLost = delegate {};
-
+        public bool Connected => tcpClient.Connected;
 
         private readonly TcpClient tcpClient;
         private readonly ILogger<RemotePoint> logger;

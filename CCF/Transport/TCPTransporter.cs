@@ -11,12 +11,14 @@ using Microsoft.Extensions.Logging;
 using CCF.Shared;
 using System.Threading;
 using CCF.Messages;
+using System.Linq;
 
 namespace CCF.Transport
 {
 
     class TCPTransporter : ITransporter
     {
+        private HashSet<Task> tasksSet = new HashSet<Task>();
         private SemaphoreSlim semaphoreSlim = new SemaphoreSlim(1, 1);
         public event Func<InvokeMessage, Task> OnReceiveMessge;
         public event Func<InvokeResult, Task> OnReceiveResult;
@@ -33,7 +35,7 @@ namespace CCF.Transport
             tcpClient.ConnectAsync(host, port).Wait();
             using (var writer = new BinaryWriter(tcpClient.GetStream(), Encoding.ASCII, true))
                 writer.Write(password);
-            new Task(
+            tasksSet.Add(Task.Factory.StartNew(
                 async () =>
                 {
                     try
@@ -45,7 +47,7 @@ namespace CCF.Transport
                         logger.LogWarning($"Connection was aborted, exception: {ex.Message}");
                         OnConnectionLost?.Invoke();
                     }
-                }).Start();
+                }));
             this.logger = logger;
         }
 
@@ -147,7 +149,7 @@ namespace CCF.Transport
                     {
                         case MessageType.Message:
                             InvokeMessage message = DecodeMessage(contentStream, id);
-                            Task.Factory.StartNew(() => OnReceiveMessge?.Invoke(message));
+                            tasksSet.Add(Task.Factory.StartNew(() => OnReceiveMessge?.Invoke(message)));
                             logger.LogDebug($"invoked message handler for {id}, go to new iteration");
                             break;
                         case MessageType.Result:
@@ -283,6 +285,18 @@ namespace CCF.Transport
 
         public void Dispose()
         {
+            foreach(var task in tasksSet)
+            {
+                try
+                {
+                    task.Dispose();
+                }
+                catch (Exception ex)
+                {
+                    logger.LogWarning(ex, $"Error while ending task");
+                }
+            }
+            Task.WaitAll(tasksSet.ToArray());
             tcpClient.Dispose();
         }
     }

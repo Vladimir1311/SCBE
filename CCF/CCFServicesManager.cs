@@ -10,40 +10,63 @@ using System.Reflection.Emit;
 using System.Reflection;
 using System.Linq;
 using CCF.Shared.Http;
+using System.Threading.Tasks;
 
 namespace CCF
 {
     public class CCFServicesManager
     {
+        private readonly string hostName;
+        private readonly string port;
+        private readonly ILogger<CCFServicesManager> logger;
+        private readonly ILoggerFactory loggerFactory;
 
-        //private const string SITE_IP = "52.163.114.252";
-        //private const string SITE_PORT = "80";
 
-        private static string SITE_IP = "127.0.0.1";
-        private static string SITE_PORT = "5100";
 
-        public static void SetHostPort(string host, string port)
-            => (SITE_IP, SITE_PORT) = (host, port);
-
-        public static void RegisterService<T>(Func<T> serviceInvoker)
+        public CCFServicesManager(ILoggerFactory loggerFactory, Params @params)
         {
-            var result = new HttpClient().GetStringAsync($"http://{SITE_IP}:{SITE_PORT}/ip/TCPRegister/RegisterServiceProvider/{typeof(T).Name}").Result;
-            var data = JObject.Parse(result).ToObject<Response>();
-            ITransporter transporterCreating(string S) =>
-                new TCPTransporter(SITE_IP, data.Port, S, new ConsoleLogger());
-            var serviceProvider = new ServiceProvider<T>(serviceInvoker, data.Password, transporterCreating);
+            logger = loggerFactory.CreateLogger<CCFServicesManager>();
+            this.loggerFactory = loggerFactory;
+            (hostName, port) = (@params.HostName, @params.Port);
         }
 
 
-        public static T GetService<T>()
+        public async void RegisterService<T>(Func<T> serviceInvoker)
+        {
+            try
+            {
+                var result = await new HttpClient().GetAsync($"http://{hostName}:{port}/ip/TCPRegister/RegisterServiceProvider/{typeof(T).Name}");
+                logger.LogDebug($"receved result from HTTP request {result.StatusCode}");
+                var data = JObject.Parse(await result.Content.ReadAsStringAsync()).ToObject<Response>();
+                ITransporter transporterCreating(string S) =>
+                    new TCPTransporter(hostName, data.Port, S, loggerFactory.CreateLogger<TCPTransporter>());
+                var serviceProvider = new ServiceProvider<T>(serviceInvoker, data.Password, transporterCreating, loggerFactory.CreateLogger<ServiceProvider<T>>());   
+            }
+            catch (HttpRequestException)
+            {
+                logger.LogWarning("Error while sending request, try to reconnect");
+                var newTry = Task.Run(async () => {
+                    await Task.Delay(TimeSpan.FromSeconds(5));
+                    RegisterService(serviceInvoker);
+                });
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, $"Unexpected error");
+                throw;
+            }
+        }
+
+
+        public T GetService<T>()
             where T : class
         {
             if (!typeof(T).IsInterface) throw new Exception($"type {typeof(T)} must be interface");
-            var result = new HttpClient().GetStringAsync($"http://{SITE_IP}:{SITE_PORT}/ip/TCPRegister/ConnectoToService/{typeof(T).Name}").Result;
+            var result = new HttpClient().GetStringAsync($"http://{hostName}:{port}/ip/TCPRegister/ConnectoToService/{typeof(T).Name}").Result;
             var data = JObject.Parse(result).ToObject<Response>();
             if (!data.Success)
                 throw new ServiceUnavailableException();
-            var transporter = new TCPTransporter(SITE_IP, data.Port, data.Password, new ConsoleLogger());
+            var transporter = new TCPTransporter(hostName, data.Port, data.Password, loggerFactory.CreateLogger<TCPTransporter>());
             var disposableInterface = DisposableWrapper(typeof(T));
             T worker;
             if (disposableInterface == typeof(T))
@@ -63,23 +86,19 @@ namespace CCF
             newType.AddInterfaceImplementation(typeof(IDisposable));
             return newType.CreateTypeInfo().AsType();
         }
-
-
-        private class ConsoleLogger : ILogger<TCPTransporter>
+        public class Params
         {
-            public IDisposable BeginScope<TState>(TState state) => new Disposable();
-
-            public bool IsEnabled(LogLevel logLevel) => true;
-
-            public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
+            public Params(string hostName, string ip)
             {
-                Console.WriteLine($"{logLevel} : {formatter(state, exception)}");
+                HostName = hostName;
+                Port = ip;
             }
-            private class Disposable : IDisposable
-            {
-                public void Dispose()
-                { }
-            }
+
+            public string HostName { get; }
+            public string Port { get; }
+
+            public static Params Default => new Params("52.163.114.252", "80");
+            public static Params LocalHost => new Params("127.0.0.1", "5100");
         }
     }
 }

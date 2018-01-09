@@ -8,15 +8,31 @@ using DocsToPictures.Models;
 using DocsToPictures.Interfaces;
 using System.Threading;
 using System.IO;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace DocsToPictures
 {
     class Program
     {
+        static IServiceProvider provider;
+        static Program()
+        {
+            var serviceCollection = new ServiceCollection();
+            serviceCollection.AddSingleton(new LoggerFactory()
+                .AddConsole());
+            serviceCollection.AddLogging();
+            serviceCollection.AddSingleton(CCFServicesManager.Params.LocalHost);
+            serviceCollection.AddSingleton<CCFServicesManager>();
+            provider = serviceCollection.BuildServiceProvider();
+        }
+
         static void Main(string[] args)
         {
+            var ccfManager = provider.GetService<CCFServicesManager>();
+
             IDocumentProcessor processor = new DocumentProcessor();
-            CCFServicesManager.RegisterService(() =>processor);
+            ccfManager.RegisterService(() => processor);
             while (true)
             {
                 Console.WriteLine("Go to wait!");

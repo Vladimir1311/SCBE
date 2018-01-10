@@ -7,11 +7,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using CCF.Shared;
 using IPResolver.Extensions;
+using IPResolver.Models.Common;
 using Microsoft.Extensions.Logging;
 
 namespace IPResolver.Models.Points
 {
-    public class ServiceProvider
+    public class ServiceProvider : UniqueID
     {
         public RemotePoint providerPoint;
         private ILogger<ServiceProvider> logger;

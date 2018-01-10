@@ -29,7 +29,8 @@ namespace IPResolver.Models.Points
         private readonly ILogger<RemotePoint> logger;
         private readonly BinaryReader reader;
 
-        public string Ip => (tcpClient.Client.RemoteEndPoint as IPEndPoint).Address.ToString();
+        public string Ip => (tcpClient.Client.RemoteEndPoint as IPEndPoint)?.Address.ToString()
+            ?? "error while getting ip";
         public string Port => (tcpClient.Client.RemoteEndPoint as IPEndPoint).Port.ToString();
 
         public RemotePoint(TcpClient client, ILoggerFactory factory)
@@ -40,8 +41,6 @@ namespace IPResolver.Models.Points
             logger = factory.CreateLogger<RemotePoint>();
         }
 
-        public string IPAddress => (tcpClient.Client.RemoteEndPoint as IPEndPoint)?.Address.MapToIPv4().ToString()
-            ?? "error while getting ip";
 
         public async Task SendMessage(long packLength, Guid packId, MessageType type, Stream from)
         {

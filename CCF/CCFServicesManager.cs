@@ -35,17 +35,21 @@ namespace CCF
         {
             try
             {
-                var result = await new HttpClient().GetAsync($"http://{hostName}:{port}/ip/TCPRegister/RegisterServiceProvider/{typeof(T).Name}");
-                logger.LogDebug($"receved result from HTTP request {result.StatusCode}");
-                var data = JObject.Parse(await result.Content.ReadAsStringAsync()).ToObject<Response>();
-                ITransporter transporterCreating(string S) =>
-                    new TCPTransporter(hostName, data.Port, S, loggerFactory.CreateLogger<TCPTransporter>());
-                var serviceProvider = new ServiceProvider<T>(serviceInvoker, data.Password, transporterCreating, loggerFactory.CreateLogger<ServiceProvider<T>>());   
+                ITransporter transporterCreating(string password)
+
+                ITransporter providerTransporterCreating() {
+                    var result = new HttpClient().GetAsync($"http://{hostName}:{port}/ip/TCPRegister/RegisterServiceProvider/{typeof(T).Name}").Result;
+                    logger.LogDebug($"receved result from HTTP request {result.StatusCode}");
+                    var data = JObject.Parse(result.Content.ReadAsStringAsync().Result).ToObject<Response>();
+                    return new TCPTransporter(hostName, data.Port, data.Password, loggerFactory.CreateLogger<TCPTransporter>());
+                }
+                var serviceProvider = new ServiceProvider<T>(serviceInvoker, transporterCreating, loggerFactory.CreateLogger<ServiceProvider<T>>());
             }
             catch (HttpRequestException)
             {
                 logger.LogWarning("Error while sending request, try to reconnect");
-                var newTry = Task.Run(async () => {
+                var newTry = Task.Run(async () =>
+                {
                     await Task.Delay(TimeSpan.FromSeconds(5));
                     RegisterService(serviceInvoker);
                 });

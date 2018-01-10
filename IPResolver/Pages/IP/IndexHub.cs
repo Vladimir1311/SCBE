@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using IPResolver.Models;
 using Microsoft.AspNetCore.SignalR;
 
@@ -6,6 +8,7 @@ namespace IPResolver.Pages.IP
 {
     public class IndexHub : Hub
     {
+        static HashSet<HubCallerContext> clients;
         readonly RemoteServicesManager servicesManager;
 
         public IndexHub(RemoteServicesManager servicesManager)
@@ -20,6 +23,10 @@ namespace IPResolver.Pages.IP
             };
         }
 
-
+        public async override Task OnConnectedAsync()
+        {
+            await base.OnConnectedAsync();
+            clients.Add(Context);
+        }
     }
 }

@@ -29,7 +29,7 @@ namespace IPResolver
 
             services.AddSignalR();
 
-          services.AddSingleton(SP => new RemoteServicesManager(5476, SP.GetService<ILoggerFactory>()));
+          services.AddSingleton(SP => new RemoteServicesManager(5476, SP.GetService<ILoggerFactory>(), SP.GetService<Pages.IP.IndexHub>()));
             //services.AddTransient<IConfigsManager, FileConfigsManager>();
             
             services.AddSignalR();
@@ -52,7 +52,9 @@ namespace IPResolver
 
             app.UseSignalR(route =>
             {
-                //route.MapHub<Pages.View.IndexHub>("indexhub");
+                route.MapHub<Pages.IP.IndexHub>("indexhub", options =>
+                {
+                });
             });
 
             app.UseMvc(routes =>

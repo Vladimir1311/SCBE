@@ -6,21 +6,76 @@
 
 <div class="row">
     <h2>Service Providers</h2>
-    <table id="services">
+    <table class="table-bordered table" id="services">
         <tr>
+            <th>Id</th>
             <th>Service Name</th>
             <th>IP</th>
             <th>Port</th>
-            <th>Port</th>
+
         </tr>
         @foreach(var provider in Model.Providers)
         {
             <tr>
+                <td>@provider.Id</td>
                 <td>@provider.InterfaceName</td>
                 <td>@provider.providerPoint.Ip</td>
                 <td>@provider.providerPoint.Port</td>
-                <td>@provider.InterfaceName</td>
             </tr>
         }
     </table>
 </div>
+<div class="row">
+    <h2>Point Linkers</h2>
+    <table class="table-bordered table" id="services">
+        <tr>
+            <th>Id</th>
+            <th>First IP</th>
+            <th>First Port</th>
+            <th>Second IP</th>
+            <th>Second Port</th>
+        </tr>
+        @foreach (var pair in Model.PointsLinkers)
+        {
+        <tr>
+            <td>@pair.Id</td>
+            <td>@pair.First.Ip</td>
+            <td>@pair.First.Port</td>
+            <td>@pair.Second.Port</td>
+            <td>@pair.Second.Port</td>
+        </tr>
+        }
+    </table>
+</div>
+<script src="~/ip/js/signalr-client-1.0.0-alpha2-final.min.js">
+</script>
+<script>
+    let services = document.getElementById("services");
+    let hubUrl = `${window.location.origin}/indexhub`;
+    let httpConnection = new signalR.HttpConnection(hubUrl);
+    let hubConnection = new signalR.HubConnection(httpConnection);
+
+    hubConnection.on("ServiceProviderAdded", function (name, ip, port) {
+
+        let name = document.createElement("td");
+        name.appendChild(document.createTextNode(data));
+        let iptd = document.createElement("td");
+        iptd.appendChild(document.createTextNode(ip));
+        let porttd = document.createElement("td");
+        porttd.appendChild(document.createTextNode(port));
+
+        let row = document.createElement("tr");
+        row.appendChild(name);
+        row.appendChild(iptd);
+        row.appendChild(porttd);
+        servicces.appendChild(row);
+
+    });
+
+    //document.getElementById("sendBtn").addEventListener("click", function (e) {
+    //    let message = document.getElementById("message").value;
+    //    hubConnection.invoke("Send", message);
+    //});
+
+    hubConnection.start();
+</script>

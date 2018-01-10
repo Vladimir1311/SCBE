@@ -12,16 +12,20 @@ namespace CCF
     internal class ServiceProvider<T>
     {
         private readonly Func<T> instanceCreater;
-        private readonly string password;
-        private readonly Func<string, ITransporter> transporterCreator;
+        private readonly Func<ITransporter> providerTransporterCreator;
+        private readonly Func<string, ITransporter> instanceTransporterCreator;
         private readonly ILogger<ServiceProvider<T>> logger;
         private ITransporter transporter;
 
-        public ServiceProvider(Func<T> serviceInvoker, string password, Func<string, ITransporter> transporterCreator, ILogger<ServiceProvider<T>> logger)
+        public ServiceProvider(
+            Func<T> serviceInvoker, 
+            Func<ITransporter> providerTransporterCreator,
+            Func<string, ITransporter> instanceTransporterCreator,
+            ILogger<ServiceProvider<T>> logger)
         {
             instanceCreater = serviceInvoker ?? throw new ArgumentNullException(nameof(serviceInvoker));
-            this.password = password;
-            this.transporterCreator = transporterCreator ?? throw new ArgumentNullException(nameof(transporterCreator));
+            this.providerTransporterCreator = providerTransporterCreator ?? throw new ArgumentNullException(nameof(providerTransporterCreator));
+            this.instanceTransporterCreator = instanceTransporterCreator;
             this.logger = logger;
             UpdateConnection();
         }
@@ -34,7 +38,7 @@ namespace CCF
                     transporter.Dispose();
 
                 logger.LogInformation("try get new transporter");
-                transporter = transporterCreator(password);
+                transporter = providerTransporterCreator();
                 transporter.OnNeedNewInstance += NeedNewInstance;
                 transporter.OnConnectionLost += () =>
                 {
@@ -47,6 +51,11 @@ namespace CCF
                 logger.LogWarning(sockEx, "Error while connecting to remote host");
                 UpdateConnection();
             }
+            catch (AggregateException aggrEx)
+            {
+                logger.LogWarning(aggrEx, "Error while connecting to remote host");
+                UpdateConnection();
+            }
             catch (Exception ex)
             {
                 logger.LogError(ex, "Unexpected error while creating ITransporter");
@@ -56,7 +65,7 @@ namespace CCF
 
         private Task NeedNewInstance(string password)
         {
-            var instanceTransporter = transporterCreator(password);
+            var instanceTransporter = instanceTransporterCreator(password);
             var instance = instanceCreater();
             var codeInvoker = new CodeInvoker(instance, typeof(T));
             InstanceWrapper rootWrapper = new InstanceWrapper(codeInvoker, instanceTransporter);

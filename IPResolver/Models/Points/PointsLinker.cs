@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using IPResolver.Models.Common;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace IPResolver.Models.Points
 {
-    public class PointsLinker
+    public class PointsLinker : UniqueID
     {
         private RemotePoint first;
         private RemotePoint second;
@@ -17,8 +18,8 @@ namespace IPResolver.Models.Points
         private Task readFirst;
         private Task readSecond;
 
-        private static long count;
-        private long id = count++;
+        public RemotePoint First { get => first; }
+        public RemotePoint Second { get => second; }
 
         public PointsLinker(RemotePoint first, RemotePoint second, ILogger<PointsLinker> logger)
         {
@@ -32,13 +33,13 @@ namespace IPResolver.Models.Points
         {
             readFirst = Task.Factory.StartNew(() => SetPipe(first, second).Wait());
             readSecond = Task.Factory.StartNew(() => SetPipe(second, first).Wait());
-            logger.LogDebug($"{id} started tasks");
+            logger.LogDebug($"{Id} started tasks");
             var res = Task.WhenAll(readFirst, readSecond);
             await res;
-            logger.LogDebug($"{id} tasks ended");
+            logger.LogDebug($"{Id} tasks ended");
             first.Dispose();
             second.Dispose();
-            logger.LogDebug($"{id} done work");
+            logger.LogDebug($"{Id} done work");
         }
 
 

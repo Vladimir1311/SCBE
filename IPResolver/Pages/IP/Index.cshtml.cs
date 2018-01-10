@@ -7,11 +7,12 @@ using IPResolver.Models.Points;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace IPResolver.Pages.IP.Index
+namespace IPResolver.Pages.IP
 {
     public class IndexModel : PageModel
     {
         public IEnumerable<ServiceProvider> Providers { get; private set; }
+        public IEnumerable<PointsLinker> PointsLinkers { get; private set; }
 
         readonly RemoteServicesManager manager;
 
@@ -22,6 +23,7 @@ namespace IPResolver.Pages.IP.Index
         public void OnGet()
         {
             Providers = manager.ServiceProviders;
+            PointsLinkers = manager.PointsLinkers;
         }
     }
 }

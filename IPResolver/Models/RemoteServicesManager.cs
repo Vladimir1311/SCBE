@@ -2,6 +2,7 @@
 using IPResolver.Extensions;
 using IPResolver.Models;
 using IPResolver.Models.Points;
+using IPResolver.Pages.IP;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Concurrent;
@@ -33,7 +34,8 @@ namespace IPResolver.Models
         public event Action<ServiceProvider> ServiceProviderAdded = delegate {};
 
         public ServiceProvider[] ServiceProviders => serviceProviders.ToArray();
-        public RemoteServicesManager(int port, ILoggerFactory loggerFactory)
+        public PointsLinker[] PointsLinkers => linkedPairs.ToArray();
+        public RemoteServicesManager(int port, ILoggerFactory loggerFactory, IndexHub hub)
         {
             logger = loggerFactory.CreateLogger<RemoteServicesManager>();
             Port = port;

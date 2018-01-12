@@ -20,7 +20,7 @@ namespace CCF
         private readonly string port;
         private readonly ILogger<CCFServicesManager> logger;
         private readonly ILoggerFactory loggerFactory;
-
+        private readonly HttpClient httpClient = new HttpClient();
 
 
         public CCFServicesManager(ILoggerFactory loggerFactory, Params @params)
@@ -36,14 +36,22 @@ namespace CCF
             try
             {
                 ITransporter transporterCreating(string password)
-
-                ITransporter providerTransporterCreating() {
-                    var result = new HttpClient().GetAsync($"http://{hostName}:{port}/ip/TCPRegister/RegisterServiceProvider/{typeof(T).Name}").Result;
+                {
+                    var port = GetPort();
+                    logger.LogDebug($"TCP Connection to port {port}");
+                    return new TCPTransporter(hostName, port, password, loggerFactory.CreateLogger<TCPTransporter>());
+                }
+                ITransporter providerTransporterCreating()
+                {
+                    var result = httpClient.GetAsync($"http://{hostName}:{port}/ip/TCPRegister/RegisterServiceProvider/{typeof(T).Name}").Result;
                     logger.LogDebug($"receved result from HTTP request {result.StatusCode}");
                     var data = JObject.Parse(result.Content.ReadAsStringAsync().Result).ToObject<Response>();
                     return new TCPTransporter(hostName, data.Port, data.Password, loggerFactory.CreateLogger<TCPTransporter>());
                 }
-                var serviceProvider = new ServiceProvider<T>(serviceInvoker, transporterCreating, loggerFactory.CreateLogger<ServiceProvider<T>>());
+                var serviceProvider = new ServiceProvider<T>(serviceInvoker,
+                    providerTransporterCreating,
+                    transporterCreating,
+                    loggerFactory.CreateLogger<ServiceProvider<T>>());
             }
             catch (HttpRequestException)
             {
@@ -66,7 +74,7 @@ namespace CCF
             where T : class
         {
             if (!typeof(T).IsInterface) throw new Exception($"type {typeof(T)} must be interface");
-            var result = new HttpClient().GetStringAsync($"http://{hostName}:{port}/ip/TCPRegister/ConnectoToService/{typeof(T).Name}").Result;
+            var result = httpClient.GetStringAsync($"http://{hostName}:{port}/ip/TCPRegister/ConnectoToService/{typeof(T).Name}").Result;
             var data = JObject.Parse(result).ToObject<Response>();
             if (!data.Success)
                 throw new ServiceUnavailableException();
@@ -90,6 +98,15 @@ namespace CCF
             newType.AddInterfaceImplementation(typeof(IDisposable));
             return newType.CreateTypeInfo().AsType();
         }
+
+        private int GetPort()
+        {
+            var result = httpClient.GetStringAsync($"http://{hostName}:{port}/ip/TCPRegister/GetPort").Result;
+            var data = JObject.Parse(result).ToObject<Response>();
+            return data.Port;
+        }
+
+
         public class Params
         {
             public Params(string hostName, string ip)

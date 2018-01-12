@@ -38,6 +38,11 @@ namespace IPResolver.Controllers
             return new Response { Password = password, Port = servicesManager.Port};
         }
 
+        public Response GetPort()
+        {
+            return new Response { Port = servicesManager.Port };
+        }
+
         private string CreatePassword()
         {
             var bytes = new byte[20];

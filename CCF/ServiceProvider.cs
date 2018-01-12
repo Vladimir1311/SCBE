@@ -30,31 +30,32 @@ namespace CCF
             UpdateConnection();
         }
 
-        private void UpdateConnection()
+        private void UpdateConnection(int tryNum = 0)
         {
+            tryNum++;
             try
             {
                 if (transporter != null)
                     transporter.Dispose();
 
-                logger.LogInformation("try get new transporter");
+                logger.LogInformation($"try get new transporter try {tryNum}");
                 transporter = providerTransporterCreator();
                 transporter.OnNeedNewInstance += NeedNewInstance;
                 transporter.OnConnectionLost += () =>
                 {
                     Console.WriteLine("CONNECTION LOST :( try to reconnect");
-                    UpdateConnection();
+                    UpdateConnection(tryNum);
                 };
             }
             catch (SocketException sockEx)
             {
                 logger.LogWarning(sockEx, "Error while connecting to remote host");
-                UpdateConnection();
+                UpdateConnection(tryNum);
             }
             catch (AggregateException aggrEx)
             {
                 logger.LogWarning(aggrEx, "Error while connecting to remote host");
-                UpdateConnection();
+                UpdateConnection(tryNum);
             }
             catch (Exception ex)
             {

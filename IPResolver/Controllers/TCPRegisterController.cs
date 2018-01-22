@@ -1,11 +1,12 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
+using CCF.Shared.Http;
+using IPResolver.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using IPResolver.Services;
-using System.Text;
 
 namespace IPResolver.Controllers
 {
@@ -13,28 +14,33 @@ namespace IPResolver.Controllers
     [Route("ip/TCPRegister/[action]")]
     public class TCPRegisterController : Controller
     {
-        
-        private readonly RemoteServicesManager remoteServices;
+
+        private readonly RemoteServicesManager servicesManager;
 
         public TCPRegisterController(RemoteServicesManager remoteServices)
         {
-            this.remoteServices = remoteServices;
+            servicesManager = remoteServices;
         }
-
-        public Response RegisterService(string interfaceName)
+        [Route("{interfaceName}")]
+        public Response RegisterServiceProvider(string interfaceName)
         {
             var password = CreatePassword();
-            remoteServices.AddService(interfaceName, password);
-            return new Response { Password = password, Port = remoteServices.Port };
+            servicesManager.AddServiceProviderQueue(interfaceName, password);
+            return new Response { Password = password, Port = servicesManager.Port };
         }
-
-        public async Task<Response> UseService(string interfaceName)
+        [Route("{interfaceName}")]
+        public Response ConnectoToService(string interfaceName)
         {
             var password = CreatePassword();
-            var serviceId = await remoteServices.AddServiceUser(interfaceName, password);
-            if (serviceId == -1)
+            if (!servicesManager.HasService(interfaceName))
                 return new Response { Success = false };
-            return new Response {  Password = password, Port = remoteServices.Port, Id = serviceId };
+            servicesManager.AddToClientsQueue(password, interfaceName);
+            return new Response { Password = password, Port = servicesManager.Port};
+        }
+
+        public Response GetPort()
+        {
+            return new Response { Port = servicesManager.Port };
         }
 
         private string CreatePassword()
@@ -44,11 +50,5 @@ namespace IPResolver.Controllers
             return Encoding.ASCII.GetString(bytes);
         }
     }
-    public class Response
-    {
-        public bool Success { get; set; } = true;
-        public string Password { get; set; }
-        public int Port { get; set; }
-        public int Id { get; set; }
-    }
+    
 }

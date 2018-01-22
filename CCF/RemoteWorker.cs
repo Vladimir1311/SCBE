@@ -12,13 +12,14 @@ using System.Threading;
 using System.Collections.Concurrent;
 using CCF.Shared.Exceptions;
 using System.Threading.Tasks;
+using CCF.Messages;
 
 namespace CCF
 {
     public class RemoteWorker : IInterceptor, IDisposable
     {
         private static IProxyGenerator proxyGenerator = new ProxyGenerator();
-        
+
         private class WaitPair
         {
             public ManualResetEvent ResetEvent { get; set; }
@@ -34,14 +35,14 @@ namespace CCF
 
 
         private readonly ITransporter transporter;
-        private int objectId;
+        private long objectId;
         private ConcurrentDictionary<Guid, WaitPair> waiters
             = new ConcurrentDictionary<Guid, WaitPair>();
         private bool aborted = false;
         private bool wrapped;
 
 
-        private RemoteWorker(ITransporter transporter, int objectId, bool wrapped)
+        private RemoteWorker(ITransporter transporter, long objectId, bool wrapped)
         {
             this.transporter = transporter;
             this.objectId = objectId;
@@ -64,7 +65,7 @@ namespace CCF
             return Task.CompletedTask;
         }
 
-        internal static object Create(Type workerType, ITransporter transporter, int serviceId, bool disposeWrapped = false)
+        internal static object Create(Type workerType, ITransporter transporter, long serviceId, bool disposeWrapped = false)
         {
             CheckType(workerType);
             return proxyGenerator.CreateInterfaceProxyWithoutTarget(
@@ -109,7 +110,9 @@ namespace CCF
             {
                 Id = Guid.NewGuid(),
                 MethodName = invocation.Method.Name,
-                SubObjectId = objectId
+                SubObjectId = objectId,
+                Args = new Dictionary<string, Value>(),
+                Streams = new Dictionary<string, Stream>()
             };
 
             if (invocation.Method.Name == "Dispose" && wrapped)
@@ -130,11 +133,27 @@ namespace CCF
                 if (argument is Stream stream)
                 {
                     message.Streams[param.Name] = stream;
+                    continue;
+                }
+                Value value = new Value();
+                if (argument == null)
+                {
+                    value.Type = Messages.ValueType.Null;
                 }
                 else
+                if (PrimitiveTypes.Contains(argument.GetType()))
                 {
-                    message.Args[param.Name] = JToken.FromObject(argument);
+                    value.Type = Messages.ValueType.Primitive;
+                    value.Data = JToken.FromObject(argument);
+                }                
+                else
+                {
+                    value.Type = Messages.ValueType.HardObject;
+                    CodeInvoker newInvoker = new CodeInvoker(argument, param.ParameterType);
+                    InstanceWrapper instanceWrapper = new InstanceWrapper(newInvoker, transporter);
+                    value.Data = instanceWrapper.Id;
                 }
+                message.Args[param.Name] = value;
             }
             var data = JsonConvert.SerializeObject(message, Formatting.Indented);
             Console.WriteLine(data);
@@ -145,7 +164,7 @@ namespace CCF
 
             transporter.SendMessage(message).Wait();
 
-            while(!resetEvent.WaitOne(TimeSpan.FromSeconds(0.5)))
+            while (!resetEvent.WaitOne(TimeSpan.FromSeconds(0.5)))
             {
                 if (aborted) throw new ServiceUnavailableException();
             }
@@ -153,42 +172,27 @@ namespace CCF
             if (!waiters.TryRemove(message.Id, out var waitPair))
                 throw new Exception("Blya blya blya nety waitera!!!!");
             var result = waitPair.Result;
-
-            if (result.SubObjectId != -1)
+            switch (result.ResultType)
             {
-                Console.WriteLine($"Hard object, id: {result.SubObjectId} for request {message.MethodName}");
-                var worker = new RemoteWorker(transporter, result.SubObjectId, false);
-                invocation.ReturnValue = Create(invocation.Method.ReturnType, worker);
-                return;
+                case ResultType.Primitive:
+                    Console.WriteLine($"Primitive, value: {result.PrimitiveValue} for resuest {message.MethodName}");
+                    invocation.ReturnValue = result.PrimitiveValue.ToObject(invocation.Method.ReturnType);
+                    return;
+                case ResultType.Null:
+                    Console.WriteLine($"null value for request {message.MethodName} or void method");
+                    return;
+                case ResultType.Stream:
+                    Console.WriteLine($"Stream, length: {result.StreamValue.Length} for request {message.MethodName}");
+                    invocation.ReturnValue = result.StreamValue;
+                    return;
+                case ResultType.Exception:
+                    throw new Exception(result.ExceptionMessage);
+                case ResultType.HardObject:
+                    Console.WriteLine($"Hard object, id: {result.HardObjectId} for request {message.MethodName}");
+                    var worker = new RemoteWorker(transporter, result.HardObjectId, false);
+                    invocation.ReturnValue = Create(invocation.Method.ReturnType, worker);
+                    return;
             }
-
-            if (result.IsPrimitive)
-            {
-                Console.WriteLine($"Primitive, value: {result.Value} for resuest {message.MethodName}");
-                invocation.ReturnValue = result.Value?.ToObject(invocation.Method.ReturnType);
-                return;
-            }
-
-
-            if (invocation.Method.ReturnType == typeof(Stream))
-            {
-                Console.WriteLine($"Stream, length: {result.StreamValue.Length} for request {message.MethodName}");
-                invocation.ReturnValue = result.StreamValue;
-                return;
-            }
-
-            if (invocation.Method.ReturnType == typeof(void))
-            {
-                Console.WriteLine($"void method {message.MethodName}");
-                return;
-            }
-
-            if (result.Value.Type == JTokenType.Null)
-            {
-                Console.WriteLine($"null value for request {message.MethodName}");
-                return;
-            }
-
         }
 
         public void Dispose()

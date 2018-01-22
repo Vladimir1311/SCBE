@@ -10,5 +10,7 @@ namespace DocsToPictures.Interfaces
         IDocument AddToHandle(string fileName, Stream fileStream);
 
         IDocument CheckDocument(Guid id);
+
+        IEnumerable<string> GetSupportedExtensions();
     }
 }

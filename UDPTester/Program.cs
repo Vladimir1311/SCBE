@@ -1,7 +1,11 @@
 ﻿using Castle.DynamicProxy;
 using CCF;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Dynamic;
+using System.IO;
+using System.Net.Sockets;
 using System.Reflection;
 using System.Reflection.Emit;
 
@@ -9,66 +13,77 @@ namespace UDPTester
 {
     public class Program
     {
+        static IServiceProvider provider;
+        static Program()
+        {
+            var serviceCollection = new ServiceCollection();
+            serviceCollection.AddSingleton(new LoggerFactory()
+                .AddConsole());
+            serviceCollection.AddLogging();
+            serviceCollection.AddSingleton(CCFServicesManager.Params.LocalHost);
+            serviceCollection.AddSingleton<CCFServicesManager>();
+            provider = serviceCollection.BuildServiceProvider();
+        }
         private static void Main(string[] args)
         {
+            var ccfManager = provider.GetService<CCFServicesManager>();
+            var inp = Console.ReadLine();
+            if (inp == "SP")
+            {
 
-            var newType = AssemblyBuilder
-                .DefineDynamicAssembly(new AssemblyName("Some"), AssemblyBuilderAccess.Run)
-                .DefineDynamicModule("Some.dll")
-                .DefineType("MYBeutyInterface", TypeAttributes.Public | TypeAttributes.Interface | TypeAttributes.Abstract);
-            newType.AddInterfaceImplementation(typeof(ILOL));
-            newType.AddInterfaceImplementation(typeof(IDisposable));
-            var generated = newType.CreateType();
-            var invoker = new ProxyGenerator().CreateInterfaceProxyWithoutTarget(generated, new Ceptor()) as ILOL;
-            var length = invoker.StrLength("HA ha ha");
-            var disposable = invoker as IDisposable;
-            disposable.Dispose();
-            Console.WriteLine();
+                ccfManager.RegisterService<IRemoteWorker>(() => new RemoteWorker());
+                Console.WriteLine("Registered...");
+                Console.ReadLine();
+            }
+            else
+            if (inp == "C")
+            {
+
+                var client = ccfManager.GetService<IRemoteWorker>();
+                //Console.WriteLine("Getted invoker");
+                //Console.ReadLine();
+
+                //var value = 5.4d;
+                //Console.WriteLine($"method Value with {value}");
+                //Console.WriteLine(client.Value(value));
+                //Console.ReadLine();
+
+                //var codeToJson = "Hi! I есть гр4т";
+                //var str = client.CodeToJson(codeToJson);
+                //Console.WriteLine($"receive stream length {str.Length}");
+                //using (var reader = new StreamReader(str))
+                //    Console.WriteLine(reader.ReadToEnd());
+
+                //var streamInfo = new MemoryStream(new byte[] { 1, 2, 3, 4, 5});
+                //Console.WriteLine(client.StreamInfo(streamInfo));
+                Console.ReadLine();
+
+                var not = new N();
+                client.HardWork(not);
+                Console.WriteLine("Invoked magic");
+
+            }
+            Console.WriteLine("General end");
+
+
+            Console.ReadLine();
+
         }
-    }
-    class LOLERPROXY : DynamicObject
-    {
 
-        public override bool TryConvert(ConvertBinder binder, out object result)
+        class N : INotifyer
         {
-            result = this;
-            return true;
-            return base.TryConvert(binder, out result); 
+            public void Notify(string message)
+            {
+                Console.WriteLine("THIS IS MESSAGE FROM SERVICE!");
+                Console.WriteLine(message);
+                Console.WriteLine("THIS IS MESSAGE FROM SERVICE!");
+                Console.WriteLine(message);
+                Console.WriteLine("THIS IS MESSAGE FROM SERVICE!");
+                Console.WriteLine(message);
+                Console.WriteLine("THIS IS MESSAGE FROM SERVICE!");
+                Console.WriteLine(message);
+            }
         }
 
-        public override bool TryGetMember(GetMemberBinder binder, out object result)
-        {
-            Console.WriteLine(binder.Name);
-            Action func = () => { Console.WriteLine("Dispose func"); };
-            result = func;
-            return true;
-        }
-    }
-
-
-    public class Ceptor : IInterceptor
-    {
-        public void Intercept(IInvocation invocation)
-        {
-            Console.WriteLine(invocation.Method.Name);
-            invocation.ReturnValue = -1;
-        }
-    }
-
-    class lol : ILOL, IDisposable
-    {
-        public void Dispose()
-        {
-            throw new NotImplementedException();
-        }
-
-        public int StrLength(string str) => str.Length;
-    }
-
-    
-
-    public interface ILOL : IDisposable
-    {
-        int StrLength(string str);
     }
 }

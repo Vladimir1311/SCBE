@@ -15,6 +15,8 @@ namespace DocsToPictures.Models
         private List<string> supportedFormats;
         private Thread workThread;
 
+
+        public IEnumerable<string> SupportedFormats => supportedFormats;
         public DocumentHandler()
         {
             supportedFormats = GetType().GetCustomAttributes<SupportedFormatAttribyte>()
@@ -40,6 +42,11 @@ namespace DocsToPictures.Models
             workThread = new Thread(Handle);
             workThread.Start();
         }
+        protected static int Percents(double done, double all)
+        {
+            return (int)Math.Floor((done / all) * 100);
+        }
+
         protected abstract void Handle();
 
         public abstract void Dispose();

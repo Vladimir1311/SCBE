@@ -48,10 +48,6 @@ namespace DocsToPictures.Models
             }
 
         }
-        private static int Percents(double done, double all)
-        {
-            return (int)Math.Floor((done / all) * 100);
-        }
 
         public override void Dispose()
         {

@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using SituationCenter.Shared.Models.People;
 using System;
 
 namespace SituationCenter.Shared.ResponseObjects.People
@@ -7,12 +8,16 @@ namespace SituationCenter.Shared.ResponseObjects.People
     {
         [JsonProperty("roomId", NullValueHandling = NullValueHandling.Ignore)]
         public Guid? RoomId { get; set; }
+        [JsonProperty("me")]
+        public PersonPresent Me { get; set; }
 
-        protected MeResponse(Guid? roomId)
+        protected MeResponse(Guid? roomId, PersonPresent person)
         {
             RoomId = roomId;
+            Me = person;
         }
 
-        public static MeResponse Create(Guid? roomId) => new MeResponse(roomId);
+        public static MeResponse Create(Guid? roomId, PersonPresent present) 
+            => new MeResponse(roomId, present);
     }
 }

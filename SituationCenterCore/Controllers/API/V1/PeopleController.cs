@@ -12,7 +12,6 @@ using SituationCenterCore.Filters;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using URSA.Respose;
 
 namespace SSituationCenterCore.Controllers.API.V1
 {
@@ -32,7 +31,7 @@ namespace SSituationCenterCore.Controllers.API.V1
         public async Task<MeResponse> Me()
         {
             var user = await repository.FindUser(User) ?? throw new ArgumentException();
-            return MeResponse.Create(user.RoomId);
+            return MeResponse.Create(user.RoomId, user.ToPresent());
         }
 
         [HttpPost]

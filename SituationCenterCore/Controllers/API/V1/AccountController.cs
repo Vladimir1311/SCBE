@@ -19,8 +19,6 @@ using SituationCenter.Shared.ResponseObjects;
 using SituationCenterCore.Pages.Account;
 using SituationCenter.Shared.ResponseObjects.Account;
 using SituationCenterCore.Filters;
-using URSA.Respose;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using SituationCenterCore.Extensions;
 
 namespace SituationCenterCore.Controllers.API.V1

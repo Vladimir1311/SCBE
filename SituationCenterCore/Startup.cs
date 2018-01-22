@@ -15,9 +15,9 @@ using Storage.Interfaces;
 using SituationCenterCore.Models.Rooms;
 using SituationCenterCore.Models.Rooms.Security;
 using SituationCenterBackServer.Interfaces;
-using URSA;
-using SituationCenterCore.Models.Multiplayer.Interfaces;
-using SituationCenterCore.Models.Multiplayer.Server;
+using Castle.DynamicProxy;
+using System.Reflection;
+using System.Dynamic;
 
 namespace SituationCenterCore
 {
@@ -40,7 +40,6 @@ namespace SituationCenterCore
             services.AddTransient<IRoomManager, RoomsManager>();
             services.AddTransient<IRoomSecurityManager, RoomSecurityManager>();
 
-            services.AddURSACollector();
 
             services.AddIdentity<ApplicationUser, IdentityRole>(options =>
             {
@@ -59,7 +58,6 @@ namespace SituationCenterCore
                         options.TokenValidationParameters = new TokenValidationParameters
                         {
                             ValidateIssuer = true,
-
                             ValidIssuer = MockAuthOptions.ISSUER,
 
                             ValidateAudience = true,
@@ -89,7 +87,9 @@ namespace SituationCenterCore
             services.AddCCFService<IStorage>();
             // services.AddSingleton<IStorage, MockStorage>();
 
-            services.UseAsServise<IAccessValidator, AlwaysTrueAccessValidator>();
+            services.AddCCF()
+                .AddCCFService<IStorage>()
+                .UseAsServise<IAccessValidator, AlwaysTrueAccessValidator>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -108,8 +108,6 @@ namespace SituationCenterCore
             app.UseStaticFiles();
 
             app.UseAuthentication();
-
-            app.UseWebSockets();
 
             app.UseMvc(routes =>
             {

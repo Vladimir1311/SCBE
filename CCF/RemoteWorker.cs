@@ -127,7 +127,7 @@ namespace CCF
                 var argument = invocation.Arguments[i++];
                 if(argument == null)
                 {
-                    message.Args[param.Name] = JValue.CreateNull();
+                    message.Args[param.Name] = new Value { Type = Messages.ValueType.Null };
                 }
                 else
                 if (argument is Stream stream)

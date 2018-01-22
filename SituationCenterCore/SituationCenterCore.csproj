@@ -4,6 +4,12 @@
     <UserSecretsId>aspnet-SituationCenterCore-F379C195-EFC8-4973-84BE-6DEE1E4AF292</UserSecretsId>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="Models\StorageModels\**" />
+    <Content Remove="Models\StorageModels\**" />
+    <EmbeddedResource Remove="Models\StorageModels\**" />
+    <None Remove="Models\StorageModels\**" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="2.0.0" PrivateAssets="All" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.0.0" PrivateAssets="All" />
@@ -24,8 +30,5 @@
     <Content Update="appsettings.jwt.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Models\StorageModels\" />
   </ItemGroup>
 </Project>

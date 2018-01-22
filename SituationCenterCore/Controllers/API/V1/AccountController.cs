@@ -20,6 +20,7 @@ using SituationCenterCore.Pages.Account;
 using SituationCenter.Shared.ResponseObjects.Account;
 using SituationCenterCore.Filters;
 using SituationCenterCore.Extensions;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace SituationCenterCore.Controllers.API.V1
 {

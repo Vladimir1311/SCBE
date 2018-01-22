@@ -22,7 +22,7 @@ namespace DocsToPictures
             serviceCollection.AddSingleton(new LoggerFactory()
                 .AddConsole());
             serviceCollection.AddLogging();
-            serviceCollection.AddSingleton(CCFServicesManager.Params.LocalHost);
+            serviceCollection.AddSingleton(CCFServicesManager.Params.Default);
             serviceCollection.AddSingleton<CCFServicesManager>();
             provider = serviceCollection.BuildServiceProvider();
         }

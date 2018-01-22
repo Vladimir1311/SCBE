@@ -118,7 +118,7 @@ namespace CCF
             public string HostName { get; }
             public string Port { get; }
 
-            public static Params Default => new Params("52.163.114.252", "80");
+            public static Params Default => new Params("13.79.225.57", "80");
             public static Params LocalHost => new Params("127.0.0.1", "5100");
         }
     }

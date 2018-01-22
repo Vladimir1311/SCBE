@@ -25,8 +25,6 @@ using SituationCenterBackServer.Interfaces;
 using Castle.DynamicProxy;
 using System.Reflection;
 using System.Dynamic;
-using URSA;
-using URSA.Collector;
 
 namespace SituationCenterCore
 {
@@ -49,7 +47,6 @@ namespace SituationCenterCore
             services.AddTransient<IRoomManager, RoomsManager>();
             services.AddTransient<IRoomSecurityManager, RoomSecurityManager>();
 
-            services.AddURSACollector();
 
             services.AddIdentity<ApplicationUser, IdentityRole>(options =>
             {

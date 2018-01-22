@@ -12,8 +12,7 @@ namespace CCF.IPResolver.Adapter
     {
         public static CCFCollection AddCCF(this IServiceCollection services, CCFServicesManager.Params @params = null)
         {
-            if (@params.Equals(default(CCFServicesManager.Params))) @params = CCFServicesManager.Params.Default;
-
+            @params = @params ?? CCFServicesManager.Params.Default;
             return new CCFCollection(services, services.BuildServiceProvider().GetService<ILoggerFactory>(), @params);
         }
     }

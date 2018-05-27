@@ -264,3 +264,4 @@ __pycache__/
 /WorkAroundFilesBuffer/App_Data
 /DocsToPictures/uploads
 /SituationCenterCore/appsettings.jwt.json
+/Storage/Storage.Service/AppData

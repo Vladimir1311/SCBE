@@ -16,7 +16,7 @@ namespace DocsToPictures.Models
         private string dataFolder;
         public DocumentProcessor()
         {
-            dataFolder = Directory.GetCurrentDirectory();
+            dataFolder = @"D:\Users\maksa\Desktop\New folder";
             handlers = Assembly.GetExecutingAssembly()
                 .GetTypes()
                 .Where(T => T.IsSubclassOf(typeof(DocumentHandler)))

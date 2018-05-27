@@ -1,4 +1,5 @@
 ﻿using DocsToPictures.Interfaces;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -13,6 +14,7 @@ namespace DocsToPictures.Models
         public string Folder { get; set; }
         public string Name { get; set; }
         public int Progress { get; set; }
+        [JsonIgnore]
         public string[] PagesPaths { get; set; }
 
         private List<int> indexes;

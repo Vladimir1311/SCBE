@@ -26,7 +26,10 @@ namespace DocsToPictures.Models
             documentsBase = new ConcurrentDictionary<Guid, Document>();
             Task.Factory.StartNew(async () => await DocsCheck());
         }
-
+        public IEnumerable<IDocument> GetCurrentDocs()
+        {
+            return documentsBase.Values;
+        }
         public IDocument AddToHandle(string fileName, Stream fileStream)
         {
             fileName = Path.GetFileName(fileName);

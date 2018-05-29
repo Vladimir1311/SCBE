@@ -63,11 +63,14 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonitoringApp.iOS", "Monito
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonitoringApp.UWP", "MonitoringApp\MonitoringApp.UWP\MonitoringApp.UWP.csproj", "{FD043EB4-3E89-415D-BA8B-2D3C0E5C72FE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonitoringApp.Wasm", "MonitoringApp\MonitoringApp.Wasm\MonitoringApp.Wasm.csproj", "{D4AE93B4-EEC4-4C84-8109-D0373DFFC6F8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MonitoringApp.Wasm", "MonitoringApp\MonitoringApp.Wasm\MonitoringApp.Wasm.csproj", "{D4AE93B4-EEC4-4C84-8109-D0373DFFC6F8}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		MonitoringApp\MonitoringApp.Shared\MonitoringApp.Shared.projitems*{46db150b-93bf-458f-923a-ba83a680d816}*SharedItemsImports = 4
+		MonitoringApp\MonitoringApp.Shared\MonitoringApp.Shared.projitems*{49cc2c20-b942-41e8-851a-ea486d870533}*SharedItemsImports = 4
 		MonitoringApp\MonitoringApp.Shared\MonitoringApp.Shared.projitems*{6279c845-92f8-4333-ab99-3d213163593c}*SharedItemsImports = 13
+		MonitoringApp\MonitoringApp.Shared\MonitoringApp.Shared.projitems*{fd043eb4-3e89-415d-ba8b-2d3c0e5c72fe}*SharedItemsImports = 4
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Ad-Hoc|Any CPU = Ad-Hoc|Any CPU

@@ -7,7 +7,39 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-		<TextBlock Text="Hello, world !" Margin="20" FontSize="30" />
-    </Grid>
+    <SplitView IsPaneOpen="True"
+               DisplayMode="Inline"
+               OpenPaneLength="296">
+        <SplitView.Pane>
+            <StackPanel
+                VerticalAlignment="Center"
+                HorizontalAlignment="Center">
+
+                <Button Content="Pane"
+                       FontSize="24"
+                        HorizontalAlignment="Center"
+                        Click="Button_Click"
+                        />
+                <Button Content="Pane 2"
+                       FontSize="24"
+                        HorizontalAlignment="Center"/>
+            </StackPanel>
+        </SplitView.Pane>
+        <Frame x:Name="ContentFrame">
+        </Frame>
+    </SplitView>
+    <!--<NavigationView>
+        <NavigationView.MenuItems>
+            <NavigationViewItem x:Uid="HomeNavItem" Content="Home" Tag="home">
+                <NavigationViewItem.Icon>
+                    <FontIcon Glyph="&#xE10F;"/>
+                </NavigationViewItem.Icon>
+            </NavigationViewItem>
+            <NavigationViewItemSeparator/>
+            <NavigationViewItemHeader Content="Main pages"/>
+            <NavigationViewItem x:Uid="AppsNavItem" Icon="AllApps" Content="Apps" Tag="apps"/>
+            <NavigationViewItem x:Uid="GamesNavItem" Icon="Video" Content="Games" Tag="games"/>
+            <NavigationViewItem x:Uid="MusicNavItem" Icon="Audio" Content="Music" Tag="music"/>
+        </NavigationView.MenuItems>
+    </NavigationView>-->
 </Page>

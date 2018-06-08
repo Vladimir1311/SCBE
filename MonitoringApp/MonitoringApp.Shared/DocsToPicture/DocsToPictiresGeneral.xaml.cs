@@ -22,6 +22,12 @@ namespace MonitoringApp.Shared.DocsToPicture
     /// </summary>
     public sealed partial class DocsToPictiresGeneral : Page
     {
+        public List<string> values = new List<string>()
+        {
+            "One record",
+            "Two record",
+            "Other data"
+        };
         public DocsToPictiresGeneral()
         {
             this.InitializeComponent();

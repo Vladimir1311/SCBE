@@ -21,6 +21,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)DocsToPicture\DocsToPictiresGeneral.xaml.cs">
       <DependentUpon>DocsToPictiresGeneral.xaml</DependentUpon>
     </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)DocsToPicture\DocsToPictureConnector.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)General\GeneralFactory.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>

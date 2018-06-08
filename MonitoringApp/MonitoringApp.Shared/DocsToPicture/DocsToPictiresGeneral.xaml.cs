@@ -22,6 +22,9 @@ namespace MonitoringApp.Shared.DocsToPicture
     /// </summary>
     public sealed partial class DocsToPictiresGeneral : Page
     {
+
+        private readonly DocsToPictureConnector connector;
+
         public List<string> values = new List<string>()
         {
             "One record",
@@ -31,6 +34,12 @@ namespace MonitoringApp.Shared.DocsToPicture
         public DocsToPictiresGeneral()
         {
             this.InitializeComponent();
+            connector = new DocsToPictureConnector();
+        }
+
+        private async void Button_Click(object sender, RoutedEventArgs e)
+        {
+            logsBlock.Text = await connector.GetSome();
         }
     }
 }

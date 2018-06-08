@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace MonitoringApp.Shared.DocsToPicture
 {
@@ -18,5 +19,8 @@ namespace MonitoringApp.Shared.DocsToPicture
         {
             httpClient = GeneralFactory.CreateHttpClient();
         }
+
+        public async Task<string> GetSome()
+            => await httpClient.GetStringAsync("https://jsonplaceholder.typicode.com/posts");
     }
 }

@@ -13,6 +13,7 @@ namespace DocsToPictures.NETFrameworkWEB.Controllers
     [RoutePrefix("api/document")]
     public class DocumentController : ApiController
     {
+        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         private static DocumentProcessor documentProcessor = new DocumentProcessor();
         [HttpGet]
         [Route("{id}")]
@@ -20,6 +21,7 @@ namespace DocsToPictures.NETFrameworkWEB.Controllers
         {
             try
             {
+                log.Info("Get values");
                 return documentProcessor.CheckDocument(id);
             }
             catch (Exception ex)
@@ -58,20 +60,34 @@ namespace DocsToPictures.NETFrameworkWEB.Controllers
         [HttpGet]
         [Route("all")]
         public IEnumerable<IDocument> GetAll()
-            => documentProcessor.GetCurrentDocs();
+        {
+            log.Info("Get all values");
+            try
+            {
+                return documentProcessor.GetCurrentDocs();
+            } catch (Exception ex)
+            {
+                log.Warn("when getCurrentDocs", ex);
+                return null;
+            }
+
+        }
 
         [HttpPost]
         public IDocument Post()
         {
             try
             {
+                log.Info($"Files count: {HttpContext.Current.Request.Files.Count}");
                 var file = HttpContext.Current.Request.Files.Count > 0 ?
                         HttpContext.Current.Request.Files[0] : null;
+                log.Info($"Files name: {file.FileName}");
+                log.Info($"Files length: {file.ContentLength}");
                 return documentProcessor.AddToHandle(file.FileName, file.InputStream);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"try upload file");
+                log.Warn($"exception: {ex.Message}");
                 return null;
             }
         }

@@ -6,10 +6,13 @@
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
-    <PackageReference Include="Storage.Interfaces" Version="2.0.8" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Models\People\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="C:\Users\maksa\source\repos\FileServer\Storage.Interfaces\Storage.Interfaces.csproj" />
   </ItemGroup>
 </Project>

@@ -16,7 +16,7 @@ namespace DocsToPictures.Models
         private string dataFolder;
         public DocumentProcessor()
         {
-            dataFolder = Directory.GetCurrentDirectory();
+            dataFolder = @"C:\Users\maksa\Desktop\New folder (3)";
             handlers = Assembly.GetExecutingAssembly()
                 .GetTypes()
                 .Where(T => T.IsSubclassOf(typeof(DocumentHandler)))
@@ -26,7 +26,10 @@ namespace DocsToPictures.Models
             documentsBase = new ConcurrentDictionary<Guid, Document>();
             Task.Factory.StartNew(async () => await DocsCheck());
         }
-
+        public IEnumerable<IDocument> GetCurrentDocs()
+        {
+            return documentsBase.Values;
+        }
         public IDocument AddToHandle(string fileName, Stream fileStream)
         {
             fileName = Path.GetFileName(fileName);

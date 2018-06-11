@@ -7,6 +7,7 @@ using System.IO;
 using Spire.Pdf;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Threading;
 
 namespace DocsToPictures.Models
 {
@@ -15,38 +16,33 @@ namespace DocsToPictures.Models
     public class WordHandler : DocumentHandler
     {
         private Application wordApp = new Application();
-        protected override void Handle()
+
+        public WordHandler(CancellationToken cancellationToken) : base(cancellationToken)
         {
-            Document neededDoc = null;
-            while (true)
+        }
+
+        protected override void Handle(Document document)
+        {
+            var wordFileName = Path.Combine(document.Folder, document.Name);
+            var doc = wordApp.Documents.Add(wordFileName);
+            var pdfFileName = Path.ChangeExtension(wordFileName, "pdf");
+            doc.SaveAs2(pdfFileName, WdSaveFormat.wdFormatPDF);
+            doc.Close(WdSaveOptions.wdDoNotSaveChanges, Type.Missing, Type.Missing);
+
+            using (var pdfFile = new PdfDocument(pdfFileName))
             {
-                workQueueStopper.WaitOne();
-                while (documentsStream.TryDequeue(out neededDoc))
+                document.SetPagesCount(pdfFile.Pages.Count);
+                for (var i = 0; i < pdfFile.Pages.Count; i++)
                 {
-                    var wordFileName = Path.Combine(neededDoc.Folder, neededDoc.Name);
-                    var doc = wordApp.Documents.Add(wordFileName);
-                    var pdfFileName = Path.ChangeExtension(wordFileName, "pdf");
-                    doc.SaveAs2(pdfFileName, WdSaveFormat.wdFormatPDF);
-                    doc.Close(WdSaveOptions.wdDoNotSaveChanges, Type.Missing, Type.Missing);
-
-                    using (var pdfFile = new PdfDocument(pdfFileName))
-                    {
-                        neededDoc.PagesPaths = new string[pdfFile.Pages.Count + 1];
-                        for (var i = 0; i < pdfFile.Pages.Count; i++)
-                        {
-                            var image = pdfFile.SaveAsImage(i);
-                            string imagePath = Path.Combine(neededDoc.Folder, $"{i + 1}.png");
-                            image.Save(imagePath, ImageFormat.Png);
-                            image.Dispose();
-                            neededDoc.PagesPaths[i + 1] = imagePath;
-                            neededDoc.Progress = Percents(i, pdfFile.Pages.Count);
-                        }
-
-                    }
+                    var image = pdfFile.SaveAsImage(i);
+                    string imagePath = Path.Combine(document.Folder, $"{i + 1}.png");
+                    image.Save(imagePath, ImageFormat.Png);
+                    image.Dispose();
+                    document[i + 1] = imagePath;
+                    document.Progress = Percents(i, pdfFile.Pages.Count);
                 }
-                workQueueStopper.Reset();
-            }
 
+            }
         }
 
         public override void Dispose()
@@ -60,4 +56,4 @@ namespace DocsToPictures.Models
             }
         }
     }
-    }
+}

@@ -18,6 +18,11 @@ namespace DocsToPictures
 
         public static void InvalidArgs()
             => Console.WriteLine(JsonConvert.SerializeObject(new Message { MessageType = MessageType.InvalidArgs }));
+
+        internal static void IncorrectOutputPath()
+            => Console.WriteLine(JsonConvert.SerializeObject(new Message { MessageType = MessageType.IncorrectOutputPath }));
+
+
         public static void Info(string message)
             => Console.WriteLine(JsonConvert.SerializeObject(new InfoMessage { Message = message }));
     }

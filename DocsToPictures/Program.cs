@@ -19,7 +19,7 @@ namespace DocsToPictures
         {
             var stopwatch = new Stopwatch();
             stopwatch.Start();
-            if (args.Length == 0)
+            if (args.Length != 2)
             {
                 LogsWriter.InvalidArgs();
                 return;
@@ -29,7 +29,12 @@ namespace DocsToPictures
                 LogsWriter.IncorrectDoc();
                 return;
             }
-            IDocumentProcessor processor = new DocumentProcessor();
+            if (!Directory.Exists(args[1]))
+            {
+                LogsWriter.IncorrectOutputPath();
+                return;
+            }
+            IDocumentProcessor processor = new DocumentProcessor(args[1]);
             if (!processor.GetSupportedExtensions().Contains(Path.GetExtension(args[0])))
             {
                 LogsWriter.IncorrectDoc();

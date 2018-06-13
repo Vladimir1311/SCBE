@@ -18,11 +18,11 @@ namespace DocsToPictures.Models
         private readonly CancellationToken cancellationToken;
         private readonly CancellationTokenSource cancellationTokenSource;
 
-        public DocumentProcessor()
+        public DocumentProcessor(string dataFolderPath)
         {
             cancellationTokenSource = new CancellationTokenSource();
             cancellationToken = cancellationTokenSource.Token;
-            dataFolder = @"C:\Users\maksa\Desktop\New folder (3)";
+            dataFolder = dataFolderPath;
             handlers = Assembly.GetExecutingAssembly()
                 .GetTypes()
                 .Where(T => T.IsSubclassOf(typeof(DocumentHandler)))

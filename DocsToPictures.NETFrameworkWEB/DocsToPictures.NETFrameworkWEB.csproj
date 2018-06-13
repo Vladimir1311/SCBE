@@ -50,6 +50,9 @@
       <HintPath>..\packages\log4net.2.0.8\lib\net45-full\log4net.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Microsoft.IdentityModel.Protocols">
+      <HintPath>C:\Program Files\dotnet\sdk\NuGetFallbackFolder\microsoft.identitymodel.protocols\2.1.4\lib\netstandard1.4\Microsoft.IdentityModel.Protocols.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
@@ -162,7 +165,9 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\DocumentHandler.cs" />
     <Compile Include="Models\DocumentsQueue.cs" />
+    <Compile Include="Models\Logger.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -188,6 +193,10 @@
     <None Include="Properties\PublishProfiles\SCDTP - Web Deploy.pubxml" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\DocsToPictures.ClIProtocol\DocsToPictures.ClIProtocol.csproj">
+      <Project>{5F0304A8-FD4D-4FBE-8B73-1A2A63FB6FE5}</Project>
+      <Name>DocsToPictures.ClIProtocol</Name>
+    </ProjectReference>
     <ProjectReference Include="..\DocsToPictures.Interfaces\DocsToPictures.Interfaces.csproj">
       <Project>{E7C9C715-B5FB-4A69-97E3-3CEFF46DFF94}</Project>
       <Name>DocsToPictures.Interfaces</Name>

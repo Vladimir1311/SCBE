@@ -39,7 +39,6 @@ namespace DocsToPictures.Models
                     image.Save(imagePath, ImageFormat.Png);
                     image.Dispose();
                     document[i + 1] = imagePath;
-                    document.Progress = Percents(i, pdfFile.Pages.Count);
                 }
 
             }

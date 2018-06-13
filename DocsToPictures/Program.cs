@@ -17,24 +17,29 @@ namespace DocsToPictures
     {
         static void Main(string[] args)
         {
+            LogsWriter.Info($"args is {string.Join("---", args)}");
             var stopwatch = new Stopwatch();
             stopwatch.Start();
             if (args.Length != 2)
             {
+                LogsWriter.Info($"not two args");
                 LogsWriter.InvalidArgs();
                 return;
             }
             if (!File.Exists(args[0]))
             {
+                LogsWriter.Info($"file no exist");
                 LogsWriter.IncorrectDoc();
                 return;
             }
             if (!Directory.Exists(args[1]))
             {
+                LogsWriter.Info($"no dir");
                 LogsWriter.IncorrectOutputPath();
                 return;
             }
             IDocumentProcessor processor = new DocumentProcessor(args[1]);
+            LogsWriter.Info($"extensions: {string.Join("---", processor.GetSupportedExtensions())}");
             if (!processor.GetSupportedExtensions().Contains(Path.GetExtension(args[0])))
             {
                 LogsWriter.IncorrectDoc();
@@ -56,7 +61,7 @@ namespace DocsToPictures
                 Thread.Sleep(TimeSpan.FromSeconds(5));
             }
             LogsWriter.Info($"Finish, time: {stopwatch.ElapsedMilliseconds} milliseconds");
-
+            LogsWriter.Finish();
             processor.Dispose();
         }
     }

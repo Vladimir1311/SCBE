@@ -12,6 +12,7 @@ namespace DocsToPictures.ClIProtocol
         Error,
         InvalidArgs,
         Info,
-        IncorrectOutputPath
+        IncorrectOutputPath,
+        Finish
     }
 }

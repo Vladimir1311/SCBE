@@ -25,5 +25,8 @@ namespace DocsToPictures
 
         public static void Info(string message)
             => Console.WriteLine(JsonConvert.SerializeObject(new InfoMessage { Message = message }));
+
+        internal static void Finish()
+            => Console.WriteLine(JsonConvert.SerializeObject(new FinishMessage()));
     }
 }

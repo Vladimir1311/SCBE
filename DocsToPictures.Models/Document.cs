@@ -13,7 +13,8 @@ namespace DocsToPictures.Models
         public Guid Id { get; set; }
         public string Folder { get; set; }
         public string Name { get; set; }
-        public int Progress { get; set; }
+        public int Progress => _pagesPaths == null ? 0
+            : GetAvailablePages().Count / (_pagesPaths.Length - 1) * 100;
 
         private List<int> indexes;
         private string[] _pagesPaths;

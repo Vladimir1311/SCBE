@@ -44,10 +44,6 @@ namespace DocsToPictures.Models
             workThread = new Thread(HandleCycle);
             workThread.Start();
         }
-        protected static int Percents(double done, double all)
-        {
-            return (int)Math.Floor((done / all) * 100);
-        }
 
 
         private void HandleCycle()

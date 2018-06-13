@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace DocsToPictures.Models
 {
     [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = true)]
-    sealed class SupportedFormatAttribyte : Attribute
+    public class SupportedFormatAttribyte : Attribute
     {
         readonly string format;
         public SupportedFormatAttribyte(string format)

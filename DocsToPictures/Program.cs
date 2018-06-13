@@ -10,6 +10,7 @@ using System.IO;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
+using System.Reflection;
 
 namespace DocsToPictures
 {
@@ -26,27 +27,50 @@ namespace DocsToPictures
                 LogsWriter.InvalidArgs();
                 return;
             }
-            if (!File.Exists(args[0]))
+            var directory = args[0];
+            var fileName = args[1];
+            var filePath = Path.Combine(directory, fileName);
+
+
+            if (!File.Exists(filePath))
             {
                 LogsWriter.Info($"file no exist");
                 LogsWriter.IncorrectDoc();
                 return;
             }
-            if (!Directory.Exists(args[1]))
+            if (!Directory.Exists(directory))
             {
                 LogsWriter.Info($"no dir");
                 LogsWriter.IncorrectOutputPath();
                 return;
             }
-            IDocumentProcessor processor = new DocumentProcessor(args[1]);
-            LogsWriter.Info($"extensions: {string.Join("---", processor.GetSupportedExtensions())}");
-            if (!processor.GetSupportedExtensions().Contains(Path.GetExtension(args[0])))
+
+            var cancellationSource = new CancellationTokenSource();
+
+            var handler = Assembly.GetAssembly(typeof(DocumentHandler))
+                .GetTypes()
+                .Where(T => T.IsSubclassOf(typeof(DocumentHandler)))
+                .Where(T => T.GetCustomAttributes<SupportedFormatAttribyte>().Any(attr => attr.Format == Path.GetExtension(fileName)))
+                .Select(T => Activator.CreateInstance(T, cancellationSource.Token) as DocumentHandler)
+                .DefaultIfEmpty(null)
+                .Single();
+
+            if (handler == null)
             {
                 LogsWriter.IncorrectDoc();
-                processor.Dispose();
+                cancellationSource.Cancel();
                 return;
             }
-            var document = processor.AddToHandle(Path.GetFileName(args[0]), File.OpenRead(args[0]));
+
+            var document = new Document
+            {
+                Folder = directory,
+                Name = fileName,
+                Id = Guid.NewGuid()
+            };
+            handler.Initialize();
+            handler.AddToHandle(document);
+
             document.MetaReadyEvent += (pCount) =>
             {
                 LogsWriter.MetaReady(pCount);
@@ -62,7 +86,8 @@ namespace DocsToPictures
             }
             LogsWriter.Info($"Finish, time: {stopwatch.ElapsedMilliseconds} milliseconds");
             LogsWriter.Finish();
-            processor.Dispose();
+            cancellationSource.Cancel();
+            handler.Dispose();
         }
     }
 }

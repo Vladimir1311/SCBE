@@ -32,7 +32,7 @@ namespace DocsToPictures.NETFrameworkWEB.Models
                 StartInfo = new ProcessStartInfo
                 {
                     FileName = RenderClientExe,
-                    Arguments = $"\"{Path.Combine(doc.Folder, doc.Name)}\" \"{RenderClientUploads}\"",
+                    Arguments = $"\"{doc.Folder}\" \"{doc.Name}\"",
                     RedirectStandardError = true,
                     RedirectStandardOutput = true,
                     UseShellExecute = false

@@ -38,31 +38,31 @@ namespace DocsToPictures.NETFrameworkWEB.Controllers
             }
         }
 
-        //[HttpGet]
-        //[Route("{id}/{pageNum}")]
-        //public HttpResponseMessage Get(Guid id, int pageNum)
-        //{
-        //    try
-        //    {
-        //        var targetDoc = documentProcessor.CheckDocument(id);
-        //        if (targetDoc == null)
-        //            return Request.CreateResponse(HttpStatusCode.NotFound);
-        //        var pic = targetDoc.GetPicture(pageNum);
-        //        if (pic == null)
-        //            return Request.CreateResponse(HttpStatusCode.NotFound);
-        //        HttpResponseMessage httpResponseMessage = Request.CreateResponse(HttpStatusCode.OK);
-        //        httpResponseMessage.Content = new StreamContent(pic);
-        //        httpResponseMessage.Content.Headers.ContentDisposition = new System.Net.Http.Headers.ContentDispositionHeaderValue("attachment");
-        //        httpResponseMessage.Content.Headers.ContentDisposition.FileName = $"{pageNum}.PNG";
-        //        httpResponseMessage.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/octet-stream");
-        //        return httpResponseMessage;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Console.WriteLine($"Try get info about doc id {id}");
-        //        return null;
-        //    }
-        //}
+        [HttpGet]
+        [Route("{id}/{pageNum}")]
+        public HttpResponseMessage Get(Guid id, int pageNum)
+        {
+            try
+            {
+                var targetDoc = docsQueue.CurrentDocuments.FirstOrDefault(d => d.Id == id);
+                if (targetDoc == null)
+                    return Request.CreateResponse(HttpStatusCode.NotFound);
+                var pic = targetDoc.GetPicture(pageNum);
+                if (pic == null)
+                    return Request.CreateResponse(HttpStatusCode.NotFound);
+                HttpResponseMessage httpResponseMessage = Request.CreateResponse(HttpStatusCode.OK);
+                httpResponseMessage.Content = new StreamContent(pic);
+                httpResponseMessage.Content.Headers.ContentDisposition = new System.Net.Http.Headers.ContentDispositionHeaderValue("attachment");
+                httpResponseMessage.Content.Headers.ContentDisposition.FileName = $"{pageNum}.PNG";
+                httpResponseMessage.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/octet-stream");
+                return httpResponseMessage;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Try get info about doc id {id}");
+                return null;
+            }
+        }
 
         [HttpGet]
         [Route("all")]
@@ -98,37 +98,6 @@ namespace DocsToPictures.NETFrameworkWEB.Controllers
                 logger.Warning($"exception: {ex.Message}", ex);
                 return null;
             }
-        }
-
-        //[HttpGet()]
-        //[Route("extensions")]
-        //public IEnumerable<string> Get()
-        //{
-        //    try
-        //    {
-        //        return documentProcessor.GetSupportedExtensions();
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Console.WriteLine($"try upload file");
-        //        return null;
-        //    }
-        //}
-        [HttpGet()]
-        [Route("extensions")]
-        public IEnumerable<string> Get()
-        {
-            try
-            {
-                return new string[] { ConfigurationManager.AppSettings["PathToReneringClient"] };
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"try upload file");
-                return null;
-            }
-
-
         }
     }
 }

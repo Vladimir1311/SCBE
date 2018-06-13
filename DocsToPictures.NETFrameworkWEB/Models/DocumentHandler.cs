@@ -40,8 +40,7 @@ namespace DocsToPictures.NETFrameworkWEB.Models
             };
             try
             {
-
-            proccess.Start();
+                proccess.Start();
             }
             catch (Exception ex)
             {

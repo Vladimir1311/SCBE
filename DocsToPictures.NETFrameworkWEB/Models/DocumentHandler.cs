@@ -4,6 +4,7 @@ using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using DocsToPictures.ClIProtocol;
@@ -12,13 +13,18 @@ using Newtonsoft.Json;
 
 namespace DocsToPictures.NETFrameworkWEB.Models
 {
-    public class DocumentHandler
+    public class DocumentHandler : IDisposable
     {
         private static string RenderClientExe => ConfigurationManager.AppSettings["PathToReneringClient"];
         private static string RenderClientUploads => ConfigurationManager.AppSettings["PathToReneringClientUploads"];
 
         private readonly Logger<DocumentHandler> logger = new Logger<DocumentHandler>();
+        
+        private readonly CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
         private readonly Document doc;
+
+        public Guid Id => doc.Id;
+        public Task CurrentTask { get; set; }
 
         public DocumentHandler(Document doc)
         {
@@ -35,6 +41,7 @@ namespace DocsToPictures.NETFrameworkWEB.Models
                     Arguments = $"\"{doc.Folder}\" \"{doc.Name}\"",
                     RedirectStandardError = true,
                     RedirectStandardOutput = true,
+                    RedirectStandardInput = true,
                     UseShellExecute = false
                 }
             };
@@ -50,6 +57,10 @@ namespace DocsToPictures.NETFrameworkWEB.Models
             {
                 while (true)
                 {
+                    if (cancellationTokenSource.IsCancellationRequested)
+                    {
+                        await proccess.StandardInput.WriteLineAsync("q");
+                    }
                     var line = await reader.ReadLineAsync();
                     logger.Debug($"readed >>{line}<<");
                     var message = JsonConvert.DeserializeObject<Message>(line);
@@ -93,6 +104,12 @@ namespace DocsToPictures.NETFrameworkWEB.Models
             }
             proccess.WaitForExit();
             logger.Info($"doc with id {doc.Id}, exit code: {proccess.ExitCode}");
+        }
+
+        public void Dispose()
+        {
+            cancellationTokenSource.Cancel();
+            CurrentTask.Wait();
         }
     }
 }

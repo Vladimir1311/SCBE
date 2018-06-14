@@ -99,5 +99,19 @@ namespace DocsToPictures.NETFrameworkWEB.Controllers
                 return null;
             }
         }
+
+        [HttpDelete]
+        [Route("{id}")]
+        public async Task Delete(Guid id)
+        {
+            try
+            {
+                await docsQueue.Remove(id);
+            }
+            catch (Exception ex)
+            {
+                logger.Warning($"deleting: {ex.Message}", ex);
+            }
+        }
     }
 }

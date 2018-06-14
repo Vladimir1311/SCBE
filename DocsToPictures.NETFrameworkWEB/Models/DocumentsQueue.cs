@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 
@@ -22,12 +23,11 @@ namespace DocsToPictures.NETFrameworkWEB.Models
 
         public IEnumerable<IDocument> CurrentDocuments => inMemoryDocuments;
 
-        private readonly ConcurrentQueue<DocumentHandler> documentHandlers = new ConcurrentQueue<DocumentHandler>();
+        private readonly ConcurrentDictionary<Guid, DocumentHandler> documentHandlers = new ConcurrentDictionary<Guid, DocumentHandler>();
 
         private readonly ConcurrentQueue<Document> documents = new ConcurrentQueue<Document>();
 
         private readonly List<IDocument> inMemoryDocuments = new List<IDocument>();
-        private readonly List<Task> tasks = new List<Task>();
 
         private DocumentsQueue()
         {
@@ -48,10 +48,19 @@ namespace DocsToPictures.NETFrameworkWEB.Models
                 await fileStream.CopyToAsync(fileSystemStream);
             }
             inMemoryDocuments.Add(doc);
-            //documents.Enqueue(doc);
             var handler = new DocumentHandler(doc);
-            tasks.Add(Task.Run(handler.Run));
+            handler.CurrentTask = Task.Run(handler.Run);
+            documentHandlers[handler.Id] = handler;
             return doc;
+        }
+
+        public Task Remove(Guid id)
+        {
+            if (documentHandlers.TryGetValue(id, out var handler))
+            {
+                handler.Dispose();
+            }
+            return Task.CompletedTask;
         }
     }
 }

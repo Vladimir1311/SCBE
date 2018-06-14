@@ -45,11 +45,12 @@ namespace DocsToPictures
             try
             {
                 GeneralWork(fileName, directory);
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 LogsWriter.Info($"{ex.Message}\n {ex.StackTrace}");
                 if (ex.InnerException != null)
-                LogsWriter.Info($"Inner exception: {ex.InnerException.Message}\n {ex.InnerException.StackTrace}");
+                    LogsWriter.Info($"Inner exception: {ex.InnerException.Message}\n {ex.InnerException.StackTrace}");
             }
         }
 
@@ -80,8 +81,6 @@ namespace DocsToPictures
                 Name = fileName,
                 Id = Guid.NewGuid()
             };
-            handler.Initialize();
-            handler.AddToHandle(document);
 
             document.MetaReadyEvent += (pCount) =>
             {
@@ -91,8 +90,20 @@ namespace DocsToPictures
             {
                 LogsWriter.PageReady(pNum, pPath);
             };
+
+            handler.Initialize();
+            handler.AddToHandle(document);
+
             while (document.GetAvailablePages().Count != document.PagesCount)
             {
+                if (Console.KeyAvailable)
+                {
+                    if (Console.ReadLine() == "q")
+                    {
+                        cancellationSource.Cancel();
+                        break;
+                    }
+                }
                 LogsWriter.Info($"Waiting {stopwatch.ElapsedMilliseconds} milliseconds");
                 Thread.Sleep(TimeSpan.FromSeconds(5));
             }

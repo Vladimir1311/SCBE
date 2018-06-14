@@ -19,8 +19,6 @@ namespace DocsToPictures
         static void Main(string[] args)
         {
             LogsWriter.Info($"args is {string.Join("---", args)}");
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
             if (args.Length != 2)
             {
                 LogsWriter.Info($"not two args");
@@ -44,7 +42,21 @@ namespace DocsToPictures
                 LogsWriter.IncorrectOutputPath();
                 return;
             }
+            try
+            {
+                GeneralWork(fileName, directory);
+            } catch (Exception ex)
+            {
+                LogsWriter.Info($"{ex.Message}\n {ex.StackTrace}");
+                if (ex.InnerException != null)
+                LogsWriter.Info($"Inner exception: {ex.InnerException.Message}\n {ex.InnerException.StackTrace}");
+            }
+        }
 
+        static void GeneralWork(string fileName, string directory)
+        {
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
             var cancellationSource = new CancellationTokenSource();
 
             var handler = Assembly.GetAssembly(typeof(DocumentHandler))

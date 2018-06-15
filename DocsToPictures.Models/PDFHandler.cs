@@ -16,25 +16,25 @@ namespace DocsToPictures.Models
         public PDFHandler(CancellationToken cancellationToken) : base(cancellationToken)
         {
         }
+        private PdfDocument pdfDoc;
 
-        protected override void Handle(Document document)
+        protected override void Prepare()
         {
-            using (var pdfFile = new PdfDocument(Path.Combine(document.Folder, document.Name)))
-            {
-                document.SetPagesCount(pdfFile.Pages.Count);
-                for (var i = 0; i < pdfFile.Pages.Count; i++)
-                {
-                    var image = pdfFile.SaveAsImage(i);
-                    string imagePath = Path.Combine(document.Folder, $"{i + 1}.png");
-                    image.Save(imagePath, ImageFormat.Png);
-                    image.Dispose();
-                    document[i + 1] = imagePath;
-                }
-            }
+            pdfDoc = new PdfDocument(FilePath);
+        }
+
+        protected override int ReadMeta()
+            => pdfDoc.Pages.Count;
+
+        protected override void RenderPage(int number, string targetFileName)
+        {
+            var image = pdfDoc.SaveAsImage(number - 1);
+            image.Save(targetFileName, ImageFormat.Png);
+            image.Dispose();
         }
         public override void Dispose()
         {
+            pdfDoc?.Dispose();
         }
-
     }
 }

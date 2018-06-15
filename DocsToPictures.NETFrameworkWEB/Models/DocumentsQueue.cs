@@ -16,6 +16,7 @@ namespace DocsToPictures.NETFrameworkWEB.Models
     public class DocumentsQueue
     {
         private static string ASPTemp => ConfigurationManager.AppSettings["PathToASPTemp"];
+        private readonly Logger<DocumentsQueue> logger = new Logger<DocumentsQueue>();
 
         private static DocumentsQueue documentsQueue;
         public static DocumentsQueue Instance => documentsQueue ?? 
@@ -27,10 +28,11 @@ namespace DocsToPictures.NETFrameworkWEB.Models
 
         private readonly ConcurrentQueue<Document> documents = new ConcurrentQueue<Document>();
 
-        private readonly List<IDocument> inMemoryDocuments = new List<IDocument>();
+        private readonly List<Document> inMemoryDocuments = new List<Document>();
 
         private DocumentsQueue()
         {
+            logger.Info("CREATED DOCUMENTS QUEUE");
         }
         public async Task<IDocument> AddAsync(string fileName, Stream fileStream)
         {
@@ -49,18 +51,46 @@ namespace DocsToPictures.NETFrameworkWEB.Models
             }
             inMemoryDocuments.Add(doc);
             var handler = new DocumentHandler(doc);
+            handler.Done += () =>
+            {
+                documentHandlers.TryRemove(handler.Id, out var removedHandler);
+            };
             handler.CurrentTask = Task.Run(handler.Run);
             documentHandlers[handler.Id] = handler;
             return doc;
         }
 
-        public Task Remove(Guid id)
+        public void Remove(Guid id)
         {
-            if (documentHandlers.TryGetValue(id, out var handler))
+            logger.Trace($"Try remove document with id {id}");
+            var document = inMemoryDocuments.SingleOrDefault(d => d.Id == id);
+            if (document == null)
+                return;
+            inMemoryDocuments.Remove(document);
+            if (documentHandlers.TryGetValue( id, out var handler))
             {
+                logger.Trace($"finded document handler {id}, doc progress is {handler.Progress}");
                 handler.Dispose();
+                logger.Trace($"Disposed handler {id}");
+                handler.Done += () => TryRemove(document);
             }
-            return Task.CompletedTask;
+            else
+            {
+                logger.Trace($"document {id}, done, delete folder {document.Folder}");
+                TryRemove(document);
+            }
+        }
+
+        private void TryRemove(Document doc)
+        {
+            try
+            {
+                doc.Remove();
+            }
+            catch (Exception ex)
+            {
+                logger.Warning("removing doc", ex);
+            }
         }
     }
 }

@@ -9,7 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace DocsToPictures.Models
-{
+{/*
     public class DocumentProcessor : IDocumentProcessor
     {
         private List<DocumentHandler> handlers;
@@ -110,5 +110,5 @@ namespace DocsToPictures.Models
                 .Select(H => H.SupportedFormats)
                 .Aggregate((F, S) => F.Concat(S));
         }
-    }
+    }*/
 }

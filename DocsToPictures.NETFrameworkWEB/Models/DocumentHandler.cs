@@ -19,12 +19,15 @@ namespace DocsToPictures.NETFrameworkWEB.Models
         private static string RenderClientUploads => ConfigurationManager.AppSettings["PathToReneringClientUploads"];
 
         private readonly Logger<DocumentHandler> logger = new Logger<DocumentHandler>();
-        
+
         private readonly CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
         private readonly Document doc;
+        private bool isRun = true;
 
         public Guid Id => doc.Id;
+        public int Progress => doc.Progress;
         public Task CurrentTask { get; set; }
+        public event Action Done;
 
         public DocumentHandler(Document doc)
         {
@@ -57,39 +60,49 @@ namespace DocsToPictures.NETFrameworkWEB.Models
             {
                 while (true)
                 {
-                    if (cancellationTokenSource.IsCancellationRequested)
+                    if (cancellationTokenSource.IsCancellationRequested && isRun)
                     {
-                        await proccess.StandardInput.WriteLineAsync("q");
+                        isRun = false;
+                        logger.Debug("token source cancellation requested");
+                        proccess.StandardInput.WriteLine("q");
+                        logger.Trace("writed 'q' to proccess");
                     }
                     var line = await reader.ReadLineAsync();
-                    logger.Debug($"readed >>{line}<<");
+                    logger.Trace($"readed >>{line}<<");
                     var message = JsonConvert.DeserializeObject<Message>(line);
                     switch (message.MessageType)
                     {
                         case MessageType.MetaReady:
                             var metaMessage = JsonConvert.DeserializeObject<MetaReadyMessage>(line);
+                            logger.Debug($"MetaReady: {metaMessage.PagesCount}");
                             doc.SetPagesCount(metaMessage.PagesCount);
                             break;
                         case MessageType.PageReady:
                             var pageReady = JsonConvert.DeserializeObject<PageReadyMessage>(line);
+                            logger.Debug($"PageReady: {pageReady.PageNum}");
                             doc[pageReady.PageNum] = pageReady.PagePath;
                             break;
                         case MessageType.IncorrectDoc:
+                            logger.Warning($"Send incorect doc to handling");
                             break;
                         case MessageType.Error:
-                            throw new Exception("Error in proccess!");
+                            logger.Warning($"Proccess throws error");
                             break;
                         case MessageType.InvalidArgs:
-                            throw new Exception("Invalid Args for proccess");
+                            logger.Warning($"Passed invalid argumens");
                             break;
                         case MessageType.Info:
+                            var infoMessage = JsonConvert.DeserializeObject<InfoMessage>(line);
+                            logger.Debug($"Proccess send info >>{infoMessage.Message}<<");
                             break;
                         case MessageType.IncorrectOutputPath:
-                            throw new Exception("Incorrect out Path");
+                            logger.Warning($"Incorrect output Path");
                             break;
                         case MessageType.Finish:
+                            logger.Debug($"send Finish keyword");
                             return;
                         default:
+                            logger.Warning($"Incorrect message type from proccess");
                             break;
                     }
                 }
@@ -97,19 +110,21 @@ namespace DocsToPictures.NETFrameworkWEB.Models
             try
             {
                 await ReadFunc(proccess.StandardOutput);
+                var p = proccess.HasExited;
+                proccess.WaitForExit();
+                logger.Info($"doc with id {doc.Id}, exit code: {proccess.ExitCode}");
+                Done?.Invoke();
             }
             catch (Exception ex)
             {
                 logger.Warning("while read", ex);
             }
-            proccess.WaitForExit();
-            logger.Info($"doc with id {doc.Id}, exit code: {proccess.ExitCode}");
         }
 
         public void Dispose()
         {
             cancellationTokenSource.Cancel();
-            CurrentTask.Wait();
+            logger.Trace("DISPOSE Cancelled token");
         }
     }
 }

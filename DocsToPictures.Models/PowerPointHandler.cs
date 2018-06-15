@@ -19,34 +19,20 @@ namespace DocsToPictures.Models
             Visible = MsoTriState.msoTrue
         };
 
+        private Presentation presentation;
+
         public PowerPointHandler(CancellationToken cancellationToken) : base(cancellationToken)
         {
         }
 
-        protected override void Handle(Document document)
-        {
-            Presentation ppt = pptApplication.Presentations.Open(Path.Combine(document.Folder, document.Name), MsoTriState.msoFalse, MsoTriState.msoFalse, MsoTriState.msoFalse);
-            document.SetPagesCount(ppt.Slides.Count);
-            var folderName = Guid.NewGuid().ToString();
-            ppt.SaveAs(document.Folder, PpSaveAsFileType.ppSaveAsPNG);
-            for (int i = 1; i <= document.PagesCount; i++)
-            {
-                document[i] = Path.Combine(document.Folder, $"Slide{i}.PNG");
-            }
-            //foreach (Slide slide in ppt.Slides)
-            //{
-            //    string imagePath = Path.Combine(document.Folder, $"{count}.png");
-            //    slide.Export(imagePath, "png", 960, 720);
-            //    count++;
-            //    document.PagesPaths[count] = imagePath;
-            //    document.Progress = Percents(count, ppt.Slides.Count);
-            //    //object doNotSaveChanges = WDSaveOptions.wdDoNotSaveChanges;
-            //    //ppt.Close(ref doNotSaveChanges, Type.Missing, Type.Missing);
-            //}
-            ppt.Close();
+        protected override void Prepare()
+             => presentation = pptApplication.Presentations.Open(FilePath, MsoTriState.msoFalse, MsoTriState.msoFalse, MsoTriState.msoFalse);
 
-        }
+        protected override int ReadMeta()
+            => presentation.Slides.Count;
 
+        protected override void RenderPage(int number, string targetFilePath)
+            => presentation.Slides[number].Export(targetFilePath, "PNG");
 
         public override void Dispose()
         {

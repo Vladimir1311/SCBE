@@ -16,43 +16,38 @@ namespace DocsToPictures.Models
     public class WordHandler : DocumentHandler
     {
         private Application wordApp = new Application();
-
+        private PdfDocument pdfDoc;
         public WordHandler(CancellationToken cancellationToken) : base(cancellationToken)
         {
         }
 
-        protected override void Handle(Document document)
+        protected override void Prepare()
         {
-            var wordFileName = Path.Combine(document.Folder, document.Name);
-            var doc = wordApp.Documents.Add(wordFileName);
-            var pdfFileName = Path.ChangeExtension(wordFileName, "pdf");
+            var doc = wordApp.Documents.Add(FilePath);
+            var pdfFileName = Path.ChangeExtension(FilePath, "pdf");
             doc.SaveAs2(pdfFileName, WdSaveFormat.wdFormatPDF);
             doc.Close(WdSaveOptions.wdDoNotSaveChanges, Type.Missing, Type.Missing);
-
-            using (var pdfFile = new PdfDocument(pdfFileName))
-            {
-                document.SetPagesCount(pdfFile.Pages.Count);
-                for (var i = 0; i < pdfFile.Pages.Count; i++)
-                {
-                    var image = pdfFile.SaveAsImage(i);
-                    string imagePath = Path.Combine(document.Folder, $"{i + 1}.png");
-                    image.Save(imagePath, ImageFormat.Png);
-                    image.Dispose();
-                    document[i + 1] = imagePath;
-                }
-
-            }
+            pdfDoc = new PdfDocument(pdfFileName);
         }
 
+        protected override int ReadMeta()
+            => pdfDoc.Pages.Count;
+
+        protected override void RenderPage(int number, string targetFilePath)
+        {
+            var image = pdfDoc.SaveAsImage(number - 1);
+            image.Save(targetFilePath, ImageFormat.Png);
+            image.Dispose();
+        }
         public override void Dispose()
         {
             if (wordApp != null)
             {
-
                 foreach (var document in wordApp.Documents.Cast<Microsoft.Office.Interop.Word.Document>())
                     document.Close(WdSaveOptions.wdDoNotSaveChanges);
                 wordApp.Quit(WdSaveOptions.wdDoNotSaveChanges);
             }
+            pdfDoc.Dispose();
         }
     }
 }

@@ -17,9 +17,19 @@ namespace DocsToPictures.NETFrameworkWEB.Models
 
         private void WriteLine(LogLevel level, string content)
         {
+
             lock (locker)
             {
-                File.AppendAllText(LogFilePath, $"{DateTime.Now} {{{typeof(T).FullName}}} |{level}|: {content}\n");
+                while (true)
+                {
+                    try
+                    {
+                        File.AppendAllText(LogFilePath, $"{DateTime.Now} {{{typeof(T).FullName}}} |{level}|: {content}\n");
+                        break;
+                    }
+                    catch {}
+
+                }
             }
         }
         private enum LogLevel
@@ -34,8 +44,10 @@ namespace DocsToPictures.NETFrameworkWEB.Models
         internal void Warning(string v, Exception ex = null)
             => WriteLine(LogLevel.Warn, $"{v} : {ex?.Message}\n{ex?.StackTrace}");
 
-
         internal void Debug(string v)
-            => WriteLine(LogLevel.Debug, v);
+            => WriteLine(LogLevel.Trace, v);
+
+        internal void Trace(string v)
+            => WriteLine(LogLevel.Trace, v);
     }
 }

@@ -102,11 +102,11 @@ namespace DocsToPictures.NETFrameworkWEB.Controllers
 
         [HttpDelete]
         [Route("{id}")]
-        public async Task Delete(Guid id)
+        public void Delete(Guid id)
         {
             try
             {
-                await docsQueue.Remove(id);
+                docsQueue.Remove(id);
             }
             catch (Exception ex)
             {

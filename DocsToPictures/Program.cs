@@ -91,26 +91,30 @@ namespace DocsToPictures
                 LogsWriter.PageReady(pNum, pPath);
             };
 
+            handler.SetDocument(document);
             handler.Initialize();
-            handler.AddToHandle(document);
 
             while (document.GetAvailablePages().Count != document.PagesCount)
             {
-                if (Console.KeyAvailable)
+                if (ConsoleReader.TryReadLine(out var readed, TimeSpan.FromSeconds(0.5)))
                 {
-                    if (Console.ReadLine() == "q")
+                    LogsWriter.Info("Key available");
+                    LogsWriter.Info($"Readed {readed}");
+                    if (readed == "q")
                     {
+                        LogsWriter.Info("Cancel token source");
                         cancellationSource.Cancel();
+                        LogsWriter.Info("Exit from loop");
                         break;
                     }
                 }
                 LogsWriter.Info($"Waiting {stopwatch.ElapsedMilliseconds} milliseconds");
                 Thread.Sleep(TimeSpan.FromSeconds(5));
             }
-            LogsWriter.Info($"Finish, time: {stopwatch.ElapsedMilliseconds} milliseconds");
-            LogsWriter.Finish();
             cancellationSource.Cancel();
             handler.Dispose();
+            LogsWriter.Info($"Finish, time: {stopwatch.ElapsedMilliseconds} milliseconds");
+            LogsWriter.Finish();
         }
     }
 }

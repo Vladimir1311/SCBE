@@ -15,6 +15,7 @@ namespace DocsToPictures.Models
         public string Name { get; set; }
         public int Progress => _pagesPaths == null ? 0
             : GetAvailablePages().Count / (_pagesPaths.Length - 1) * 100;
+        public DateTime? DoneTime { get; set; }
         public bool Removed => removed;
 
         private List<int> indexes;
@@ -43,6 +44,7 @@ namespace DocsToPictures.Models
         public int PagesCount => removed? -1 : _pagesPaths?.Count() - 1 ?? -1;
 
         public int ReadyPagesCount => removed ? -1 : _pagesPaths?.Where(P => !string.IsNullOrEmpty(P)).Count() ?? 0;
+
 
         public Stream GetPicture(int pageNum)
         {

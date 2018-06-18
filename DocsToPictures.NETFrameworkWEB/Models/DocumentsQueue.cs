@@ -16,6 +16,7 @@ namespace DocsToPictures.NETFrameworkWEB.Models
     public class DocumentsQueue
     {
         private static string ASPTemp => ConfigurationManager.AppSettings["PathToASPTemp"];
+        private static int DocumentLifeTimeMinutes => int.Parse(ConfigurationManager.AppSettings["DocumentLifeTimeMinutes"]);
         private readonly Logger<DocumentsQueue> logger = new Logger<DocumentsQueue>();
 
         private static DocumentsQueue documentsQueue;
@@ -30,9 +31,12 @@ namespace DocsToPictures.NETFrameworkWEB.Models
 
         private readonly List<Document> inMemoryDocuments = new List<Document>();
 
+        private readonly Task deleteLoopTask;
+
         private DocumentsQueue()
         {
             logger.Info("CREATED DOCUMENTS QUEUE");
+            deleteLoopTask = Task.Run(DeleteLoop);
         }
         public async Task<IDocument> AddAsync(string fileName, Stream fileStream)
         {
@@ -54,6 +58,7 @@ namespace DocsToPictures.NETFrameworkWEB.Models
             handler.Done += () =>
             {
                 documentHandlers.TryRemove(handler.Id, out var removedHandler);
+                doc.DoneTime = DateTime.Now;
             };
             handler.CurrentTask = Task.Run(handler.Run);
             documentHandlers[handler.Id] = handler;
@@ -90,6 +95,24 @@ namespace DocsToPictures.NETFrameworkWEB.Models
             catch (Exception ex)
             {
                 logger.Warning("removing doc", ex);
+            }
+        }
+
+        private async Task DeleteLoop()
+        {
+            while (true)
+            {
+                await Task.Delay(TimeSpan.FromSeconds(10));
+                var nowTime = DateTime.Now;
+                var oldDocs = inMemoryDocuments
+                    .Where(d => nowTime - d.DoneTime > TimeSpan.FromMinutes(DocumentLifeTimeMinutes))
+                    .ToList();
+                inMemoryDocuments.RemoveAll(d => oldDocs.Contains(d));
+                oldDocs.ForEach(d =>
+                    {
+                        logger.Trace($"Remove doc {d.Id} after {nowTime - d.DoneTime}");
+                        TryRemove(d);
+                    });
             }
         }
     }

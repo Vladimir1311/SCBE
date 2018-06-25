@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -11,11 +12,10 @@ using SituationCenterCore.Filters;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using URSA.Respose;
 
 namespace SSituationCenterCore.Controllers.API.V1
 {
-    [Authorize(AuthenticationSchemes = "Bearer")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Produces("application/json")]
     [Route("api/v1/[controller]/[action]/{*pathToFolder}")]
     [TypeFilter(typeof(JsonExceptionsFilterAttribute))]
@@ -31,7 +31,7 @@ namespace SSituationCenterCore.Controllers.API.V1
         public async Task<MeResponse> Me()
         {
             var user = await repository.FindUser(User) ?? throw new ArgumentException();
-            return MeResponse.Create(user.RoomId);
+            return MeResponse.Create(user.RoomId, user.ToPresent());
         }
 
         [HttpPost]

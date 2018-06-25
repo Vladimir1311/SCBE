@@ -13,5 +13,7 @@ namespace DocsToPictures.Interfaces
         int ReadyPagesCount { get; }
         ICollection<int> GetAvailablePages();
         Stream GetPicture(int pageNum);
+        event Action<int, string> PageReady;
+        event Action<int> MetaReadyEvent;
     }
 }

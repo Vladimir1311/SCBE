@@ -8,7 +8,7 @@ namespace CCF.Shared
         Result,
         PingRequest,
         PingResponse,
-        ServiceCreateRequest,
-        ServiceCreateResponse
+        CreateInstanceRequest,
+        CreateInstanceResponse,
     }
 }

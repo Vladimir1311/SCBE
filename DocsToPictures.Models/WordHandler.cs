@@ -7,6 +7,7 @@ using System.IO;
 using Spire.Pdf;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Threading;
 
 namespace DocsToPictures.Models
 {
@@ -15,53 +16,38 @@ namespace DocsToPictures.Models
     public class WordHandler : DocumentHandler
     {
         private Application wordApp = new Application();
-        protected override void Handle()
+        private PdfDocument pdfDoc;
+        public WordHandler(CancellationToken cancellationToken) : base(cancellationToken)
         {
-            Document neededDoc = null;
-            while (true)
-            {
-                workQueueStopper.WaitOne();
-                while (documentsStream.TryDequeue(out neededDoc))
-                {
-                    var wordFileName = Path.Combine(neededDoc.Folder, neededDoc.Name);
-                    var doc = wordApp.Documents.Add(wordFileName);
-                    var pdfFileName = Path.ChangeExtension(wordFileName, "pdf");
-                    doc.SaveAs2(pdfFileName, WdSaveFormat.wdFormatPDF);
-                    doc.Close(WdSaveOptions.wdDoNotSaveChanges, Type.Missing, Type.Missing);
-
-                    using (var pdfFile = new PdfDocument(pdfFileName))
-                    {
-                        neededDoc.PagesPaths = new string[pdfFile.Pages.Count + 1];
-                        for (var i = 0; i < pdfFile.Pages.Count; i++)
-                        {
-                            var image = pdfFile.SaveAsImage(i);
-                            string imagePath = Path.Combine(neededDoc.Folder, $"{i + 1}.png");
-                            image.Save(imagePath, ImageFormat.Png);
-                            image.Dispose();
-                            neededDoc.PagesPaths[i + 1] = imagePath;
-                            neededDoc.Progress = Percents(i, pdfFile.Pages.Count);
-                        }
-
-                    }
-                }
-                workQueueStopper.Reset();
-            }
-
-        }
-        private static int Percents(double done, double all)
-        {
-            return (int)Math.Floor((done / all) * 100);
         }
 
+        protected override void Prepare()
+        {
+            var doc = wordApp.Documents.Add(FilePath);
+            var pdfFileName = Path.ChangeExtension(FilePath, "pdf");
+            doc.SaveAs2(pdfFileName, WdSaveFormat.wdFormatPDF);
+            doc.Close(WdSaveOptions.wdDoNotSaveChanges, Type.Missing, Type.Missing);
+            pdfDoc = new PdfDocument(pdfFileName);
+        }
+
+        protected override int ReadMeta()
+            => pdfDoc.Pages.Count;
+
+        protected override void RenderPage(int number, string targetFilePath)
+        {
+            var image = pdfDoc.SaveAsImage(number - 1);
+            image.Save(targetFilePath, ImageFormat.Png);
+            image.Dispose();
+        }
         public override void Dispose()
         {
             if (wordApp != null)
             {
-
                 foreach (var document in wordApp.Documents.Cast<Microsoft.Office.Interop.Word.Document>())
                     document.Close(WdSaveOptions.wdDoNotSaveChanges);
                 wordApp.Quit(WdSaveOptions.wdDoNotSaveChanges);
             }
+            pdfDoc.Dispose();
         }
     }
-    }
+}

@@ -5,28 +5,37 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace DocsToPictures.Models
-{
+{/*
     public class DocumentProcessor : IDocumentProcessor
     {
         private List<DocumentHandler> handlers;
         private ConcurrentDictionary<Guid, Document> documentsBase;
         private string dataFolder;
-        public DocumentProcessor()
+        private readonly CancellationToken cancellationToken;
+        private readonly CancellationTokenSource cancellationTokenSource;
+
+        public DocumentProcessor(string dataFolderPath)
         {
-            dataFolder = Directory.GetCurrentDirectory();
+            cancellationTokenSource = new CancellationTokenSource();
+            cancellationToken = cancellationTokenSource.Token;
+            dataFolder = dataFolderPath;
             handlers = Assembly.GetExecutingAssembly()
                 .GetTypes()
                 .Where(T => T.IsSubclassOf(typeof(DocumentHandler)))
-                .Select(T => Activator.CreateInstance(T) as DocumentHandler)
+                .Select(T => Activator.CreateInstance(T, cancellationToken) as DocumentHandler)
                 .ToList();
             handlers.ForEach(DH => DH.Initialize());
             documentsBase = new ConcurrentDictionary<Guid, Document>();
             Task.Factory.StartNew(async () => await DocsCheck());
         }
-
+        public IEnumerable<IDocument> GetCurrentDocs()
+        {
+            return documentsBase.Values;
+        }
         public IDocument AddToHandle(string fileName, Stream fileStream)
         {
             fileName = Path.GetFileName(fileName);
@@ -62,6 +71,8 @@ namespace DocsToPictures.Models
         {
             while (true)
             {
+                if (cancellationToken.IsCancellationRequested)
+                    break;
                 foreach (var doc in documentsBase.Values.ToArray())
                     if (DateTime.Now - Directory.GetCreationTime(doc.Folder) > TimeSpan.FromHours(2))
                         DeleteDocument(doc);
@@ -79,6 +90,7 @@ namespace DocsToPictures.Models
 
         public void Dispose()
         {
+            cancellationTokenSource.Cancel();
             foreach (var handler in handlers)
             {
                 try
@@ -91,5 +103,12 @@ namespace DocsToPictures.Models
                 }
             }
         }
-    }
+
+        public IEnumerable<string> GetSupportedExtensions()
+        {
+            return handlers
+                .Select(H => H.SupportedFormats)
+                .Aggregate((F, S) => F.Concat(S));
+        }
+    }*/
 }

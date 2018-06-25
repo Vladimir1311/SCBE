@@ -1,10 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -13,20 +8,11 @@ using SituationCenterCore.Data;
 using SituationCenterCore.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
 using SituationCenterCore.Data.DatabaseAbstraction;
-using SituationCenterCore.Extensions;
 using SituationCenterCore.Models.TokenAuthModels;
-using CCF.IPResolver.Adapter;
-using Storage.Interfaces;
 using SituationCenterCore.Models.Rooms;
 using SituationCenterCore.Models.Rooms.Security;
 using SituationCenterBackServer.Interfaces;
-using Castle.DynamicProxy;
-using System.Reflection;
-using System.Dynamic;
-using URSA;
-using URSA.Collector;
 
 namespace SituationCenterCore
 {
@@ -43,13 +29,12 @@ namespace SituationCenterCore
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+                options.UseSqlServer(Configuration.GetConnectionString("DataBase")));
 
             services.AddTransient<IRepository, EntityRepository>();
             services.AddTransient<IRoomManager, RoomsManager>();
             services.AddTransient<IRoomSecurityManager, RoomSecurityManager>();
 
-            services.AddURSACollector();
 
             services.AddIdentity<ApplicationUser, IdentityRole>(options =>
             {
@@ -67,21 +52,17 @@ namespace SituationCenterCore
                         options.RequireHttpsMetadata = false;
                         options.TokenValidationParameters = new TokenValidationParameters
                         {
-                            // ��������, ����� �� �������������� �������� ��� ��������� ������
                             ValidateIssuer = true,
-                            // ������, �������������� ��������
                             ValidIssuer = MockAuthOptions.ISSUER,
 
-                            // ����� �� �������������� ����������� ������
                             ValidateAudience = true,
-                            // ��������� ����������� ������
+                            
                             ValidAudience = MockAuthOptions.AUDIENCE,
-                            // ����� �� �������������� ����� �������������
+                            
                             ValidateLifetime = true,
-
-                            // �������� �� ����� ������������
+                            
                             IssuerSigningKey = MockAuthOptions.GetSymmetricSecurityKey(),
-                            // ��������� ����� ������������
+                            
                             ValidateIssuerSigningKey = true,
                         };
                     });
@@ -96,11 +77,6 @@ namespace SituationCenterCore
             // Register no-op EmailSender used by account confirmation and password reset during development
             // For more information on how to enable account confirmation and password reset please visit https://go.microsoft.com/fwlink/?LinkID=532713
             services.AddSingleton<IEmailSender, EmailSender>();
-
-
-            services.AddCCFService<IStorage>();
-
-            services.UseAsServise<IAccessValidator, AlwaysTrueAccessValidator>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

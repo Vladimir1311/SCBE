@@ -21,7 +21,7 @@ namespace SituationCenterCore
         {
             var builder = WebHost.CreateDefaultBuilder(args);
             builder.UseConfiguration(new ConfigurationBuilder()
-                                .AddJsonFile("appsettings.jwt.json", optional: true)
+                                .AddJsonFile("appsettings.Secret.json", optional: true)
                                 .Build())
                     .UseStartup<Startup>();
             return builder.Build();

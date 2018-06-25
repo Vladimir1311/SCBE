@@ -10,16 +10,19 @@ using CCF.Extensions;
 using Microsoft.Extensions.Logging;
 using CCF.Shared;
 using System.Threading;
+using CCF.Messages;
+using System.Linq;
 
 namespace CCF.Transport
 {
 
     class TCPTransporter : ITransporter
     {
+        private HashSet<Task> tasksSet = new HashSet<Task>();
         private SemaphoreSlim semaphoreSlim = new SemaphoreSlim(1, 1);
         public event Func<InvokeMessage, Task> OnReceiveMessge;
         public event Func<InvokeResult, Task> OnReceiveResult;
-        public event Func<Guid, Task> OnNeedNewService;
+        public event Func<string, Task> OnNeedNewInstance;
         public event Action OnConnectionLost;
 
         private object locker = new object();
@@ -32,7 +35,7 @@ namespace CCF.Transport
             tcpClient.ConnectAsync(host, port).Wait();
             using (var writer = new BinaryWriter(tcpClient.GetStream(), Encoding.ASCII, true))
                 writer.Write(password);
-            new Task(
+            tasksSet.Add(Task.Factory.StartNew(
                 async () =>
                 {
                     try
@@ -44,7 +47,7 @@ namespace CCF.Transport
                         logger.LogWarning($"Connection was aborted, exception: {ex.Message}");
                         OnConnectionLost?.Invoke();
                     }
-                }).Start();
+                }));
             this.logger = logger;
         }
 
@@ -85,11 +88,11 @@ namespace CCF.Transport
             await semaphoreSlim.WaitAsync();
             try
             {
-                using (var writer = new BinaryWriter(tcpClient.GetStream(), Encoding.Unicode, true))
+                using (var writer = new BinaryWriter(tcpClient.GetStream(), Encoding.UTF8, true))
                 {
                     writer.Write((long)(16 + 1));
                     writer.Write(packId.ToByteArray());
-                    writer.Write((byte)MessageType.ServiceCreateResponse);
+                    writer.Write((byte)MessageType.CreateInstanceResponse);
                     writer.Write(serviceId);
                 }
             }
@@ -104,7 +107,7 @@ namespace CCF.Transport
             await semaphoreSlim.WaitAsync();
             try
             {
-                using (var writer = new BinaryWriter(tcpClient.GetStream(), Encoding.Unicode, true))
+                using (var writer = new BinaryWriter(tcpClient.GetStream(), Encoding.UTF8, true))
                 {
                     writer.Write((long)(16 + 1));
                     writer.Write(id.ToByteArray());
@@ -146,7 +149,7 @@ namespace CCF.Transport
                     {
                         case MessageType.Message:
                             InvokeMessage message = DecodeMessage(contentStream, id);
-                            await OnReceiveMessge?.Invoke(message);
+                            tasksSet.Add(Task.Factory.StartNew(() => OnReceiveMessge?.Invoke(message)));
                             logger.LogDebug($"invoked message handler for {id}, go to new iteration");
                             break;
                         case MessageType.Result:
@@ -159,9 +162,10 @@ namespace CCF.Transport
                             await SendPingResponse(id);
                             logger.LogDebug($"Sended ping response");
                             break;
-                        case MessageType.ServiceCreateRequest:
+                        case MessageType.CreateInstanceRequest:
                             logger.LogDebug("need new service instance");
-                            await OnNeedNewService?.Invoke(id);
+                            var password = await ReadPassword(contentStream, (int)size - 17);
+                            await OnNeedNewInstance?.Invoke(password);
                             break;
                         default:
                             logger.LogWarning($"incorrect message type {type}");
@@ -170,20 +174,28 @@ namespace CCF.Transport
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"EXCEPTION {ex.Message}");
+                    logger.LogInformation(ex, $"EXCEPTION {ex.Message}");
                 }
             }
+        }
+
+        private async Task<string> ReadPassword(Stream stream, int length)
+        {
+            var bytes = new byte[length];
+            await stream.ReadAsync(bytes, 0, length);
+            //ASCII FOR PASSWORD!!!
+            return Encoding.ASCII.GetString(bytes);
         }
 
         private InvokeMessage DecodeMessage(MemoryStream contentStream, Guid id)
         {
             InvokeMessage message = new InvokeMessage();
-            using (var reader = new BinaryReader(contentStream, Encoding.Unicode))
+            using (var reader = new BinaryReader(contentStream, Encoding.UTF8))
             {
                 message.Id = id;
-                message.SubObjectId = reader.ReadInt32();
+                message.SubObjectId = reader.ReadInt64();
                 message.MethodName = reader.ReadString();
-                message.Args = JsonConvert.DeserializeObject<Dictionary<string, JToken>>(reader.ReadString());
+                message.Args = JsonConvert.DeserializeObject<Dictionary<string, Value>>(reader.ReadString());
                 message.Streams = new Dictionary<string, Stream>();
                 while (contentStream.Position != contentStream.Length)
                 {
@@ -201,7 +213,7 @@ namespace CCF.Transport
         private Stream EncodeMessage(InvokeMessage message)
         {
             var outStream = new MemoryStream();
-            using (BinaryWriter writer = new BinaryWriter(outStream, Encoding.Unicode, true))
+            using (BinaryWriter writer = new BinaryWriter(outStream, Encoding.UTF8, true))
             {
                 writer.Write(long.MaxValue);
                 writer.Write(message.Id.ToByteArray());
@@ -225,13 +237,12 @@ namespace CCF.Transport
         }
         private InvokeResult DecodeResult(MemoryStream contentStream, Guid id)
         {
-            InvokeResult result = new InvokeResult();
-            using (var reader = new BinaryReader(contentStream, Encoding.Unicode))
+            InvokeResult result;
+            using (var reader = new BinaryReader(contentStream, Encoding.UTF8))
             {
+
+                result = JsonConvert.DeserializeObject<InvokeResult>(reader.ReadString());
                 result.Id = id;
-                result.SubObjectId = reader.ReadInt32();
-                result.IsPrimitive = reader.ReadBoolean();
-                result.Value = JToken.Parse(reader.ReadString());
                 if (contentStream.Position != contentStream.Length)
                 {
                     var size = (int)reader.ReadInt64();
@@ -247,14 +258,16 @@ namespace CCF.Transport
         private Stream EncodeResult(InvokeResult result)
         {
             var outStream = new MemoryStream();
-            using (BinaryWriter writer = new BinaryWriter(outStream, Encoding.Unicode, true))
+            using (BinaryWriter writer = new BinaryWriter(outStream, Encoding.UTF8, true))
             {
                 writer.Write(long.MaxValue);
                 writer.Write(result.Id.ToByteArray());
                 writer.Write((byte)MessageType.Result);
-                writer.Write(result.SubObjectId);
-                writer.Write(result.IsPrimitive);
-                writer.Write(result.Value?.ToString(Formatting.Indented) ?? JValue.CreateNull().ToString(Formatting.Indented));
+                writer.Write(JsonConvert.SerializeObject(result, new JsonSerializerSettings
+                {
+                    NullValueHandling = NullValueHandling.Ignore
+                }));
+
                 if (result.StreamValue != null)
                     WriteStream(writer, result.StreamValue);
                 outStream.Position = 0;
@@ -272,6 +285,18 @@ namespace CCF.Transport
 
         public void Dispose()
         {
+            foreach(var task in tasksSet)
+            {
+                try
+                {
+                    task.Dispose();
+                }
+                catch (Exception ex)
+                {
+                    logger.LogWarning(ex, $"Error while ending task");
+                }
+            }
+            Task.WaitAll(tasksSet.ToArray());
             tcpClient.Dispose();
         }
     }

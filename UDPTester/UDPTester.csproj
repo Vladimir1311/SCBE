@@ -9,11 +9,15 @@
 
   <ItemGroup>
     <PackageReference Include="Castle.Core" Version="4.1.1" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="2.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="2.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\CCF\CCF.csproj" />
+    <ProjectReference Include="..\DocsToPictures.Models\DocsToPictures.Models.csproj" />
     <ProjectReference Include="..\SituationCenterBackServer.Interfaces\SituationCenterBackServer.Interfaces.csproj" />
   </ItemGroup>
 

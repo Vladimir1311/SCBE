@@ -11,36 +11,77 @@ namespace DocsToPictures.Models
 {
     public abstract class DocumentHandler : IDisposable
     {
-        protected ManualResetEvent workQueueStopper;
+        protected string FilePath { get; private set; }
+        protected string OutFolder { get; private set; }
+
+
+        private Document doc;
+        private readonly CancellationToken cancellationToken;
         private List<string> supportedFormats;
         private Thread workThread;
 
-        public DocumentHandler()
+        public IEnumerable<string> SupportedFormats => supportedFormats;
+        public DocumentHandler(CancellationToken cancellationToken)
         {
             supportedFormats = GetType().GetCustomAttributes<SupportedFormatAttribyte>()
                 .Select(A => A.Format)
                 .ToList();
-            workQueueStopper = new ManualResetEvent(false);
+            this.cancellationToken = cancellationToken;
         }
 
         public bool CanConvert(IDocument doc) =>
             supportedFormats.Contains(Path.GetExtension(doc.Name));
 
-        protected ConcurrentQueue<Document> documentsStream = new ConcurrentQueue<Document>();
-        public void AddToHandle(Document doc)
+        public void SetDocument(Document doc)
         {
             if (!CanConvert(doc))
                 return;
-            documentsStream.Enqueue(doc);
-            workQueueStopper.Set();
+            this.doc = doc;
+            FilePath = Path.Combine(doc.Folder, doc.Name);
+            OutFolder = doc.Folder;
+
         }
 
         public void Initialize()
         {
-            workThread = new Thread(Handle);
+            workThread = new Thread(Wrapper);
             workThread.Start();
         }
-        protected abstract void Handle();
+
+        private void Wrapper()
+        {
+            try
+            {
+                Handle();
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        private void Handle()
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            Prepare();
+            var pagesCount = ReadMeta();
+            doc.SetPagesCount(pagesCount);
+            cancellationToken.ThrowIfCancellationRequested();
+            for (int i = 1; i <= pagesCount; i++)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                var imagePath = Path.Combine(OutFolder, $"{i}.png");
+                RenderPage(i, imagePath);
+                doc[i] = imagePath;
+            }
+        }
+
+        protected abstract void Prepare();
+        protected abstract int ReadMeta();
+        protected abstract void RenderPage(int number, string targetFilePath);
 
         public abstract void Dispose();
     }

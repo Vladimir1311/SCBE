@@ -265,3 +265,4 @@ __pycache__/
 /DocsToPictures/uploads
 /SituationCenterCore/appsettings.jwt.json
 /Storage/Storage.Service/AppData
+/SituationCenterCore/appsettings.Secret.json

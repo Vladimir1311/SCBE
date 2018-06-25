@@ -10,12 +10,9 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using SituationCenterCore.Data.DatabaseAbstraction;
 using SituationCenterCore.Models.TokenAuthModels;
-using CCF.IPResolver.Adapter;
-using Storage.Interfaces;
 using SituationCenterCore.Models.Rooms;
 using SituationCenterCore.Models.Rooms.Security;
 using SituationCenterBackServer.Interfaces;
-using CCF.IPResolver.Adapter;
 
 namespace SituationCenterCore
 {
@@ -32,7 +29,7 @@ namespace SituationCenterCore
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+                options.UseSqlServer(Configuration.GetConnectionString("DataBase")));
 
             services.AddTransient<IRepository, EntityRepository>();
             services.AddTransient<IRoomManager, RoomsManager>();
@@ -80,14 +77,6 @@ namespace SituationCenterCore
             // Register no-op EmailSender used by account confirmation and password reset during development
             // For more information on how to enable account confirmation and password reset please visit https://go.microsoft.com/fwlink/?LinkID=532713
             services.AddSingleton<IEmailSender, EmailSender>();
-
-            services.AddCCF()
-                .AddCCFService<IStorage>();
-            // services.AddSingleton<IStorage, MockStorage>();
-
-            services.AddCCF()
-                .AddCCFService<IStorage>()
-                .UseAsServise<IAccessValidator, AlwaysTrueAccessValidator>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

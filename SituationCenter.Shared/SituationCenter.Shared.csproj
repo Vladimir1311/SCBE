@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -10,9 +10,5 @@
 
   <ItemGroup>
     <Folder Include="Models\People\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="C:\Users\maksa\source\repos\FileServer\Storage.Interfaces\Storage.Interfaces.csproj" />
   </ItemGroup>
 </Project>

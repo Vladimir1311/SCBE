@@ -1,0 +1,79 @@
+﻿@page "/register"
+@using SituationCenter.Shared.Requests.Account;
+@using SituationCenter.Shared.ResponseObjects;
+@inject HttpClient Http
+
+<h1>Register form</h1>
+
+<div class="form-group">
+    <label for="Input.Name">Nem </label>
+    <input id="Input.Name" class="form-control" type="text" bind="@registerRequest.Name" />
+    <span asp-validation-for="Input.Surname" class="text-danger"></span>
+</div>
+<div class="form-group">
+    <label for="Input.Surname">Surname</label>
+    <input id="Input.Surname" class="form-control" type="text" bind="@registerRequest.Surname" />
+    <span asp-validation-for="Input.Surname" class="text-danger"></span>
+</div>
+<div class="form-group">
+    <label for="email">Email</label>
+    <input id="email" class="form-control" type="text" bind="@registerRequest.Email" />
+    <span class="text-danger"></span>
+</div>
+<div class="form-group">
+    <label for="Input.Password">Password</label>
+    <input id="Input.Password" class="form-control" type="password" bind="@registerRequest.Password" />
+    <span asp-validation-for="Input.Password" class="text-danger"></span>
+</div>
+<div class="form-group">
+    <label for="Input.ConfirmPassword">Confirm Password</label>
+    <input id="Input.ConfirmPassword" type="text" class="form-control" />
+    <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
+</div>
+<div class="form-group">
+    <label for="Input.PhoneNumber">Phone Number</label>
+    <input id="Input.PhoneNumber" type="text" class="form-control" placeholder="+78005553535" bind="@registerRequest.PhoneNumber" />
+    <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
+</div>
+<div class="form-group">
+    <label for="input.birthday">birthday</label>
+    <input type="date" bind="@DirthdayString" />
+    <span asp-validation-for="input.birthday" class="text-danger"></span>
+</div>
+<div class="form-group">
+    <label for="Input.Sex">Sex</label>
+    <select bind="@registerRequest.Sex">
+        <option value=@Sex.Male selected="selected">Male</option>
+        <option value=@Sex.Female>Female</option>
+    </select>
+</div>
+<button type="submit" class="btn btn-default" onclick="@(async () => await UpdateJson())">Register</button>
+<label>@JsonContent</label>
+<label>@ServerAnswer</label>
+@functions {
+    RegisterRequest registerRequest { get; set; } = new RegisterRequest();
+    string ServerAnswer { get; set; }
+
+
+    string DirthdayString
+    {
+        get => $"{registerRequest.Birthday.Year}-{TwoDigits(registerRequest.Birthday.Month)}-{TwoDigits(registerRequest.Birthday.Day)}";
+        set
+        {
+            var date = value.Split('-').Select(c => int.Parse(c)).ToArray();
+            registerRequest.Birthday = new DateTime(date[0], date[1], date[2]);
+        }
+    }
+
+    string JsonContent { get; set; }
+
+    private async Task UpdateJson()
+    {
+        JsonContent = $"{registerRequest?.ToString()}";
+        var response = await Http.PostJsonAsync<ResponseBase>("http://localhost:5000/api/v1/Account/registration", registerRequest);
+        Console.WriteLine(response);
+        JsonContent = JsonUtil.Serialize(response);
+    }
+
+    string TwoDigits(int num) => (num < 10 ? "0" : "") + num;
+}

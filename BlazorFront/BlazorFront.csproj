@@ -14,7 +14,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Update="Pages\Register.cshtml">
+    <ProjectReference Include="..\SituationCenter.Shared\SituationCenter.Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="Pages\Account\Register.cshtml">
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>
   </ItemGroup>

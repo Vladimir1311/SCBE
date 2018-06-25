@@ -40,7 +40,7 @@ namespace SituationCenterCore
             {
                 options.Password.RequiredLength = 10;
                 options.Password.RequireNonAlphanumeric = false;
-                
+
             })
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
@@ -56,13 +56,13 @@ namespace SituationCenterCore
                             ValidIssuer = MockAuthOptions.ISSUER,
 
                             ValidateAudience = true,
-                            
+
                             ValidAudience = MockAuthOptions.AUDIENCE,
-                            
+
                             ValidateLifetime = true,
-                            
+
                             IssuerSigningKey = MockAuthOptions.GetSymmetricSecurityKey(),
-                            
+
                             ValidateIssuerSigningKey = true,
                         };
                     });
@@ -77,6 +77,7 @@ namespace SituationCenterCore
             // Register no-op EmailSender used by account confirmation and password reset during development
             // For more information on how to enable account confirmation and password reset please visit https://go.microsoft.com/fwlink/?LinkID=532713
             services.AddSingleton<IEmailSender, EmailSender>();
+            services.AddCors();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -92,6 +93,12 @@ namespace SituationCenterCore
             {
                 app.UseExceptionHandler("/Error");
             }
+            app.UseCors(policy => policy
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowAnyOrigin()
+                    .AllowCredentials()
+            );
             app.UseStaticFiles();
 
             app.UseAuthentication();

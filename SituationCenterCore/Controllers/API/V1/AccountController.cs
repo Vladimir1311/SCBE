@@ -21,6 +21,7 @@ using SituationCenter.Shared.ResponseObjects.Account;
 using SituationCenterCore.Filters;
 using SituationCenterCore.Extensions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using SituationCenter.Shared.Requests.Account;
 
 namespace SituationCenterCore.Controllers.API.V1
 {
@@ -77,7 +78,7 @@ namespace SituationCenterCore.Controllers.API.V1
 
         [HttpPost]
         [AllowAnonymous]
-        public async Task<ResponseBase> Registration([FromBody]RegisterModel.InputModel model)
+        public async Task<ResponseBase> Registration([FromBody]RegisterRequest model)
         {
             if (ModelState.IsValid)
             {
@@ -90,8 +91,8 @@ namespace SituationCenterCore.Controllers.API.V1
                     Name = model.Name,
                     Surname = model.Surname,
                     PhoneNumber = model.PhoneNumber,
-                    Sex = model.Sex,
-                    Birthday = model.ParsedBirthday()
+                    Sex = model.Sex == Sex.Male,
+                    Birthday = model.Birthday
                 };
 
                 var result = await repository.CreateUserAsync(user, model.Password);
@@ -125,7 +126,7 @@ namespace SituationCenterCore.Controllers.API.V1
             return SearchResponse.Create(users.Select(U => U.ToPresent()));
         }
 
-        private async Task CheckRegistrationsArgs(RegisterModel.InputModel model)
+        private async Task CheckRegistrationsArgs(RegisterRequest model)
         {
             var codes = new List<StatusCode>();
 

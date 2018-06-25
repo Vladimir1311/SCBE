@@ -11,7 +11,7 @@ namespace SituationCenter.Shared.ResponseObjects
         [JsonProperty("errors", NullValueHandling = NullValueHandling.Ignore)]
         public StatusCode[] Errors { get; }
 
-        protected ResponseBase()
+        public ResponseBase()
         {
             StatusCode = StatusCode.OK;
         }

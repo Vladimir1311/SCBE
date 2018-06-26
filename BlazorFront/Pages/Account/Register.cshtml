@@ -1,7 +1,9 @@
 ﻿@page "/register"
 @using SituationCenter.Shared.Requests.Account;
 @using SituationCenter.Shared.ResponseObjects;
-@inject HttpClient Http
+@using BlazorFront.Services.Account;
+@inject UserState UserState
+@inject AccountBridge AccountBridge
 
 <h1>Register form</h1>
 
@@ -48,11 +50,14 @@
     </select>
 </div>
 <button type="submit" class="btn btn-default" onclick="@(async () => await UpdateJson())">Register</button>
+<button type="submit" class="btn btn-default" onclick="@(() => WriteUser())">Write User</button>
 <label>@JsonContent</label>
 <label>@ServerAnswer</label>
+<label>@UserView</label>
 @functions {
     RegisterRequest registerRequest { get; set; } = new RegisterRequest();
     string ServerAnswer { get; set; }
+    string UserView { get; set; }
 
 
     string DirthdayString
@@ -70,10 +75,14 @@
     private async Task UpdateJson()
     {
         JsonContent = $"{registerRequest?.ToString()}";
-        var response = await Http.PostJsonAsync<ResponseBase>("http://localhost:5000/api/v1/Account/registration", registerRequest);
+        var response = await AccountBridge.Register(registerRequest);
         Console.WriteLine(response);
-        JsonContent = JsonUtil.Serialize(response);
+        ServerAnswer = JsonUtil.Serialize(response);
     }
 
+    private void WriteUser()
+    {
+        UserView = JsonUtil.Serialize(UserState.User);
+    }
     string TwoDigits(int num) => (num < 10 ? "0" : "") + num;
 }

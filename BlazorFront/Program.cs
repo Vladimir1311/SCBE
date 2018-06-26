@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Blazor.Browser.Rendering;
+﻿using BlazorFront.Services.Account;
+using Cloudcrate.AspNetCore.Blazor.Browser.Storage;
+using Microsoft.AspNetCore.Blazor.Browser.Rendering;
 using Microsoft.AspNetCore.Blazor.Browser.Services;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -11,7 +13,9 @@ namespace BlazorFront
         {
             var serviceProvider = new BrowserServiceProvider(services =>
             {
-                // Add any custom services here
+                services.AddStorage();
+                services.AddSingleton<UserState>();
+                services.AddTransient<AccountBridge>();
             });
 
             new BrowserRenderer(serviceProvider).AddComponent<App>("app");

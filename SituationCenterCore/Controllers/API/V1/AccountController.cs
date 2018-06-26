@@ -47,7 +47,7 @@ namespace SituationCenterCore.Controllers.API.V1
 
         [HttpPost]
         [AllowAnonymous]
-        public async Task<AuthorizeResponse> Authorize([FromBody]LoginModel.InputModel model)
+        public async Task<AuthorizeResponse> Authorize([FromBody]LoginRequest model)
         {
             if (!ModelState.IsValid)
                 throw new StatusCodeException(SituationCenter.Shared.Exceptions.StatusCode.ArgumentsIncorrect);

@@ -10,8 +10,8 @@ namespace SituationCenter.Shared.ResponseObjects.Account
         [JsonProperty("accessToken")]
         public string AccessToken { get; set; }
 
-        private AuthorizeResponse(string token)
-        { AccessToken = token; }
+        public AuthorizeResponse() { }
+        public AuthorizeResponse(string token) { AccessToken = token; }
 
 
         public static AuthorizeResponse Create(string token)

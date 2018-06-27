@@ -8,7 +8,7 @@
 <h1>Register form</h1>
 
 <div class="form-group">
-    <label for="Input.Name">Nem </label>
+    <label for="Input.Name">Name </label>
     <input id="Input.Name" class="form-control" type="text" bind="@registerRequest.Name" />
     <span asp-validation-for="Input.Surname" class="text-danger"></span>
 </div>
@@ -39,7 +39,7 @@
 </div>
 <div class="form-group">
     <label for="input.birthday">birthday</label>
-    <input type="date" bind="@DirthdayString" />
+    <input type="date" bind="@BirthdayString" />
     <span asp-validation-for="input.birthday" class="text-danger"></span>
 </div>
 <div class="form-group">
@@ -60,7 +60,7 @@
     string UserView { get; set; }
 
 
-    string DirthdayString
+    string BirthdayString
     {
         get => $"{registerRequest.Birthday.Year}-{TwoDigits(registerRequest.Birthday.Month)}-{TwoDigits(registerRequest.Birthday.Day)}";
         set

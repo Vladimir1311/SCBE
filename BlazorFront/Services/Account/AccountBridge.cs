@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Blazor;
+﻿using BlazorFront.Services.General;
+using Microsoft.AspNetCore.Blazor;
 using SituationCenter.Shared.Requests.Account;
 using SituationCenter.Shared.ResponseObjects;
 using SituationCenter.Shared.ResponseObjects.Account;
@@ -17,7 +18,6 @@ namespace BlazorFront.Services.Account
         public AccountBridge(HttpClient client)
         {
             this.client = client;
-            client.BaseAddress = new Uri("http://localhost:5000");
         }
 
         public Task<ResponseBase> Register(RegisterRequest registerRequest)

@@ -16,6 +16,9 @@ namespace BlazorFront.Services.Account
             this.localStorage = localStorage;
         }
 
+        public bool IsUserLoginned => User != null;
+
         public PersonPresent User { get; set; }
+        public string Token { get; set; }
     }
 }

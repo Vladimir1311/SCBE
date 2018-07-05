@@ -69,7 +69,16 @@ namespace DocsToPictures.NETFrameworkWEB.Models
                     }
                     var line = await reader.ReadLineAsync();
                     logger.Trace($"readed >>{line}<<");
-                    var message = JsonConvert.DeserializeObject<Message>(line);
+                    Message message = null;
+                    try
+                    {
+                        message = JsonConvert.DeserializeObject<Message>(line);
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.Warning("parsing failed", ex);
+                        continue;
+                    }
                     switch (message.MessageType)
                     {
                         case MessageType.MetaReady:

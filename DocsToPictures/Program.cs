@@ -19,6 +19,7 @@ namespace DocsToPictures
         static void Main(string[] args)
         {
             LogsWriter.Info($"args is {string.Join("---", args)}");
+            LogsWriter.Info($"UserName is  {Environment.UserName}");
             if (args.Length != 2)
             {
                 LogsWriter.Info($"not two args");

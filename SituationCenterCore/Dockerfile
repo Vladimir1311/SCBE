@@ -1,8 +1,9 @@
-FROM microsoft/aspnetcore:2.0 AS base
+FROM microsoft/dotnet:2.1-aspnetcore-runtime AS base
 WORKDIR /app
-EXPOSE 80
+EXPOSE 5000
+EXPOSE 44356
 
-FROM microsoft/aspnetcore-build:2.0 AS build
+FROM microsoft/dotnet:2.1-sdk AS build
 WORKDIR /src
 COPY SituationCenterCore/SituationCenterCore.csproj SituationCenterCore/
 COPY SituationCenter.Shared/SituationCenter.Shared.csproj SituationCenter.Shared/

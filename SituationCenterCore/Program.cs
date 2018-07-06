@@ -14,17 +14,14 @@ namespace SituationCenterCore
     {
         public static void Main(string[] args)
         {
-            BuildWebHost(args).Run();
+            CreateWebHostBuilder(args).Build().Run();
         }
 
-        public static IWebHost BuildWebHost(string[] args)
-        {
-            var builder = WebHost.CreateDefaultBuilder(args);
-            builder.UseConfiguration(new ConfigurationBuilder()
+        public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
+            WebHost.CreateDefaultBuilder(args)
+                .UseConfiguration(new ConfigurationBuilder()
                                 .AddJsonFile("appsettings.Secret.json", optional: false)
                                 .Build())
                     .UseStartup<Startup>();
-            return builder.Build();
-        }
     }
 }

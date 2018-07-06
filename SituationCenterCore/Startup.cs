@@ -14,6 +14,9 @@ using SituationCenterCore.Models.Rooms;
 using SituationCenterCore.Models.Rooms.Security;
 using SituationCenterBackServer.Interfaces;
 using System;
+using SituationCenterCore.Models.Settings;
+using SituationCenterCore.Services.Interfaces;
+using SituationCenterCore.Services.Implementations;
 
 namespace SituationCenterCore
 {
@@ -31,10 +34,12 @@ namespace SituationCenterCore
         {
             AddDataBase(services);
 
+            services.Configure<ServiceBusSettings>(Configuration.GetSection(nameof(ServiceBusSettings)));
+
             services.AddTransient<IRepository, EntityRepository>();
             services.AddTransient<IRoomManager, RoomsManager>();
             services.AddTransient<IRoomSecurityManager, RoomSecurityManager>();
-
+            services.AddTransient<IFileServerNotifier, ServiceBusFileServerNotifier>();
 
             services.AddIdentity<ApplicationUser, IdentityRole>(options =>
             {
@@ -88,7 +93,6 @@ namespace SituationCenterCore
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.UseBrowserLink();
                 app.UseDatabaseErrorPage();
             }
             else

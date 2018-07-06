@@ -13,6 +13,7 @@ using SituationCenterCore.Models.TokenAuthModels;
 using SituationCenterCore.Models.Rooms;
 using SituationCenterCore.Models.Rooms.Security;
 using SituationCenterBackServer.Interfaces;
+using System;
 
 namespace SituationCenterCore
 {
@@ -28,8 +29,7 @@ namespace SituationCenterCore
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("DataBase")));
+            AddDataBase(services);
 
             services.AddTransient<IRepository, EntityRepository>();
             services.AddTransient<IRoomManager, RoomsManager>();
@@ -80,6 +80,8 @@ namespace SituationCenterCore
             services.AddCors();
         }
 
+        
+
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
@@ -109,6 +111,16 @@ namespace SituationCenterCore
                     name: "default",
                     template: "{controller}/{action=Index}/{id?}");
             });
+        }
+        private void AddDataBase(IServiceCollection services)
+        {
+#if RELEASE
+            services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseSqlServer(Configuration.GetConnectionString("ReleaseDataBase")));
+#else
+            services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseSqlServer(Configuration.GetConnectionString("DataBase")));
+#endif
         }
     }
 }

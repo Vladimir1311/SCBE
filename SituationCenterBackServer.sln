@@ -45,7 +45,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocsToPictures.ClIProtocol"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FrontEnd", "FrontEnd", "{226E7096-CFBB-40E8-8054-F716DBE3F868}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorFront", "BlazorFront\BlazorFront.csproj", "{CCDFA765-4140-41CF-8B8F-C9FFA91C694F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorFront", "BlazorFront\BlazorFront.csproj", "{CCDFA765-4140-41CF-8B8F-C9FFA91C694F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B723F9C9-7A72-4A9E-9A54-62145A3B99A7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

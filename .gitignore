@@ -266,3 +266,4 @@ __pycache__/
 /SituationCenterCore/appsettings.jwt.json
 /Storage/Storage.Service/AppData
 /SituationCenterCore/appsettings.Secret.json
+/SituationCenterCore/Migrations

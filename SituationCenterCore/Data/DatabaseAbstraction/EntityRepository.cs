@@ -9,22 +9,26 @@ using SituationCenterCore.Models.Rooms.Security;
 
 namespace SituationCenterCore.Data.DatabaseAbstraction
 {
-    public class EntityRepository : ApplicationDbContext, IRepository
+    public class EntityRepository : IRepository
     {
         private readonly RoleManager<IdentityRole> roleManager;
         private readonly UserManager<ApplicationUser> userManager;
+        private readonly ApplicationDbContext dbContext;
 
         IQueryable<ApplicationUser> IRepository.Users => userManager.Users;
 
-        public EntityRepository(DbContextOptions<ApplicationDbContext> options, 
+        public EntityRepository(
+            DbContextOptions<ApplicationDbContext> options, 
             RoleManager<IdentityRole> roleManager,
-            UserManager<ApplicationUser> userManager) : base(options)
+            UserManager<ApplicationUser> userManager,
+            ApplicationDbContext dbContext)
         {
             this.roleManager = roleManager;
             this.userManager = userManager;
+            this.dbContext = dbContext;
         }
         public async Task<RoomSecurityRule[]> GetRulesAsync() =>
-            await Task.FromResult(Rules.ToArray());
+            await Task.FromResult(dbContext.Rules.ToArray());
 
         public async Task<IdentityResult> CreateRoleAsync(IdentityRole role) =>
             await roleManager.CreateAsync(role);
@@ -47,10 +51,10 @@ namespace SituationCenterCore.Data.DatabaseAbstraction
             await userManager.CreateAsync(user, password);
 
         public Task<List<ApplicationUser>> FindUsers(Func<ApplicationUser, bool> predicate) =>
-            Task.FromResult(Users.Where(predicate).ToList());
+            Task.FromResult(dbContext.Users.Where(predicate).ToList());
 
         public Task<bool> AnyUser(Func<ApplicationUser, bool> predicate) =>
-            Task.FromResult(Users.Any(predicate));
+            Task.FromResult(dbContext.Users.Any(predicate));
 
         public Task<ApplicationUser> FindUserByEmailAsync(string email) =>
             userManager.FindByEmailAsync(email);
@@ -65,6 +69,6 @@ namespace SituationCenterCore.Data.DatabaseAbstraction
             Guid.Parse(userManager.GetUserId(user));
 
         public async Task<RoomSecurityRule> GetRuleAsync(Guid ruleId) =>
-            await Rules.FirstOrDefaultAsync(R => R.Id == ruleId);
+            await dbContext.Rules.FirstOrDefaultAsync(R => R.Id == ruleId);
     }
 }

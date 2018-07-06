@@ -134,7 +134,7 @@ namespace SituationCenterCore.Models.Rooms
 
         public void DeleteRoom(Guid userId, Guid roomId)
         {
-            var room = FindRoom(roomId);
+            var room = FindRoom(roomId) ?? throw new StatusCodeException(StatusCode.DontExistRoom);
             var user = room.Users.FirstOrDefault(U => U.Id == userId.ToString());
             if (user == null)
                 user = dataBase.Users.FirstOrDefault(U => U.Id == userId.ToString());
@@ -208,10 +208,8 @@ namespace SituationCenterCore.Models.Rooms
 
         public async Task InviteUsersByPhoneToRoom(Guid currentRoomId, List<string> phones)
         {
-            var rule = await dataBase.Rules
-                                     .FirstOrDefaultAsync(R => R.PrivacyRule == PrivacyRoomType.InvationPrivate
-                                                     && R.Id == dataBase.Rooms.FirstOrDefault(Room => Room.Id == currentRoomId).Id);
-            if (rule.PrivacyRule != PrivacyRoomType.InvationPrivate)
+            var rule = (await dataBase.Rooms.Include(r => r.SecurityRule).FirstOrDefaultAsync(Room => Room.Id == currentRoomId))?.SecurityRule;
+            if (rule?.PrivacyRule != PrivacyRoomType.InvationPrivate)
                 throw new StatusCodeException(StatusCode.IncrorrecrTargetRoomType);
             rule.Data = string.Join('\n', rule.Data
                 .Split('\n')

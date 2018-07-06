@@ -8,6 +8,9 @@ namespace SituationCenter.Shared.ResponseObjects
         [JsonProperty("status")]
         public StatusCode StatusCode { get; }
 
+        [JsonProperty("somedebugdescription")]
+        public string SomeDebugDescription => this.StatusCode.ToString();
+
         [JsonProperty("errors", NullValueHandling = NullValueHandling.Ignore)]
         public StatusCode[] Errors { get; }
 

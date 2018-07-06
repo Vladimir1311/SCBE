@@ -90,8 +90,8 @@ namespace SituationCenterCore.Controllers.API.V1
                        throw new StatusCodeException(Exceptions.StatusCode.YouAreNotInRoom);
             return room.ToRoomPresent();
         }
-
-        public async Task<ResponseBase> InvitePerson(List<string> phones)
+        [HttpPost]
+        public async Task<ResponseBase> InvitePerson([FromBody]List<string> phones)
         {
             var user = await repository.FindUser(User);
             var currentRoomId = user.RoomId ?? 

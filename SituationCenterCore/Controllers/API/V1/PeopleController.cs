@@ -41,7 +41,9 @@ namespace SSituationCenterCore.Controllers.API.V1
         public async Task<SCFSTokenResponse> GetSCFSToken()
         {
             var token = "".Random(40);
+            var user = await repository.FindUser(User);
             await fileServerNotifier.AddToken(UserId, token);
+            await fileServerNotifier.SetRoom(UserId, user.RoomId);
             return new SCFSTokenResponse { TempToken = token };
         }
 

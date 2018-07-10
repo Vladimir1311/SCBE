@@ -19,12 +19,19 @@ namespace SituationCenterCore.Services.Implementations
         {
             queueClient = new QueueClient(options.Value.ConnectionString, options.Value.FileServerQueueName);
         }
+
         public async Task AddToken(Guid userId, string token)
+            => await SendAscync(new {userId, token});
+
+        public async Task SetRoom(Guid userId, Guid? roomId)
+            => await SendAscync(new {userId, roomId});
+
+        private Task SendAscync(object body)
         {
-            var text = JsonConvert.SerializeObject(new { userId, token });
+            var text = JsonConvert.SerializeObject(body);
             var bytes = Encoding.UTF8.GetBytes(text);
             var message = new Message(bytes);
-            await queueClient.SendAsync(message);
+            return queueClient.SendAsync(message);
         }
     }
 }

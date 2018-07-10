@@ -8,5 +8,6 @@ namespace SituationCenterCore.Services.Interfaces
     public interface IFileServerNotifier
     {
         Task AddToken(Guid userId, string token);
+        Task SetRoom(Guid userId, Guid? roomId);
     }
 }

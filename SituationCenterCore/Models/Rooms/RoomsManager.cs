@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using SituationCenter.Shared.Models.Rooms;
+using SituationCenterCore.Services.Interfaces;
 
 namespace SituationCenterCore.Models.Rooms
 {
@@ -19,16 +20,19 @@ namespace SituationCenterCore.Models.Rooms
         private ILogger<RoomsManager> logger;
         private ApplicationDbContext dataBase;
         private readonly IRoomSecurityManager roomSecyrityManager;
+        private readonly IFileServerNotifier fileServerNotifier;
 
         public RoomsManager(
             ILogger<RoomsManager> logger,
             ApplicationDbContext dataBase,
-            IRoomSecurityManager roomSecyrityManager)
+            IRoomSecurityManager roomSecyrityManager,
+            IFileServerNotifier fileServerNotifier)
 
         {
             this.logger = logger;
             this.dataBase = dataBase;
             this.roomSecyrityManager = roomSecyrityManager;
+            this.fileServerNotifier = fileServerNotifier;
         }
 
         public Room CreateNewRoom(Guid createrId, CreateRoomRequest createRoomInfo)
@@ -42,7 +46,7 @@ namespace SituationCenterCore.Models.Rooms
 
             CheckCreatingRoomParams(createRoomInfo, creater);
 
-            Room newRoom = new Room()
+            var newRoom = new Room()
             {
                 Name = createRoomInfo.Name,
                 PeopleCountLimit = createRoomInfo.UsersCountMax
@@ -78,6 +82,8 @@ namespace SituationCenterCore.Models.Rooms
             roomSecyrityManager.AddAdminRole(creater, newRoom);
             creater.RoomId = newRoom.Id;
             dataBase.SaveChanges();
+            //TODO Do async
+            fileServerNotifier.SetRoom(createrId, newRoom.Id).Wait();
             return newRoom;
         }
 
@@ -114,6 +120,8 @@ namespace SituationCenterCore.Models.Rooms
             logger.LogDebug("Validated user");
             user.RoomId = calledRoom.Id;
             dataBase.SaveChanges();
+            //TODO Do async
+            fileServerNotifier.SetRoom(userId, roomId).Wait();
         }
 
         public Room FindRoom(Guid roomId)
@@ -130,6 +138,7 @@ namespace SituationCenterCore.Models.Rooms
             var user = dataBase.Users.FirstOrDefault(U => U.Id == userId.ToString());
             user.RoomId = null;
             dataBase.SaveChanges();
+            fileServerNotifier.SetRoom(userId, null).Wait();
         }
 
         public void DeleteRoom(Guid userId, Guid roomId)
@@ -145,7 +154,11 @@ namespace SituationCenterCore.Models.Rooms
                 throw new Exception("Нет права на удаление комнаты!");
 
             foreach (var person in room.Users)
+            {
                 person.RoomId = null;
+                fileServerNotifier.SetRoom(Guid.Parse(person.Id), null).Wait();
+            }
+
             //TODO Проанализировать EF, слишком много запросов SaveChanges
             dataBase.SaveChanges();
             roomSecyrityManager.ClearRoles(room);

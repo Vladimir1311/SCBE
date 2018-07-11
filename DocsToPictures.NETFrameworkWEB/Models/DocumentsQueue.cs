@@ -75,9 +75,9 @@ namespace DocsToPictures.NETFrameworkWEB.Models
             if (documentHandlers.TryGetValue( id, out var handler))
             {
                 logger.Trace($"finded document handler {id}, doc progress is {handler.Progress}");
+                handler.Done += () => TryRemove(document);
                 handler.Dispose();
                 logger.Trace($"Disposed handler {id}");
-                handler.Done += () => TryRemove(document);
             }
             else
             {

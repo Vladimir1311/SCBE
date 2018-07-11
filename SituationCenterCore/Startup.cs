@@ -14,6 +14,7 @@ using SituationCenterCore.Models.Rooms;
 using SituationCenterCore.Models.Rooms.Security;
 using SituationCenterBackServer.Interfaces;
 using System;
+using SituationCenterCore.Middleware;
 using SituationCenterCore.Models.Settings;
 using SituationCenterCore.Services.Interfaces;
 using SituationCenterCore.Services.Implementations;
@@ -105,6 +106,7 @@ namespace SituationCenterCore
                     .AllowAnyOrigin()
                     .AllowCredentials()
             );
+            app.UseExceptionsHandlerMiddleware();
             app.UseStaticFiles();
 
             app.UseAuthentication();

@@ -85,7 +85,10 @@ namespace SituationCenter.Shared.Exceptions
         [Description("Попытка выполнения операции над комнатой не того типа")]
         IncrorrecrTargetRoomType,
 
-        [Description]
-        TooLongRoomName
+        [Description("Слишком длинное название комнаты (максимум - 32 символа)")]
+        TooLongRoomName,
+
+        [Description("Невалидный токен доступ")]
+        Unauthorized
     }
 }

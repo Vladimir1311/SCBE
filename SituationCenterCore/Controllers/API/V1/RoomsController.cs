@@ -83,12 +83,12 @@ namespace SituationCenterCore.Controllers.API.V1
             return RoomInfoResponse.Create(room.ToRoomPresent());
         }
 
-        public async Task<RoomPresent> Current()
+        public async Task<RoomInfoResponse> Current()
         {
             var user = await repository.FindUser(User);
             var room = roomsManager.FindRoom(user.RoomId ?? Guid.Empty) ??
                        throw new StatusCodeException(Exceptions.StatusCode.YouAreNotInRoom);
-            return room.ToRoomPresent();
+            return RoomInfoResponse.Create(room.ToRoomPresent());
         }
         [HttpPost]
         public async Task<ResponseBase> InvitePerson([FromBody]List<string> phones)

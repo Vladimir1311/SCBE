@@ -122,8 +122,10 @@ namespace SituationCenterCore.Controllers.API.V1
         [HttpGet]
         public async Task<SearchResponse> Search(string firstName, string lastName, string phone)
         {
-            var users = await repository.FindUsers(U => U.PhoneNumber.Contains(phone));
-            return SearchResponse.Create(users.Select(U => U.ToPresent()));
+            var users = await repository.FindUsers(
+                U => U.PhoneNumber.Contains(phone)
+        );
+        return SearchResponse.Create(users.Select(U => U.ToPresent()));
         }
 
         private async Task CheckRegistrationsArgs(RegisterRequest model)

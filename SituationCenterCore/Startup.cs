@@ -14,6 +14,7 @@ using SituationCenterCore.Models.Rooms;
 using SituationCenterCore.Models.Rooms.Security;
 using SituationCenterBackServer.Interfaces;
 using System;
+using AutoMapper;
 using SituationCenterCore.Middleware;
 using SituationCenterCore.Models.Settings;
 using SituationCenterCore.Services.Interfaces;
@@ -83,6 +84,7 @@ namespace SituationCenterCore
             // Register no-op EmailSender used by account confirmation and password reset during development
             // For more information on how to enable account confirmation and password reset please visit https://go.microsoft.com/fwlink/?LinkID=532713
             services.AddSingleton<IEmailSender, EmailSender>();
+            services.AddAutoMapper();
             services.AddCors();
         }
 

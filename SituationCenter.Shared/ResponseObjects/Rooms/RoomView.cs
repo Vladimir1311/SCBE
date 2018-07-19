@@ -1,14 +1,13 @@
 ﻿using Newtonsoft.Json;
 using SituationCenter.Shared.Models.Rooms;
 using System;
-using SituationCenter.Shared.ResponseObjects.Account;
 using System.Collections.Generic;
 using System.Linq;
-using SituationCenter.Shared.Models.People;
+using SituationCenter.Shared.ResponseObjects.People;
 
 namespace SituationCenter.Shared.ResponseObjects.Rooms
 {
-    public class RoomPresent
+    public class RoomView
     {
         [JsonProperty("id")]
         public Guid Id { get; set; }
@@ -21,16 +20,6 @@ namespace SituationCenter.Shared.ResponseObjects.Rooms
         [JsonProperty("privacyType")]
         public PrivacyRoomType PrivacyType { get; set; }
         [JsonProperty("users")]
-        public List<PersonPresent> Users { get; set; }
-
-        public RoomPresent(Guid id, string name, int userCount, PrivacyRoomType privacy, int peopleCountLimit, IEnumerable<PersonPresent> users)
-        {
-            Id = id;
-            Name = name;
-            UsersCount = userCount;
-            PrivacyType = privacy;
-            MaxPeopleCount = peopleCountLimit;
-            Users = users.ToList();
-        }
+        public List<PersonView> Users { get; set; }
     }
 }

@@ -7,7 +7,6 @@ using SituationCenter.Shared.Exceptions;
 using SituationCenter.Shared.ResponseObjects;
 using SituationCenter.Shared.ResponseObjects.People;
 using SituationCenter.Shared.ResponseObjects.Rooms;
-using SituationCenterBackServer.Extensions;
 using SituationCenterCore.Data;
 using SituationCenterCore.Data.DatabaseAbstraction;
 using SituationCenterCore.Extensions;
@@ -19,6 +18,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Exceptions = SituationCenter.Shared.Exceptions;
 using System.Collections.Generic;
+using AutoMapper;
+using SituationCenter.Shared.ResponseObjects.General;
 
 namespace SituationCenterCore.Controllers.API.V1
 {
@@ -30,30 +31,34 @@ namespace SituationCenterCore.Controllers.API.V1
         private readonly IRoomManager roomsManager;
         private readonly IRepository repository;
         private readonly IRoomSecurityManager roomSecyrityManager;
+        private readonly IMapper mapper;
 
         public RoomsController(IRoomManager roomsManager,
             IRepository userManager,
-            IRoomSecurityManager roomSecyrityManager)
+            IRoomSecurityManager roomSecyrityManager,
+            IMapper mapper)
         {
             this.roomsManager = roomsManager;
             this.repository = userManager;
             this.roomSecyrityManager = roomSecyrityManager;
+            this.mapper = mapper;
         }
 
-        public RoomsListResponse List()
+        public ListResponse<RoomView> List()
         {
             var userId = repository.GetUserId(User);
             var roomsPresent = roomsManager
                 .Rooms(userId)
-                .Select(R => R.ToRoomPresent());
-            return RoomsListResponse.Create(roomsPresent);
+                .Select(mapper.Map<RoomView>)
+                .ToList();
+            return roomsPresent;
         }
 
         [HttpPost]
-        public RoomCreate Create([FromBody] CreateRoomRequest info)
+        public OneObjectResponse<Guid> Create([FromBody] CreateRoomRequest info)
         {
             var room = roomsManager.CreateNewRoom(repository.GetUserId(User), info);
-            return RoomCreate.Create(room.Id);
+            return room.Id;
         }
 
         public ResponseBase Join(Guid roomId, string data = null)
@@ -76,19 +81,19 @@ namespace SituationCenterCore.Controllers.API.V1
             return ResponseBase.OKResponse;
         }
 
-        public RoomInfoResponse Info(Guid roomId)
+        public OneObjectResponse<RoomView> Info(Guid roomId)
         {
             var room = roomsManager.FindRoom(roomId) ??
                        throw new StatusCodeException(Exceptions.StatusCode.DontExistRoom);
-            return RoomInfoResponse.Create(room.ToRoomPresent());
+            return mapper.Map<RoomView>(room);
         }
 
-        public async Task<RoomInfoResponse> Current()
+        public async Task<OneObjectResponse<RoomView>> Current()
         {
             var user = await repository.FindUser(User);
             var room = roomsManager.FindRoom(user.RoomId ?? Guid.Empty) ??
                        throw new StatusCodeException(Exceptions.StatusCode.YouAreNotInRoom);
-            return RoomInfoResponse.Create(room.ToRoomPresent());
+            return mapper.Map<RoomView>(room);
         }
         [HttpPost]
         public async Task<ResponseBase> InvitePerson([FromBody]List<string> phones)

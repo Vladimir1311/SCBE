@@ -1,8 +1,8 @@
 ﻿using Newtonsoft.Json;
 
-namespace SituationCenter.Shared.Models.People
+namespace SituationCenter.Shared.ResponseObjects.People
 {
-    public class PersonPresent
+    public class PersonView
     {
         [JsonProperty("name")]
         public string Name { get; set; }
@@ -16,12 +16,5 @@ namespace SituationCenter.Shared.Models.People
         [JsonProperty("email")]
         public string Email { get; set; }
 
-        public PersonPresent(string name, string surname, string phoneNumber, string email)
-        {
-            Name = name;
-            Surname = surname;
-            PhoneNumber = phoneNumber;
-            Email = email;
-        }
     }
 }

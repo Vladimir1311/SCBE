@@ -17,11 +17,11 @@ using SituationCenterCore.Models.TokenAuthModels;
 using Microsoft.Extensions.Options;
 using SituationCenter.Shared.ResponseObjects;
 using SituationCenterCore.Pages.Account;
-using SituationCenter.Shared.ResponseObjects.Account;
 using SituationCenterCore.Filters;
 using SituationCenterCore.Extensions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using SituationCenter.Shared.Requests.Account;
+using SituationCenter.Shared.ResponseObjects.General;
 
 namespace SituationCenterCore.Controllers.API.V1
 {
@@ -47,7 +47,7 @@ namespace SituationCenterCore.Controllers.API.V1
 
         [HttpPost]
         [AllowAnonymous]
-        public async Task<AuthorizeResponse> Authorize([FromBody]LoginRequest model)
+        public async Task<OneObjectResponse<string>> Authorize([FromBody]LoginRequest model)
         {
             if (!ModelState.IsValid)
                 throw new StatusCodeException(SituationCenter.Shared.Exceptions.StatusCode.ArgumentsIncorrect);
@@ -73,7 +73,7 @@ namespace SituationCenterCore.Controllers.API.V1
                         signingCredentials: new SigningCredentials(MockAuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
             var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
             logger.LogDebug($"Send token for {user.Email}");
-            return AuthorizeResponse.Create(encodedJwt);
+            return encodedJwt;
         }
 
         [HttpPost]
@@ -118,15 +118,7 @@ namespace SituationCenterCore.Controllers.API.V1
             logger.LogWarning(JsonConvert.SerializeObject(model, Formatting.Indented));
             throw new ArgumentException();
         }
-        //TODO what the fuck this shit?
-        [HttpGet]
-        public async Task<SearchResponse> Search(string firstName, string lastName, string phone)
-        {
-            var users = await repository.FindUsers(
-                U => U.PhoneNumber.Contains(phone)
-        );
-        return SearchResponse.Create(users.Select(U => U.ToPresent()));
-        }
+        
 
         private async Task CheckRegistrationsArgs(RegisterRequest model)
         {

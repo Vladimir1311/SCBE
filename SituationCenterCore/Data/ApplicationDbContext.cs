@@ -6,10 +6,12 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using SituationCenterCore.Models.Rooms.Security;
 using SituationCenterCore.Models.Rooms;
+using SituationCenterCore.Models.TokenAuthModels;
+using Microsoft.AspNetCore.Identity;
 
 namespace SituationCenterCore.Data
 {
-    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
@@ -26,5 +28,6 @@ namespace SituationCenterCore.Data
 
         public DbSet<RoomSecurityRule> Rules { get; set; }
         public DbSet<Room> Rooms { get; set; }
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
     }
 }

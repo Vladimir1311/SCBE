@@ -98,7 +98,7 @@ namespace SituationCenterCore.Models.Rooms.Security
         private void ValidateInvation(RoomSecurityRule rule, ApplicationUser user)
         {
             logger.LogDebug("validating invite rule");
-            if (!rule.Data.Split('\n').Contains(user.Id))
+            if (!rule.Data.Split('\n').Contains(user.Id.ToString()))
                 throw new StatusCodeException(StatusCode.AccessDenied);
             logger.LogDebug("success validated invite rule");
         }

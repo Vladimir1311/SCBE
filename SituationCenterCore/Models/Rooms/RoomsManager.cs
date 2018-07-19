@@ -41,7 +41,7 @@ namespace SituationCenterCore.Models.Rooms
                 throw new StatusCodeException(StatusCode.TooLongRoomName);
             var creater = dataBase.Users
                 .Include(U => U.Room)
-                .FirstOrDefault(U => U.Id == createrId.ToString())
+                .FirstOrDefault(U => U.Id == createrId)
                 ?? throw new Exception("Не существует запрашиваемого пользователя");
 
             CheckCreatingRoomParams(createRoomInfo, creater);
@@ -71,7 +71,6 @@ namespace SituationCenterCore.Models.Rooms
                         .Users
                         .Where(U => phoneNumbers.Contains(U.PhoneNumber))
                         .Select(U => U.Id)
-                        .Select(I => Guid.Parse(I))
                         .ToArray();
                     roomSecyrityManager.CreateInvationRule(newRoom, userIds);
                     break;
@@ -100,7 +99,7 @@ namespace SituationCenterCore.Models.Rooms
         {
             var user = dataBase.Users
                 .Include(U => U.Room)
-                .FirstOrDefault(U => U.Id == userId.ToString())
+                .FirstOrDefault(U => U.Id == userId)
                 ?? throw new ArgumentException($"not user with id {userId}");
 
             if (user.RoomId != null)
@@ -135,7 +134,7 @@ namespace SituationCenterCore.Models.Rooms
 
         public void LeaveFromRoom(Guid userId)
         {
-            var user = dataBase.Users.FirstOrDefault(U => U.Id == userId.ToString());
+            var user = dataBase.Users.FirstOrDefault(U => U.Id == userId);
             user.RoomId = null;
             dataBase.SaveChanges();
             fileServerNotifier.SetRoom(userId, null).Wait();
@@ -144,9 +143,9 @@ namespace SituationCenterCore.Models.Rooms
         public void DeleteRoom(Guid userId, Guid roomId)
         {
             var room = FindRoom(roomId) ?? throw new StatusCodeException(StatusCode.DontExistRoom);
-            var user = room.Users.FirstOrDefault(U => U.Id == userId.ToString());
+            var user = room.Users.FirstOrDefault(U => U.Id == userId);
             if (user == null)
-                user = dataBase.Users.FirstOrDefault(U => U.Id == userId.ToString());
+                user = dataBase.Users.FirstOrDefault(U => U.Id == userId);
 
             if (user == null)
                 throw new Exception("Нет пользователя с указанным Id");
@@ -156,7 +155,7 @@ namespace SituationCenterCore.Models.Rooms
             foreach (var person in room.Users)
             {
                 person.RoomId = null;
-                fileServerNotifier.SetRoom(Guid.Parse(person.Id), null).Wait();
+                fileServerNotifier.SetRoom(person.Id, null).Wait();
             }
 
             //TODO Проанализировать EF, слишком много запросов SaveChanges
@@ -170,7 +169,7 @@ namespace SituationCenterCore.Models.Rooms
 
         public IEnumerable<Room> Rooms(Guid userId)
         {
-            var user = dataBase.Users.FirstOrDefault(U => U.Id == userId.ToString())
+            var user = dataBase.Users.FirstOrDefault(U => U.Id == userId)
                 ?? throw new ArgumentException();
             var allrooms = dataBase
                 .Rooms
@@ -184,7 +183,7 @@ namespace SituationCenterCore.Models.Rooms
 
         private ApplicationUser FindUser(Guid userId)
         {
-            return dataBase.Users.FirstOrDefault(U => U.Id == userId.ToString());
+            return dataBase.Users.FirstOrDefault(U => U.Id == userId);
         }
 
         private void CheckCreatingRoomParams(CreateRoomRequest createRoomInfo, ApplicationUser creater)
@@ -226,6 +225,7 @@ namespace SituationCenterCore.Models.Rooms
                 throw new StatusCodeException(StatusCode.IncrorrecrTargetRoomType);
             rule.Data = string.Join('\n', rule.Data
                 .Split('\n')
+                .Select(Guid.Parse)
                 .Union(dataBase
                        .Users
                        .Where(U => phones.Contains(U.PhoneNumber))

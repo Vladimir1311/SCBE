@@ -84,7 +84,7 @@ namespace SSituationCenterCore.Controllers.API.V1
         {
             var currentUserPhone = await repository
                 .Users
-                .Where(u => u.Id == UserId.ToString())
+                .Where(u => u.Id == UserId)
                 .Select(u => u.PhoneNumber)
                 .SingleAsync();
 

@@ -16,7 +16,6 @@ using SituationCenterCore.Data.DatabaseAbstraction;
 using SituationCenterCore.Models.TokenAuthModels;
 using Microsoft.Extensions.Options;
 using SituationCenter.Shared.ResponseObjects;
-using SituationCenterCore.Pages.Account;
 using SituationCenterCore.Filters;
 using SituationCenterCore.Extensions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;

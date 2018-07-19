@@ -109,7 +109,6 @@ namespace SituationCenterCore
                     .AllowCredentials()
             );
             app.UseExceptionsHandlerMiddleware();
-            app.UseStaticFiles();
 
             app.UseAuthentication();
 

@@ -21,32 +21,34 @@ using SituationCenterCore.Extensions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using SituationCenter.Shared.Requests.Account;
 using SituationCenter.Shared.ResponseObjects.General;
+using SituationCenter.Shared.ResponseObjects.Account;
+using Microsoft.EntityFrameworkCore;
 
 namespace SituationCenterCore.Controllers.API.V1
 {
     [Produces("application/json")]
     [Route("api/v1/Account/[action]")]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    [TypeFilter(typeof(JsonExceptionsFilterAttribute))]
-    public class AccountController : Controller
+    public class AccountController : BaseParamsController
     {
         private readonly ILogger<AccountController> logger;
         private readonly IRepository repository;
+        private readonly ApplicationDbContext dbContext;
         private readonly AuthOptions authOptions;
 
         public AccountController(
             ILogger<AccountController> logger,
             IOptions<AuthOptions> option,
-            IRepository repository)
+            IRepository repository,
+            ApplicationDbContext dbContext)
         {
             this.logger = logger;
             this.repository = repository;
+            this.dbContext = dbContext;
             this.authOptions = option.Value;
         }
 
         [HttpPost]
-        [AllowAnonymous]
-        public async Task<OneObjectResponse<string>> Authorize([FromBody]LoginRequest model)
+        public async Task<OneObjectResponse<AccessAndRefreshTokenPair>> Authorize([FromBody]LoginRequest model)
         {
             if (!ModelState.IsValid)
                 throw new StatusCodeException(SituationCenter.Shared.Exceptions.StatusCode.ArgumentsIncorrect);
@@ -54,29 +56,24 @@ namespace SituationCenterCore.Controllers.API.V1
 
             if (user == null || !await repository.CheckUserPasswordAsync(user, model.Password))
                 throw new StatusCodeException(SituationCenter.Shared.Exceptions.StatusCode.AuthorizeError);
-
-            var claims = new Claim[]
-            {
-                new Claim(ClaimsIdentity.DefaultNameClaimType, user.Email),
-                new Claim(ClaimsIdentity.DefaultRoleClaimType, "user"),
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
-            };
-            var identity = new ClaimsIdentity(claims, "Token", ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType);
-            var now = DateTime.UtcNow;
-            var jwt = new JwtSecurityToken(
-                        issuer: MockAuthOptions.ISSUER,
-                        audience: MockAuthOptions.AUDIENCE,
-                        notBefore: now,
-                        claims: identity.Claims,
-                        expires: now.Add(TimeSpan.FromMinutes(MockAuthOptions.LIFETIME)),
-                        signingCredentials: new SigningCredentials(MockAuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
-            var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
-            logger.LogDebug($"Send token for {user.Email}");
-            return encodedJwt;
+            return await GenerateAll(user);
         }
 
         [HttpPost]
-        [AllowAnonymous]
+        public async Task<OneObjectResponse<AccessAndRefreshTokenPair>> RefreshToken([FromBody]string refreshToken)
+        {
+            var nowRefreshToken = await dbContext
+                .RefreshTokens
+                .Include(rt => rt.User)
+                .Where(t => t.TokenContent == refreshToken)
+                .Where(t => t.UserAgent == UserAgent)
+                .SingleOrDefaultAsync() ?? throw new StatusCodeException(SituationCenter.Shared.Exceptions.StatusCode.IncorrectRefreshToken);
+
+            dbContext.RefreshTokens.Remove(nowRefreshToken);
+            return await GenerateAll(nowRefreshToken.User);
+        }
+
+        [HttpPost]
         public async Task<ResponseBase> Registration([FromBody]RegisterRequest model)
         {
             if (ModelState.IsValid)
@@ -117,7 +114,50 @@ namespace SituationCenterCore.Controllers.API.V1
             logger.LogWarning(JsonConvert.SerializeObject(model, Formatting.Indented));
             throw new ArgumentException();
         }
-        
+
+        private async Task<OneObjectResponse<AccessAndRefreshTokenPair>> GenerateAll(ApplicationUser user)
+        {
+            var claims = new Claim[]
+            {
+                new Claim(ClaimsIdentity.DefaultNameClaimType, user.Email),
+                new Claim(ClaimsIdentity.DefaultRoleClaimType, "user"),
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
+            };
+            var identity = new ClaimsIdentity(claims, "Token", ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType);
+            var pair = new AccessAndRefreshTokenPair
+            {
+                AccessToken = CreateAccessToken(identity),
+                RefreshToken = await CreateRefreshToken(user.Id, UserAgent)
+            };
+            return pair;
+        }
+
+        private async Task<string> CreateRefreshToken(Guid userId, string userAgent)
+        {
+            var refreshToken = new RefreshToken
+            {
+                TokenContent = "".Random(50),
+                UserId = userId,
+                UserAgent = userAgent
+            };
+            dbContext.Add(refreshToken);
+            await dbContext.SaveChangesAsync();
+            return refreshToken.TokenContent;
+        }
+
+
+        private string CreateAccessToken(ClaimsIdentity identity)
+        {
+            var now = DateTime.UtcNow;
+            var jwt = new JwtSecurityToken(
+                        issuer: MockAuthOptions.ISSUER,
+                        audience: MockAuthOptions.AUDIENCE,
+                        notBefore: now,
+                        claims: identity.Claims,
+                        expires: now.Add(TimeSpan.FromMinutes(MockAuthOptions.LIFETIME)),
+                        signingCredentials: new SigningCredentials(MockAuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
+            return new JwtSecurityTokenHandler().WriteToken(jwt);
+        }
 
         private async Task CheckRegistrationsArgs(RegisterRequest model)
         {

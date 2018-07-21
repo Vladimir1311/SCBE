@@ -106,7 +106,7 @@ namespace SituationCenterCore.Models.Rooms.Security
         public void AddAdminRole(ApplicationUser user, Room room)
         {
             var adminRole = roomRolesGenerator.GetAdministratorRole(room);
-            var createResult = repository.CreateRoleAsync(new IdentityRole(adminRole)).Result;
+            var createResult = repository.CreateRoleAsync(new IdentityRole<Guid>(adminRole)).Result;
             if (!createResult.Succeeded)
                 throw new Exception("Can't create role for room " + string.Join(" ", createResult.Errors.Select(E => $"{E.Code} {E.Description}")));
             var addToRoleResult = repository.AddToRoleAsync(user, adminRole).Result;

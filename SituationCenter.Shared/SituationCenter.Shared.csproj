@@ -10,5 +10,6 @@
 
   <ItemGroup>
     <Folder Include="Models\People\" />
+    <Folder Include="ResponseObjects\Account\" />
   </ItemGroup>
 </Project>

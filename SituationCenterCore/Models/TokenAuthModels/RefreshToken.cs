@@ -6,6 +6,8 @@ namespace SituationCenterCore.Models.TokenAuthModels
     {
         public Guid Id { get; set; }
 
+        public string TokenContent { get; set; }
+        public string UserAgent { get; set; }
         public Guid UserId { get; set; }
         public ApplicationUser User { get; set; }
     }

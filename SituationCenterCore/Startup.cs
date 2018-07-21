@@ -20,6 +20,7 @@ using SituationCenterCore.Models.Settings;
 using SituationCenterCore.Services.Interfaces;
 using SituationCenterCore.Services.Implementations;
 using System.Runtime.InteropServices;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace SituationCenterCore
 {
@@ -44,13 +45,13 @@ namespace SituationCenterCore
             services.AddTransient<IRoomSecurityManager, RoomSecurityManager>();
             services.AddTransient<IFileServerNotifier, ServiceBusFileServerNotifier>();
 
-            services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+            services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options =>
             {
                 options.Password.RequiredLength = 10;
                 options.Password.RequireNonAlphanumeric = false;
 
             })
-                //.AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
 

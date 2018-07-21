@@ -12,9 +12,9 @@ namespace SituationCenterCore.Data.DatabaseAbstraction
     {
         Task<RoomSecurityRule[]> GetRulesAsync();
         Task<RoomSecurityRule> GetRuleAsync(Guid ruleId);
-        Task<IdentityResult> CreateRoleAsync(IdentityRole role);
-        Task<IdentityRole> FindRoleByNameAsync(string name);
-        Task<IdentityResult> DeleteRoleAsync(IdentityRole identityRole);
+        Task<IdentityResult> CreateRoleAsync(IdentityRole<Guid> role);
+        Task<IdentityRole<Guid>> FindRoleByNameAsync(string name);
+        Task<IdentityResult> DeleteRoleAsync(IdentityRole<Guid> identityRole);
 
         Task<bool> IsInRoleAsync(ApplicationUser user, string roleName);
         Task<IdentityResult> AddToRoleAsync(ApplicationUser user, string roleName);

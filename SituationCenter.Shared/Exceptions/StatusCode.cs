@@ -89,6 +89,8 @@ namespace SituationCenter.Shared.Exceptions
         TooLongRoomName,
 
         [Description("Невалидный токен доступ")]
-        Unauthorized
+        Unauthorized,
+        [Description("Неверный Refresh токен")]
+        IncorrectRefreshToken
     }
 }

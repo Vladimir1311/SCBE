@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using SituationCenter.Shared.Exceptions;
 using SituationCenter.Shared.ResponseObjects;
@@ -16,10 +17,12 @@ namespace SituationCenterCore.Middleware
     public class ExceptionsHandlerMiddleware
     {
         private readonly RequestDelegate _next;
+        private readonly ILogger<ExceptionsHandlerMiddleware> logger;
 
-        public ExceptionsHandlerMiddleware(RequestDelegate next)
+        public ExceptionsHandlerMiddleware(RequestDelegate next, ILogger<ExceptionsHandlerMiddleware> logger)
         {
             _next = next;
+            this.logger = logger;
         }
 
         public async Task Invoke(HttpContext httpContext)
@@ -41,12 +44,14 @@ namespace SituationCenterCore.Middleware
                         responseObj = ResponseBase.BadResponse(mscException.Codes);
                         break;
                     case ArgumentException argException:
+                        logger.LogWarning(argException, "incorrect arguments");
                         responseObj = ResponseBase.BadResponse(StatusCode.ArgumentsIncorrect);
                         break;
                     case NotImplementedException niException:
                         responseObj = ResponseBase.BadResponse(StatusCode.NotImplementFunction);
                         break;
                     default:
+                        logger.LogWarning(ex, "Unknown Error");
                         responseObj = ResponseBase.BadResponse(StatusCode.UnknownError);
                         break;
                 }

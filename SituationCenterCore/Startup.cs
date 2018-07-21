@@ -19,6 +19,7 @@ using SituationCenterCore.Middleware;
 using SituationCenterCore.Models.Settings;
 using SituationCenterCore.Services.Interfaces;
 using SituationCenterCore.Services.Implementations;
+using System.Runtime.InteropServices;
 
 namespace SituationCenterCore
 {
@@ -49,7 +50,7 @@ namespace SituationCenterCore
                 options.Password.RequireNonAlphanumeric = false;
 
             })
-                .AddEntityFrameworkStores<ApplicationDbContext>()
+                //.AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
 
@@ -88,7 +89,7 @@ namespace SituationCenterCore
             services.AddCors();
         }
 
-        
+
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
@@ -125,8 +126,14 @@ namespace SituationCenterCore
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("ReleaseDataBase")));
 #else
-            services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("DataBase")));
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                services.AddDbContext<ApplicationDbContext>(options =>
+                    options.UseSqlServer(Configuration.GetConnectionString("DataBase")));
+            else
+                services
+                    .AddEntityFrameworkNpgsql()
+                    .AddDbContext<ApplicationDbContext>(options =>
+                    options.UseNpgsql(Configuration.GetConnectionString("PosgresDataBase")));
 #endif
         }
     }

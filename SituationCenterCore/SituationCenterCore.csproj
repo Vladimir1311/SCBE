@@ -7,7 +7,7 @@
     <LangVersion>7.3</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <LangVersion>7.3</LangVersion>
+    <LangVersion>7.1</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="Models\StorageModels\**" />
@@ -26,6 +26,7 @@
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.Azure.ServiceBus" Version="3.0.2" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.1.0" PrivateAssets="All" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="2.0.2" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SituationCenter.Shared\SituationCenter.Shared.csproj" />
@@ -42,5 +43,9 @@
   <ItemGroup>
     <Folder Include="Scripts\" />
   </ItemGroup>
-  <ProjectExtensions><VisualStudio><UserProperties appsettings_1Secret_1json__JSONSchema="appsettings.Secret.Schema.json" /></VisualStudio></ProjectExtensions>
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties appsettings_1Secret_1json__JSONSchema="appsettings.Secret.Schema.json" />
+    </VisualStudio>
+  </ProjectExtensions>
 </Project>

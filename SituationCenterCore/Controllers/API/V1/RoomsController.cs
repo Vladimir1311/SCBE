@@ -10,7 +10,6 @@ using SituationCenter.Shared.ResponseObjects.Rooms;
 using SituationCenterCore.Data;
 using SituationCenterCore.Data.DatabaseAbstraction;
 using SituationCenterCore.Extensions;
-using SituationCenterCore.Filters;
 using SituationCenterCore.Models.Rooms;
 using SituationCenterCore.Models.Rooms.Security;
 using System;
@@ -25,7 +24,6 @@ namespace SituationCenterCore.Controllers.API.V1
 {
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("api/v1/[controller]/[action]/{*pathToFolder}")]
-    [TypeFilter(typeof(JsonExceptionsFilterAttribute))]
     public class RoomsController : Controller
     {
         private readonly IRoomManager roomsManager;
@@ -95,6 +93,7 @@ namespace SituationCenterCore.Controllers.API.V1
                        throw new StatusCodeException(Exceptions.StatusCode.YouAreNotInRoom);
             return mapper.Map<RoomView>(room);
         }
+
         [HttpPost]
         public async Task<ResponseBase> InvitePerson([FromBody]List<string> phones)
         {

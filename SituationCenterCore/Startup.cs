@@ -21,6 +21,7 @@ using SituationCenterCore.Services.Interfaces;
 using SituationCenterCore.Services.Implementations;
 using System.Runtime.InteropServices;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 
 namespace SituationCenterCore
 {
@@ -76,12 +77,7 @@ namespace SituationCenterCore
                         };
                     });
 
-            services.AddMvc()
-                .AddRazorPagesOptions(options =>
-                {
-                    options.Conventions.AuthorizeFolder("/Account/Manage");
-                    options.Conventions.AuthorizePage("/Account/Logout");
-                });
+            services.AddMvc(options => options.Filters.Add<AuthorizeAttribute>());
 
             // Register no-op EmailSender used by account confirmation and password reset during development
             // For more information on how to enable account confirmation and password reset please visit https://go.microsoft.com/fwlink/?LinkID=532713
@@ -113,6 +109,7 @@ namespace SituationCenterCore
             app.UseExceptionsHandlerMiddleware();
 
             app.UseAuthentication();
+            app.UseValidateRefreshToken();
 
             app.UseMvc(routes =>
             {

@@ -100,7 +100,7 @@ namespace SituationCenterCore.Models.Rooms
             var user = dataBase.Users
                 .Include(U => U.Room)
                 .FirstOrDefault(U => U.Id == userId)
-                ?? throw new ArgumentException($"not user with id {userId}");
+                ?? throw new ApiArgumentException($"not user with id {userId}");
 
             if (user.RoomId != null)
                 throw new StatusCodeException(StatusCode.PersonInRoomAtAWrongTime);
@@ -170,7 +170,7 @@ namespace SituationCenterCore.Models.Rooms
         public IEnumerable<Room> Rooms(Guid userId)
         {
             var user = dataBase.Users.FirstOrDefault(U => U.Id == userId)
-                ?? throw new ArgumentException();
+                ?? throw new ApiArgumentException();
             var allrooms = dataBase
                 .Rooms
                 .Include(R => R.Users)

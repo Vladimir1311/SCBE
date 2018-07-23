@@ -9,7 +9,6 @@ using SituationCenterCore.Controllers;
 using SituationCenterCore.Data;
 using SituationCenterCore.Data.DatabaseAbstraction;
 using SituationCenterCore.Extensions;
-using SituationCenterCore.Filters;
 using SituationCenterCore.Services.Interfaces;
 using System;
 using System.ComponentModel.DataAnnotations;
@@ -20,13 +19,13 @@ using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 using SituationCenter.Shared.ResponseObjects.General;
 using SituationCenterCore.DataFormatting;
+using SituationCenter.Shared.Exceptions;
 
 namespace SSituationCenterCore.Controllers.API.V1
 {
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Produces("application/json")]
     [Route("api/v1/[controller]/[action]/{*pathToFolder}")]
-    [TypeFilter(typeof(JsonExceptionsFilterAttribute))]
     public class PeopleController : BaseParamsController
     {
         private readonly IRepository repository;
@@ -45,7 +44,7 @@ namespace SSituationCenterCore.Controllers.API.V1
 
         public async Task<OneObjectResponse<MeAndRoom>> Me()
         {
-            var user = await repository.FindUser(User) ?? throw new ArgumentException();
+            var user = await repository.FindUser(User) ?? throw new ApiArgumentException();
             return mapper.Map<MeAndRoom>(user);
         }
 

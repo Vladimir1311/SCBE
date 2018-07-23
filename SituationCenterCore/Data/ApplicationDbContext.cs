@@ -29,5 +29,6 @@ namespace SituationCenterCore.Data
         public DbSet<RoomSecurityRule> Rules { get; set; }
         public DbSet<Room> Rooms { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
+        public DbSet<RemovedToken> RemovedTokens { get; set; }
     }
 }

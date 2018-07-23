@@ -82,7 +82,7 @@ namespace SituationCenterCore.Models.Rooms.Security
                     break;
 
                 default:
-                    throw new ArgumentException(nameof(rule));
+                    throw new ApiArgumentException(paramName: nameof(rule));
             }
         }
 

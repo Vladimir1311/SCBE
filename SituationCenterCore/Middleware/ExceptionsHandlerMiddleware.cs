@@ -43,9 +43,13 @@ namespace SituationCenterCore.Middleware
                     case MultiStatusCodeException mscException:
                         responseObj = ResponseBase.BadResponse(mscException.Codes);
                         break;
+                    case ApiArgumentException apiArgException:
+                        logger.LogInformation(apiArgException, "api arg exception");
+                        responseObj = ResponseBase.BadResponse(StatusCode.ArgumentsIncorrect);
+                        break;
                     case ArgumentException argException:
                         logger.LogWarning(argException, "incorrect arguments");
-                        responseObj = ResponseBase.BadResponse(StatusCode.ArgumentsIncorrect);
+                        responseObj = ResponseBase.BadResponse(StatusCode.UnknownError);
                         break;
                     case NotImplementedException niException:
                         responseObj = ResponseBase.BadResponse(StatusCode.NotImplementFunction);

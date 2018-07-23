@@ -45,6 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Scripts\" />
+    <Folder Include="Filters\" />
   </ItemGroup>
   <ProjectExtensions>
     <VisualStudio>

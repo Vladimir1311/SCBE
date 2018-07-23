@@ -43,9 +43,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Scripts\" />
-  </ItemGroup>
   <ProjectExtensions>
     <VisualStudio>
       <UserProperties appsettings_1Secret_1json__JSONSchema="appsettings.Secret.Schema.json" />

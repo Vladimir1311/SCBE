@@ -57,6 +57,11 @@ namespace SituationCenterCore.Controllers.API.V1
                             .Where(t => t.UserId == UserId)
                             .ProjectTo<RefreshTokenView>()
                             .ToListAsync();
+
+        [HttpPost]
+        public Task<ResponseBase> SignOut()
+            => Disable(new List<Guid> {RefreshTokenId});
+
         [HttpDelete]
         [AllowAnonymous]
         public async Task<ResponseBase> Disable([FromBody]List<Guid> tokensToRemove)

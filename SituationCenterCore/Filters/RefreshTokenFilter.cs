@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.EntityFrameworkCore;
 using SituationCenter.Shared.Exceptions;
 using SituationCenterCore.Data;
+using SituationCenterCore.Extensions;
 
 namespace SituationCenterCore.Filters
 {
@@ -25,10 +26,21 @@ namespace SituationCenterCore.Filters
                 await next();
                 return;
             }
-            var refreshTokenString = context.HttpContext.User.Claims.FirstOrDefault(c => c.Type == "RefreshTokenId")?.Value;
-            if (!Guid.TryParse(refreshTokenString, out var refreshTokenId) ||
-                await dbContext.RemovedTokens.AnyAsync(rt => rt.Id == refreshTokenId))
+
+            try
+            {
+                var refreshTokenId = context.HttpContext.User.RefreshTokenId();
+                if (await dbContext.RemovedTokens.AnyAsync(rt => rt.Id == refreshTokenId))
+                {
+                    throw new Exception();
+                }
+
+            }
+            catch
+            {
                 throw new StatusCodeException(StatusCode.IncorrectRefreshToken);
+            }
+
             await next();
         }
     }

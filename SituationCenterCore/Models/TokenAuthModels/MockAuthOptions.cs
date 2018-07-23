@@ -9,8 +9,8 @@ namespace SituationCenterCore.Models.TokenAuthModels
 {
     public class MockAuthOptions
     {
-        public const string ISSUER = "MyAuthServer";
-        public const string AUDIENCE = "http://localhost:51884/";
+        public const string ISSUER = "http://localhost:5000";
+        public const string AUDIENCE = "http://localhost:5000/";
         const string KEY = "mysupersecret_secretkey!123";
         public const int LIFETIME = 100;
         public static SymmetricSecurityKey GetSymmetricSecurityKey()

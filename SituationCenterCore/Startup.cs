@@ -24,6 +24,8 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using SituationCenterCore.Filters;
+using SituationCenterCore.Services.Implementations.RealTime;
+using SituationCenterCore.Services.Interfaces.RealTime;
 
 namespace SituationCenterCore
 {
@@ -76,10 +78,12 @@ namespace SituationCenterCore
                             ValidAudience = MockAuthOptions.AUDIENCE,
 
                             ValidateLifetime = true,
+                            RequireExpirationTime = true,
 
                             IssuerSigningKey = MockAuthOptions.GetSymmetricSecurityKey(),
 
                             ValidateIssuerSigningKey = true,
+                            ClockSkew = TimeSpan.Zero
                         };
                     });
 
@@ -97,6 +101,8 @@ namespace SituationCenterCore
             // Register no-op EmailSender used by account confirmation and password reset during development
             // For more information on how to enable account confirmation and password reset please visit https://go.microsoft.com/fwlink/?LinkID=532713
             services.AddSingleton<IEmailSender, EmailSender>();
+            services.AddSingleton<IWebSocketManager, WebSocketManager>();
+            services.AddTransient<IWebSocketHandler, WebSocketHandler>();
             services.AddAutoMapper();
             services.AddCors();
         }
@@ -124,6 +130,8 @@ namespace SituationCenterCore
             app.UseExceptionsHandlerMiddleware();
 
             app.UseAuthentication();
+            app.UseWebSockets();
+            app.UseWebSocketMiddleware("/ws");
 
             app.UseMvc(routes =>
             {
@@ -140,7 +148,7 @@ namespace SituationCenterCore
 #else
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 services.AddDbContext<ApplicationDbContext>(options =>
-                    options.UseSqlServer(Configuration.GetConnectionString("DataBase")));
+                    options.UseSqlServer(Configuration.GetConnectionString("ReleaseDataBase")));
             else
                 services
                     .AddEntityFrameworkNpgsql()

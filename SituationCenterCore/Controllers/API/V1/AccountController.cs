@@ -96,6 +96,7 @@ namespace SituationCenterCore.Controllers.API.V1
         [AllowAnonymous]
         public async Task<OneObjectResponse<AccessAndRefreshTokenPair>> RefreshToken([FromBody]string refreshToken)
         {
+            Console.WriteLine(refreshToken);
             var nowRefreshToken = await dbContext
                 .RefreshTokens
                 .Include(rt => rt.User)
@@ -160,10 +161,9 @@ namespace SituationCenterCore.Controllers.API.V1
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim("RefreshTokenId", refreshToken.Id.ToString())
             };
-            var identity = new ClaimsIdentity(claims, "Token", ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType);
             var pair = new AccessAndRefreshTokenPair
             {
-                AccessToken = CreateAccessToken(identity),
+                AccessToken = CreateAccessToken(claims),
                 RefreshToken = refreshToken.TokenContent
             };
             return pair;
@@ -186,15 +186,15 @@ namespace SituationCenterCore.Controllers.API.V1
         }
 
 
-        private static string CreateAccessToken(ClaimsIdentity identity)
+        private static string CreateAccessToken(Claim[] claims)
         {
-            var now = DateTime.UtcNow;
+            var now = DateTime.Now;
             var jwt = new JwtSecurityToken(
                         issuer: MockAuthOptions.ISSUER,
                         audience: MockAuthOptions.AUDIENCE,
                         notBefore: now,
-                        claims: identity.Claims,
-                        expires: now.Add(TimeSpan.FromMinutes(MockAuthOptions.LIFETIME)),
+                        claims: claims,
+                        expires: now.Add(TimeSpan.FromSeconds(10)),
                         signingCredentials: new SigningCredentials(MockAuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
             return new JwtSecurityTokenHandler().WriteToken(jwt);
         }

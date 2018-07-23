@@ -19,6 +19,8 @@
     <Content Remove="Pages\_Layout.cshtml" />
     <Content Remove="Pages\_LoginPartial.cshtml" />
     <Content Remove="Pages\_ValidationScriptsPartial.cshtml" />
+    <Compile Remove="Data\Migrations\Production\20180723091225_RefreshTokens.Designer.cs" />
+    <Compile Remove="Data\Migrations\Production\20180723091225_RefreshTokens.cs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="7.0.1" />
@@ -42,6 +44,10 @@
     <Content Update="apsettings.Secret.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Models\RealTime\" />
+    <Folder Include="Models\RealTime\New Folder\" />
   </ItemGroup>
   <ProjectExtensions>
     <VisualStudio><UserProperties appsettings_1json__JSONSchema="http://json.schemastore.org/component" appsettings_1Secret_1json__JSONSchema="appsettings.Secret.Schema.json" /></VisualStudio>

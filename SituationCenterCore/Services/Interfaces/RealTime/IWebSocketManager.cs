@@ -8,6 +8,7 @@ namespace SituationCenterCore.Services.Interfaces.RealTime
 {
     public interface IWebSocketManager
     {
-        void Add(WebSocket webSocket);
+        void Add(IWebSocketHandler webSocketHandler);
+        IEnumerable<IWebSocketHandler> ForTopic(string topic);
     }
 }

@@ -103,6 +103,7 @@ namespace SituationCenterCore
             services.AddSingleton<IEmailSender, EmailSender>();
             services.AddSingleton<IWebSocketManager, WebSocketManager>();
             services.AddTransient<IWebSocketHandler, WebSocketHandler>();
+            services.AddTransient<INotificator, WebSocketNotificator>();
             services.AddAutoMapper();
             services.AddCors();
         }

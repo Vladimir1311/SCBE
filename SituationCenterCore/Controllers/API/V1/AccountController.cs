@@ -194,7 +194,7 @@ namespace SituationCenterCore.Controllers.API.V1
                         audience: MockAuthOptions.AUDIENCE,
                         notBefore: now,
                         claims: claims,
-                        expires: now.Add(TimeSpan.FromSeconds(10)),
+                        expires: now.Add(TimeSpan.FromMinutes(30)),
                         signingCredentials: new SigningCredentials(MockAuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
             return new JwtSecurityTokenHandler().WriteToken(jwt);
         }

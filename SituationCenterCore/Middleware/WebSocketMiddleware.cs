@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using SituationCenterCore.Services.Interfaces.RealTime;
+using SituationCenterCore.Extensions;
 
 namespace SituationCenterCore.Middleware
 {
@@ -25,12 +26,14 @@ namespace SituationCenterCore.Middleware
 
         public async Task Invoke(HttpContext httpContext)
         {
-            var authResult = httpContext.AuthenticateAsync(JwtBearerDefaults.AuthenticationScheme);
-
             if (httpContext.WebSockets.IsWebSocketRequest && httpContext.Request.Path.StartsWithSegments(startRoute))
             {
+                var userId = Guid.Parse(httpContext.Request.Query["userId"]);
+                var authResult = httpContext.AuthenticateAsync(JwtBearerDefaults.AuthenticationScheme);
+                if (authResult.IsFaulted)
+                    return;
                 await httpContext.RequestServices.GetService<IWebSocketHandler>()
-                    .Handle(await httpContext.WebSockets.AcceptWebSocketAsync());
+                                 .Handle(await httpContext.WebSockets.AcceptWebSocketAsync(), userId);
                 return;
             }
             await _next(httpContext);

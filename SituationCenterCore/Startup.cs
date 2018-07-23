@@ -22,6 +22,8 @@ using SituationCenterCore.Services.Implementations;
 using System.Runtime.InteropServices;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.Authorization;
+using SituationCenterCore.Filters;
 
 namespace SituationCenterCore
 {
@@ -56,7 +58,11 @@ namespace SituationCenterCore
                 .AddDefaultTokenProviders();
 
 
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            services.AddAuthentication(options =>
+                {
+                    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                })
                     .AddJwtBearer(options =>
                     {
                         options.RequireHttpsMetadata = false;
@@ -77,7 +83,16 @@ namespace SituationCenterCore
                         };
                     });
 
-            services.AddMvc(options => options.Filters.Add<AuthorizeAttribute>());
+            services.AddMvc(options =>
+            {
+
+                var policy = new AuthorizationPolicyBuilder()
+                    .RequireAuthenticatedUser()
+                    .AddAuthenticationSchemes("Bearer")
+                    .Build();
+                options.Filters.Add(new AuthorizeFilter(policy));
+                options.Filters.Add<RefreshTokenFilter>();
+            });
 
             // Register no-op EmailSender used by account confirmation and password reset during development
             // For more information on how to enable account confirmation and password reset please visit https://go.microsoft.com/fwlink/?LinkID=532713
@@ -109,7 +124,6 @@ namespace SituationCenterCore
             app.UseExceptionsHandlerMiddleware();
 
             app.UseAuthentication();
-            app.UseValidateRefreshToken();
 
             app.UseMvc(routes =>
             {

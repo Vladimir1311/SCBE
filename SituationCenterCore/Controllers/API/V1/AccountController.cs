@@ -52,15 +52,14 @@ namespace SituationCenterCore.Controllers.API.V1
         }
 
         [HttpGet]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<ListResponse<RefreshTokenView>> Get()
             => await dbContext.RefreshTokens
                             .Where(t => t.UserId == UserId)
                             .ProjectTo<RefreshTokenView>()
                             .ToListAsync();
         [HttpDelete]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public async Task<ResponseBase> Disabple(List<Guid> tokensToRemove)
+        [AllowAnonymous]
+        public async Task<ResponseBase> Disable([FromBody]List<Guid> tokensToRemove)
         {
             var targetTokens = await dbContext
                 .RefreshTokens
@@ -76,6 +75,7 @@ namespace SituationCenterCore.Controllers.API.V1
         }
 
         [HttpPost]
+        [AllowAnonymous]
         public async Task<OneObjectResponse<AccessAndRefreshTokenPair>> Authorize([FromBody]LoginRequest model)
         {
             if (!ModelState.IsValid)
@@ -88,6 +88,7 @@ namespace SituationCenterCore.Controllers.API.V1
         }
 
         [HttpPost]
+        [AllowAnonymous]
         public async Task<OneObjectResponse<AccessAndRefreshTokenPair>> RefreshToken([FromBody]string refreshToken)
         {
             var nowRefreshToken = await dbContext
@@ -102,6 +103,7 @@ namespace SituationCenterCore.Controllers.API.V1
         }
 
         [HttpPost]
+        [AllowAnonymous]
         public async Task<ResponseBase> Registration([FromBody]RegisterRequest model)
         {
             if (ModelState.IsValid)

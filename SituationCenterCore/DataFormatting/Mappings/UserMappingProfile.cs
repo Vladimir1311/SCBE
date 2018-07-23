@@ -19,6 +19,8 @@ namespace SituationCenterCore.DataFormatting.Mappings
                 .ForMember(mar => mar.Me, map => map.MapFrom(u => u));
 
             CreateMap<RefreshToken, RefreshTokenView>();
+            CreateMap<RefreshToken, RemovedToken>()
+                .ForMember(rt => rt.RemovedTokenId, map => map.MapFrom(rt => rt.Id));
         }
     }
 }

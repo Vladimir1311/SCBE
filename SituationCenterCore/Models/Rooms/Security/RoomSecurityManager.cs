@@ -9,34 +9,37 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
+using SituationCenterCore.Services.Interfaces;
 
 namespace SituationCenterCore.Models.Rooms.Security
 {
     public class RoomSecurityManager : IRoomSecurityManager
     {
-        private readonly IRepository repository;
         private readonly ILogger<RoomSecurityManager> logger;
-
-        //TODO Add rules generator in DI
-        private RoomRolesGenerator roomRolesGenerator = new RoomRolesGenerator();
+        private readonly IMapper mapper;
+        private readonly IRoleAccessor roleAccessor;
 
         public RoomSecurityManager(
-            IRepository repository,
-            ILogger<RoomSecurityManager> logger)
+            ILogger<RoomSecurityManager> logger,
+            IMapper mapper,
+            IRoleAccessor roleAccessor)
         {
-            this.repository = repository;
             this.logger = logger;
+            this.mapper = mapper;
+            this.roleAccessor = roleAccessor;
         }
 
-        public void CreateInvationRule(Room room, Guid[] usersIds)
+        public void CreateInvationRule(Room room, ICollection<Guid> usersIds)
         {
             logger.LogDebug($"creating invation rule");
-            if ((usersIds?.Length ?? 0) == 0)
+            if ((usersIds?.Count ?? 0) == 0)
                 throw new StatusCodeException(StatusCode.EmptyInvationRoom);
-            var inviteRule = new RoomSecurityRule() { PrivacyRule = PrivacyRoomType.InvationPrivate };
-
-            var userIdsString = string.Join("\n", usersIds.Select(I => I.ToString()));
-            inviteRule.Data = userIdsString;
+            var inviteRule = new RoomSecurityRule
+            {
+                PrivacyRule = PrivacyRoomType.InvationPrivate,
+                Invites = usersIds.Select(g => mapper.Map<UserRoomInvite>(g)).ToList()
+            };
 
             room.SecurityRule = inviteRule;
         }
@@ -45,7 +48,7 @@ namespace SituationCenterCore.Models.Rooms.Security
         {
             logger.LogDebug($"create public rule for room {room.Id} {room.Name}");
 
-            var publicRule = new RoomSecurityRule() { PrivacyRule = PrivacyRoomType.Public };
+            var publicRule = new RoomSecurityRule { PrivacyRule = PrivacyRoomType.Public };
             room.SecurityRule = publicRule;
         }
 
@@ -55,11 +58,11 @@ namespace SituationCenterCore.Models.Rooms.Security
 
             if (password?.Length != 6 || !int.TryParse(password, out _))
                 throw new StatusCodeException(StatusCode.IncorrectRoomPassword);
-            
-            RoomSecurityRule rule = new RoomSecurityRule()
+
+            var rule = new RoomSecurityRule()
             {
                 PrivacyRule = PrivacyRoomType.Password,
-                Data = password //TODO Использовать хеш!!!
+                Password = password //TODO Использовать хеш!!!
             };
             room.SecurityRule = rule;
         }
@@ -91,7 +94,7 @@ namespace SituationCenterCore.Models.Rooms.Security
         {
             //TODO Использовать хэши!!!
             logger.LogDebug($"validating password");
-            if (securityRule.Data != password)
+            if (securityRule.Password != password)
                 throw new StatusCodeException(StatusCode.IncorrectRoomPassword);
             logger.LogDebug($"success validated password");
         }
@@ -99,36 +102,23 @@ namespace SituationCenterCore.Models.Rooms.Security
         private void ValidateInvation(RoomSecurityRule rule, ApplicationUser user)
         {
             logger.LogDebug("validating invite rule");
-            if (!rule.Data.Split('\n').Contains(user.Id.ToString()))
+            if (rule.Invites.Any(uri => uri.UserId == user.Id))
+                logger.LogDebug("success validated invite rule");
+            else
                 throw new StatusCodeException(StatusCode.AccessDenied);
-            logger.LogDebug("success validated invite rule");
         }
 
-        public async Task AddAdminRole(ApplicationUser user, Room room)
+        public void AddAdminRole(ApplicationUser user, Room room)
         {
-            var adminRole = roomRolesGenerator.GetAdministratorRole(room);
-            var createResult = await repository.CreateRoleAsync(new IdentityRole<Guid>(adminRole));
-            if (!createResult.Succeeded)
-                throw new Exception("Can't create role for room " + string.Join(" ", createResult.Errors.Select(E => $"{E.Code} {E.Description}")));
-            var addToRoleResult = await repository.AddToRoleAsync(user, adminRole);
-            if (!addToRoleResult.Succeeded)
-                throw new Exception("Can't add to room" + string.Join(" ", addToRoleResult.Errors.Select(E => $"{E.Code} {E.Description}")));
+            user.UserRoomRole = new UserRoomRole
+            {
+                Room = room,
+                RoleId = roleAccessor.AnministratorId
+            };
         }
 
         public bool CanDelete(ApplicationUser user, Room room)
-        {
-            var adminRole = roomRolesGenerator.GetAdministratorRole(room);
-            return repository.IsInRoleAsync(user, adminRole).Result
-                || repository.IsInRoleAsync(user, "Administrator").Result;
-        }
-
-        public void ClearRoles(Room room)
-        {
-            var adminRoleName = roomRolesGenerator.GetAdministratorRole(room);
-            var adminRole = repository.FindRoleByNameAsync(adminRoleName).Result;
-            if (adminRole != null)
-                repository.DeleteRoleAsync(adminRole).Wait();
-        }
+            => user.UserRoomRole.RoleId == roleAccessor.AnministratorId;
 
         public bool CanJoin(ApplicationUser user, Room room)
         {

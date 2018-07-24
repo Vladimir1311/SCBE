@@ -18,12 +18,13 @@ using System.Threading.Tasks;
 using Exceptions = SituationCenter.Shared.Exceptions;
 using System.Collections.Generic;
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using SituationCenter.Shared.ResponseObjects.General;
 
 namespace SituationCenterCore.Controllers.API.V1
 {
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    [Route("api/v1/[controller]/[action]/{*pathToFolder}")]
+    [Route("api/v1/[controller]/[action]")]
     public class RoomsController : Controller
     {
         private readonly IRoomManager roomsManager;
@@ -47,39 +48,39 @@ namespace SituationCenterCore.Controllers.API.V1
             var userId = repository.GetUserId(User);
             var roomsPresent = roomsManager
                 .Rooms(userId)
-                .Select(mapper.Map<RoomView>)
+                .ProjectTo<RoomView>()
                 .ToList();
             return roomsPresent;
         }
 
         [HttpPost]
-        public async Task<OneObjectResponse<Guid>> CreateAsync([FromBody] CreateRoomRequest info)
+        public async Task<OneObjectResponse<Guid>> Create([FromBody] CreateRoomRequest info)
         {
             var room = await roomsManager.CreateNewRoom(repository.GetUserId(User), info);
             return room.Id;
         }
 
-        public async Task<ResponseBase> JoinAsync(Guid roomId, string data = null)
+        public async Task<ResponseBase> Join(Guid roomId, string data = null)
         {
             await roomsManager.JoinToRoom(repository.GetUserId(User), roomId, data);
             return ResponseBase.OKResponse;
         }
 
-        public async Task<ResponseBase> LeaveAsync()
+        public async Task<ResponseBase> Leave()
         {
             var userId = repository.GetUserId(User);
             await roomsManager.LeaveFromRoom(userId);
             return ResponseBase.OKResponse;
         }
-
-        public async Task<ResponseBase> DeleteAsync(Guid roomId)
+        [HttpDelete("{roomId}")]
+        public async Task<ResponseBase> Delete(Guid roomId)
         {
             var userId = repository.GetUserId(User);
             await roomsManager.DeleteRoom(userId, roomId);
             return ResponseBase.OKResponse;
         }
 
-        public async Task<OneObjectResponse<RoomView>> InfoAsync(Guid roomId)
+        public async Task<OneObjectResponse<RoomView>> Info(Guid roomId)
         {
             var room = await roomsManager.FindRoom(roomId) ??
                        throw new StatusCodeException(Exceptions.StatusCode.DontExistRoom);

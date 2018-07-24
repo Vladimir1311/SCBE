@@ -11,7 +11,7 @@ namespace SituationCenterCore.Data.DatabaseAbstraction
 {
     public class EntityRepository : IRepository
     {
-        private readonly RoleManager<IdentityRole<Guid>> roleManager;
+        private readonly RoleManager<Role> roleManager;
         private readonly UserManager<ApplicationUser> userManager;
         private readonly ApplicationDbContext dbContext;
 
@@ -19,7 +19,7 @@ namespace SituationCenterCore.Data.DatabaseAbstraction
 
         public EntityRepository(
             DbContextOptions<ApplicationDbContext> options, 
-            RoleManager<IdentityRole<Guid>> roleManager,
+            RoleManager<Role> roleManager,
             UserManager<ApplicationUser> userManager,
             ApplicationDbContext dbContext)
         {
@@ -30,13 +30,13 @@ namespace SituationCenterCore.Data.DatabaseAbstraction
         public async Task<RoomSecurityRule[]> GetRulesAsync() =>
             await Task.FromResult(dbContext.Rules.ToArray());
 
-        public async Task<IdentityResult> CreateRoleAsync(IdentityRole<Guid> role) =>
+        public async Task<IdentityResult> CreateRoleAsync(Role role) =>
             await roleManager.CreateAsync(role);
 
-        public async Task<IdentityRole<Guid>> FindRoleByNameAsync(string name) =>
+        public async Task<Role> FindRoleByNameAsync(string name) =>
             await roleManager.FindByNameAsync(name);
 
-        public async Task<IdentityResult> DeleteRoleAsync(IdentityRole<Guid> identityRole) =>
+        public async Task<IdentityResult> DeleteRoleAsync(Role identityRole) =>
             await roleManager.DeleteAsync(identityRole);
 
         public async Task<bool> IsInRoleAsync(ApplicationUser user, string roleName) =>

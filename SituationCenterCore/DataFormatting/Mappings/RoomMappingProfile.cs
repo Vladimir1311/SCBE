@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Common.Requests.Room.CreateRoom;
 using SituationCenter.Shared.ResponseObjects.Rooms;
 using SituationCenterCore.Models.Rooms;
 
@@ -15,6 +16,10 @@ namespace SituationCenterCore.DataFormatting.Mappings
             CreateMap<Room, RoomView>()
                 .ForMember(rv => rv.MaxPeopleCount, map => map.MapFrom(r => r.PeopleCountLimit))
                 .ForMember(rv => rv.PrivacyType, map => map.MapFrom(r => r.SecurityRule.PrivacyRule));
+
+            CreateMap<CreateRoomRequest, Room>();
+            CreateMap<Guid, UserRoomInvite>()
+                .ForMember(uri => uri.UserId, map => map.MapFrom(g => g));
         }
     }
 }

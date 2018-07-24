@@ -60,8 +60,8 @@ namespace SituationCenterCore.Controllers.API.V1
 
         [HttpPost]
         public Task<ResponseBase> SignOut()
-            => Disable(new List<Guid> {RefreshTokenId});
-
+            => RefreshTokenId != null ? Disable(new List<Guid> {RefreshTokenId.Value}) : Task.FromResult(ResponseBase.OKResponse);
+        
         [HttpDelete]
         [AllowAnonymous]
         public async Task<ResponseBase> Disable([FromBody]List<Guid> tokensToRemove)
@@ -70,8 +70,6 @@ namespace SituationCenterCore.Controllers.API.V1
                 .RefreshTokens
                 .Where(t => tokensToRemove.Contains(t.Id))
                 .ToListAsync();
-            if (targetTokens.Count != tokensToRemove.Count)
-                throw new StatusCodeException(SituationCenter.Shared.Exceptions.StatusCode.ArgumentsIncorrect);
 
             dbContext.RefreshTokens.RemoveRange(targetTokens);
             dbContext.RemovedTokens.AddRange(targetTokens.Select(mapper.Map<RemovedToken>));
@@ -196,7 +194,7 @@ namespace SituationCenterCore.Controllers.API.V1
                         audience: MockAuthOptions.AUDIENCE,
                         notBefore: now,
                         claims: claims,
-                        expires: now.Add(TimeSpan.FromMinutes(30)),
+                        expires: now.Add(TimeSpan.FromSeconds(10)),
                         signingCredentials: new SigningCredentials(MockAuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
             return new JwtSecurityTokenHandler().WriteToken(jwt);
         }

@@ -9,7 +9,7 @@ namespace SituationCenterCore.Models.Rooms.Security
     {
         public Guid Id { get; set; }
         public PrivacyRoomType PrivacyRule { get; set; }
-        public string Data { get; set; }
+        public string Password { get; set; }
         public List<UserRoomInvite> Invites { get; set; } = new List<UserRoomInvite>();
     }
 }   

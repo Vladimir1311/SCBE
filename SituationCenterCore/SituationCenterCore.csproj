@@ -19,9 +19,6 @@
     <Content Remove="Pages\_Layout.cshtml" />
     <Content Remove="Pages\_LoginPartial.cshtml" />
     <Content Remove="Pages\_ValidationScriptsPartial.cshtml" />
-    <Compile Remove="Data\Migrations\Production\20180723091225_RefreshTokens.Designer.cs" />
-    <Compile Remove="Data\Migrations\Production\20180723091225_RefreshTokens.cs" />
-    <Compile Remove="Data\Migrations\Production\20180723091225_RefreshTokens.cs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="7.0.1" />

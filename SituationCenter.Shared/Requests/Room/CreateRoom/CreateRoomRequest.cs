@@ -9,15 +9,10 @@ namespace Common.Requests.Room.CreateRoom
 {
     public class CreateRoomRequest
     {
-        [JsonProperty("name")]
         public string Name { get; set; }
-        [JsonProperty("privacy")]
         public PrivacyRoomType PrivacyType { get; set; }
-        [JsonProperty("peopleCountLimit")]
-        public int UsersCountMax { get; set; } = 6;
-        [JsonProperty("password")]
+        public int PeopleCountLimit { get; set; } = 6;
         public string Password { get; set; }
-        [JsonProperty("phones")]
-        public string[] Phones { get; set; }
+        public List<Guid> InviteUsers { get; set; }
     }
 }

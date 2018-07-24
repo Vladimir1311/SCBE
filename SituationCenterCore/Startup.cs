@@ -50,7 +50,7 @@ namespace SituationCenterCore
             services.AddTransient<IRoomSecurityManager, RoomSecurityManager>();
             services.AddTransient<IFileServerNotifier, ServiceBusFileServerNotifier>();
 
-            services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options =>
+            services.AddIdentity<ApplicationUser, Role>(options =>
             {
                 options.Password.RequiredLength = 10;
                 options.Password.RequireNonAlphanumeric = false;
@@ -104,6 +104,7 @@ namespace SituationCenterCore
             services.AddSingleton<IWebSocketManager, WebSocketManager>();
             services.AddTransient<IWebSocketHandler, WebSocketHandler>();
             services.AddTransient<INotificator, WebSocketNotificator>();
+            services.AddScoped<IRoleAccessor, RoleAccessor>();
             services.AddAutoMapper();
             services.AddCors();
         }
@@ -130,6 +131,11 @@ namespace SituationCenterCore
             );
             app.UseExceptionsHandlerMiddleware();
 
+            app.Use((context, func) =>
+            {
+                context.RequestServices.GetService<IRoleAccessor>().SetDbContext(context.RequestServices.GetService<ApplicationDbContext>());
+                return func();
+            });
             app.UseAuthentication();
             app.UseWebSockets();
             app.UseWebSocketMiddleware("/ws");
@@ -149,7 +155,7 @@ namespace SituationCenterCore
 #else
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 services.AddDbContext<ApplicationDbContext>(options =>
-                    options.UseSqlServer(Configuration.GetConnectionString("ReleaseDataBase")));
+                    options.UseSqlServer(Configuration.GetConnectionString("DataBase")));
             else
                 services
                     .AddEntityFrameworkNpgsql()

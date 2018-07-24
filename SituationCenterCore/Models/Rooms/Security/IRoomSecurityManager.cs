@@ -14,15 +14,13 @@ namespace SituationCenterCore.Models.Rooms.Security
 
         void CreatePasswordRule(Room room, string pasword);
 
-        void CreateInvationRule(Room room, Guid[] userIds);
+        void CreateInvationRule(Room room, ICollection<Guid> userIds);
 
-        Task AddAdminRole(ApplicationUser user, Room room);
+        void AddAdminRole(ApplicationUser user, Room room);
         IQueryable<Room> AccessedRooms(IQueryable<Room> rooms, Guid userId);
 
         bool CanDelete(ApplicationUser user, Room room);
 
         bool CanJoin(ApplicationUser user, Room room);
-
-        void ClearRoles(Room room);
     }
 }

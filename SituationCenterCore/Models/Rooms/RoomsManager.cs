@@ -10,6 +10,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 using SituationCenter.Shared.Models.Rooms;
 using SituationCenterCore.Services.Interfaces;
 
@@ -17,22 +19,25 @@ namespace SituationCenterCore.Models.Rooms
 {
     public class RoomsManager : IRoomManager
     {
-        private ILogger<RoomsManager> logger;
-        private ApplicationDbContext dataBase;
+        private readonly ILogger<RoomsManager> logger;
+        private readonly ApplicationDbContext dataBase;
         private readonly IRoomSecurityManager roomSecyrityManager;
         private readonly IFileServerNotifier fileServerNotifier;
+        private readonly IMapper mapper;
 
         public RoomsManager(
             ILogger<RoomsManager> logger,
             ApplicationDbContext dataBase,
             IRoomSecurityManager roomSecyrityManager,
-            IFileServerNotifier fileServerNotifier)
+            IFileServerNotifier fileServerNotifier,
+            IMapper mapper)
 
         {
             this.logger = logger;
             this.dataBase = dataBase;
             this.roomSecyrityManager = roomSecyrityManager;
             this.fileServerNotifier = fileServerNotifier;
+            this.mapper = mapper;
         }
 
         public async Task<Room> CreateNewRoom(Guid createrId, CreateRoomRequest createRoomInfo)
@@ -40,17 +45,14 @@ namespace SituationCenterCore.Models.Rooms
             if (createRoomInfo.Name.Length > 32)
                 throw new StatusCodeException(StatusCode.TooLongRoomName);
             var creater = await dataBase.Users
-                .Include(U => U.Room)
-                .FirstOrDefaultAsync(U => U.Id == createrId)
+                .Include(u => u.Room)
+                .FirstOrDefaultAsync(u => u.Id == createrId)
                 ?? throw new Exception("Не существует запрашиваемого пользователя");
 
             await CheckCreatingRoomParams(createRoomInfo, creater);
 
-            var newRoom = new Room()
-            {
-                Name = createRoomInfo.Name,
-                PeopleCountLimit = createRoomInfo.UsersCountMax
-            };
+            var newRoom = mapper.Map<Room>(createRoomInfo);
+
             switch (createRoomInfo.PrivacyType)
             {
                 case PrivacyRoomType.Public:
@@ -63,23 +65,19 @@ namespace SituationCenterCore.Models.Rooms
                     break;
 
                 case PrivacyRoomType.InvationPrivate:
-                    var phoneNumbers = createRoomInfo.Phones
-                        .Append(creater.PhoneNumber)
-                        .Distinct()
-                        .ToArray();
                     var userIds = await dataBase
                         .Users
-                        .Where(U => phoneNumbers.Contains(U.PhoneNumber))
-                        .Select(U => U.Id)
-                        .ToArrayAsync();
+                        .Where(u => createRoomInfo.InviteUsers.Contains(u.Id))
+                        .Select(u => u.Id)
+                        .ToListAsync();
                     roomSecyrityManager.CreateInvationRule(newRoom, userIds);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(createRoomInfo.PrivacyType));
             }
+            roomSecyrityManager.AddAdminRole(creater, newRoom);
+            creater.Room = newRoom;
             dataBase.Add(newRoom);
-            await roomSecyrityManager.AddAdminRole(creater, newRoom);
-            creater.RoomId = newRoom.Id;
             await dataBase.SaveChangesAsync();
             await fileServerNotifier.SetRoom(createrId, newRoom.Id);
             return newRoom;
@@ -116,25 +114,26 @@ namespace SituationCenterCore.Models.Rooms
 
         public Task<Room> FindRoom(Guid roomId)
             => dataBase.Rooms
-                .Include(R => R.Users)
-                .Include(R => R.SecurityRule)
-                .SingleOrDefaultAsync(R => R.Id == roomId);
+                .Include(r => r.Users)
+                    .ThenInclude(u => u.UserRoomRole)
+                .Include(r => r.SecurityRule)
+                .SingleOrDefaultAsync(r => r.Id == roomId);
 
 
         public async Task LeaveFromRoom(Guid userId)
         {
-            var user = await dataBase.Users.FirstOrDefaultAsync(U => U.Id == userId);
+            var user = await dataBase.Users.FirstOrDefaultAsync(u => u.Id == userId);
             user.RoomId = null;
             await dataBase.SaveChangesAsync();
             await fileServerNotifier.SetRoom(userId, null);
         }
-
         public async Task DeleteRoom(Guid userId, Guid roomId)
         {
             var room = await FindRoom(roomId) ?? throw new StatusCodeException(StatusCode.DontExistRoom);
-            var user = room.Users.FirstOrDefault(U => U.Id == userId);
-            if (user == null)
-                user = await dataBase.Users.FirstOrDefaultAsync(U => U.Id == userId);
+            var user = room.Users.FirstOrDefault(u => u.Id == userId) ?? await dataBase
+                           .Users
+                           .Include(u => u.UserRoomRole)
+                           .FirstOrDefaultAsync(u => u.Id == userId);
 
             if (user == null)
                 throw new Exception("Нет пользователя с указанным Id");
@@ -146,8 +145,7 @@ namespace SituationCenterCore.Models.Rooms
                 person.RoomId = null;
                 await fileServerNotifier.SetRoom(person.Id, null);
             }
-
-            roomSecyrityManager.ClearRoles(room);
+            
             dataBase.Rooms.Remove(room);
             await dataBase.SaveChangesAsync();
             dataBase.Rules.Remove(room.SecurityRule);
@@ -159,39 +157,23 @@ namespace SituationCenterCore.Models.Rooms
 
         private ApplicationUser FindUser(Guid userId)
         {
-            return dataBase.Users.FirstOrDefault(U => U.Id == userId);
+            return dataBase.Users.FirstOrDefault(u => u.Id == userId);
         }
 
-        private async Task CheckCreatingRoomParams(CreateRoomRequest createRoomInfo, ApplicationUser creater)
+        private Task CheckCreatingRoomParams(CreateRoomRequest createRoomInfo, ApplicationUser creater)
         {
             var errorcodes = new List<StatusCode>();
-
-            //TODO Искать только в видимых для пользователя комнатах
-            if (await dataBase.Rooms.AnyAsync(R => R.Name == createRoomInfo.Name))
-                errorcodes.Add(StatusCode.RoomNameBusy);
 
             if (creater.RoomId != null)
                 errorcodes.Add(StatusCode.PersonInRoomAtAWrongTime);
 
-            try { createRoomInfo.UsersCountMax = PeopleCount(createRoomInfo.UsersCountMax); }
-            catch (StatusCodeException ex) { errorcodes.Add(ex.StatusCode); }
-            catch { throw; }
-
             switch (errorcodes.Count)
             {
-                case 0: return;
+                case 0: return Task.CompletedTask;
                 case 1: throw new StatusCodeException(errorcodes[0]);
                 default:
                     throw new MultiStatusCodeException(errorcodes);
             }
-        }
-
-        private int PeopleCount(int peopleCount)
-        {
-            if (peopleCount <= 0) return 8;
-            if (peopleCount > 8 || peopleCount == 1)
-                throw new StatusCodeException(StatusCode.MaxPeopleCountInRoomIncorrect);
-            return peopleCount;
         }
 
         public async Task InviteUsersByPhoneToRoom(Guid currentRoomId, List<string> phones)
@@ -199,7 +181,7 @@ namespace SituationCenterCore.Models.Rooms
             var rule = (await dataBase.Rooms.Include(r => r.SecurityRule).FirstOrDefaultAsync(Room => Room.Id == currentRoomId))?.SecurityRule;
             if (rule?.PrivacyRule != PrivacyRoomType.InvationPrivate)
                 throw new StatusCodeException(StatusCode.IncrorrecrTargetRoomType);
-            rule.Data = string.Join('\n', rule.Data
+            rule.Password = string.Join('\n', rule.Password
                 .Split('\n')
                 .Select(Guid.Parse)
                 .Union(dataBase

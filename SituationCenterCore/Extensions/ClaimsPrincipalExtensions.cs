@@ -15,12 +15,12 @@ namespace SituationCenterCore.Extensions
                 return guid;
             throw new Exception();
         }
-        public static Guid RefreshTokenId(this ClaimsPrincipal principal)
+        public static Guid? RefreshTokenId(this ClaimsPrincipal principal)
         {
             var result = principal.Claims.SingleOrDefault(c => c.Type == "RefreshTokenId")?.Value;
             if (Guid.TryParse(result, out var guid))
                 return guid;
-            throw new Exception();
+            return null;
         }
     }
 }

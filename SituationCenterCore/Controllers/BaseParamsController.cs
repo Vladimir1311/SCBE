@@ -12,7 +12,7 @@ namespace SituationCenterCore.Controllers
     public class BaseParamsController : Controller
     {
         protected Guid UserId => User.Id();
-        protected Guid RefreshTokenId => User.RefreshTokenId();
+        protected Guid? RefreshTokenId => User.RefreshTokenId();
         protected string UserAgent =>
             Request.Headers.TryGetValue("User-Agent", out var uAgent) ? uAgent.ToString() : "No User Agent";
 

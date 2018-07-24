@@ -1,6 +1,7 @@
 ﻿using SituationCenterCore.Data;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace SituationCenterCore.Models.Rooms.Security
 {
@@ -14,7 +15,7 @@ namespace SituationCenterCore.Models.Rooms.Security
 
         void CreateInvationRule(Room room, Guid[] userIds);
 
-        void AddAdminRole(ApplicationUser user, Room room);
+        Task AddAdminRole(ApplicationUser user, Room room);
 
         bool CanDelete(ApplicationUser user, Room room);
 

@@ -19,6 +19,8 @@ namespace SituationCenterCore.Data
         public bool Sex { get; set; }
 
         public List<RefreshToken> RefreshTokens { get; set; }
+        public List<UserRoomInvite> Invites { get; set; } = new List<UserRoomInvite>();
+
 
         public override bool Equals(object obj)
         {

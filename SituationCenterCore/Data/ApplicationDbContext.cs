@@ -24,6 +24,19 @@ namespace SituationCenterCore.Data
             // Customize the ASP.NET Identity model and override the defaults if needed.
             // For example, you can rename the ASP.NET Identity table names and more.
             // Add your customizations after calling base.OnModelCreating(builder);
+            builder.Entity<UserRoomInvite>()
+                   .HasKey(uri => new { uri.RoomId, uri.UserId });
+
+            builder.Entity<UserRoomInvite>()
+                   .HasOne(uri => uri.Room)
+                   .WithMany(r => r.Invites)
+                   .HasForeignKey(uri => uri.RoomId);
+
+            builder.Entity<UserRoomInvite>()
+                   .HasOne(uri => uri.User)
+                   .WithMany(u => u.Invites)
+                   .HasForeignKey(uri => uri.UserId);
+
         }
 
         public DbSet<RoomSecurityRule> Rules { get; set; }

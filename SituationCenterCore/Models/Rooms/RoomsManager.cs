@@ -35,16 +35,16 @@ namespace SituationCenterCore.Models.Rooms
             this.fileServerNotifier = fileServerNotifier;
         }
 
-        public Room CreateNewRoom(Guid createrId, CreateRoomRequest createRoomInfo)
+        public async Task<Room> CreateNewRoom(Guid createrId, CreateRoomRequest createRoomInfo)
         {
             if (createRoomInfo.Name.Length > 32)
                 throw new StatusCodeException(StatusCode.TooLongRoomName);
-            var creater = dataBase.Users
+            var creater = await dataBase.Users
                 .Include(U => U.Room)
-                .FirstOrDefault(U => U.Id == createrId)
+                .FirstOrDefaultAsync(U => U.Id == createrId)
                 ?? throw new Exception("Не существует запрашиваемого пользователя");
 
-            CheckCreatingRoomParams(createRoomInfo, creater);
+            await CheckCreatingRoomParams(createRoomInfo, creater);
 
             var newRoom = new Room()
             {
@@ -67,33 +67,24 @@ namespace SituationCenterCore.Models.Rooms
                         .Append(creater.PhoneNumber)
                         .Distinct()
                         .ToArray();
-                    var userIds = dataBase
+                    var userIds = await dataBase
                         .Users
                         .Where(U => phoneNumbers.Contains(U.PhoneNumber))
                         .Select(U => U.Id)
-                        .ToArray();
+                        .ToArrayAsync();
                     roomSecyrityManager.CreateInvationRule(newRoom, userIds);
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException();
+                    throw new ArgumentOutOfRangeException(nameof(createRoomInfo.PrivacyType));
             }
             dataBase.Add(newRoom);
-            roomSecyrityManager.AddAdminRole(creater, newRoom);
+            await roomSecyrityManager.AddAdminRole(creater, newRoom);
             creater.RoomId = newRoom.Id;
-            dataBase.SaveChanges();
-            //TODO Do async
-            fileServerNotifier.SetRoom(createrId, newRoom.Id).Wait();
+            await dataBase.SaveChangesAsync();
+            await fileServerNotifier.SetRoom(createrId, newRoom.Id);
             return newRoom;
         }
 
-        public IEnumerable<Room> FindRooms(Predicate<Room> func)
-        {
-            return dataBase.Rooms
-                .Include(R => R.SecurityRule)
-                .Include(R => R.Users)
-                .Where(R => func(R))
-                .ToList();
-        }
 
         public void JoinToRoom(Guid userId, Guid roomId, string securityData)
         {
@@ -167,18 +158,15 @@ namespace SituationCenterCore.Models.Rooms
             dataBase.SaveChanges();
         }
 
-        public IEnumerable<Room> Rooms(Guid userId)
+        public IQueryable<Room> Rooms(Guid userId)
         {
             var user = dataBase.Users.FirstOrDefault(U => U.Id == userId)
                 ?? throw new ApiArgumentException();
-            var allrooms = dataBase
+            return dataBase
                 .Rooms
                 .Include(R => R.Users)
                 .Include(R => R.SecurityRule)
-                .ToList();
-            return allrooms
-                .Where(R => roomSecyrityManager.CanJoin(user, R))
-                .ToArray();
+                .Where(R => roomSecyrityManager.CanJoin(user, R));
         }
 
         private ApplicationUser FindUser(Guid userId)
@@ -186,12 +174,12 @@ namespace SituationCenterCore.Models.Rooms
             return dataBase.Users.FirstOrDefault(U => U.Id == userId);
         }
 
-        private void CheckCreatingRoomParams(CreateRoomRequest createRoomInfo, ApplicationUser creater)
+        private async Task CheckCreatingRoomParams(CreateRoomRequest createRoomInfo, ApplicationUser creater)
         {
             var errorcodes = new List<StatusCode>();
 
             //TODO Искать только в видимых для пользователя комнатах
-            if (dataBase.Rooms.Any(R => R.Name == createRoomInfo.Name))
+            if (await dataBase.Rooms.AnyAsync(R => R.Name == createRoomInfo.Name))
                 errorcodes.Add(StatusCode.RoomNameBusy);
 
             if (creater.RoomId != null)

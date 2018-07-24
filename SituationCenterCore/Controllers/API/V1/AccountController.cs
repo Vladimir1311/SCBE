@@ -89,6 +89,8 @@ namespace SituationCenterCore.Controllers.API.V1
 
             if (user == null || !await repository.CheckUserPasswordAsync(user, model.Password))
                 throw new StatusCodeException(SituationCenter.Shared.Exceptions.StatusCode.AuthorizeError);
+
+            await SignOut();
             return await GenerateAll(user);
         }
 

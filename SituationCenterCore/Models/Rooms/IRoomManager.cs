@@ -2,24 +2,23 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace SituationCenterCore.Models.Rooms
 {
     public interface IRoomManager
     {
-        Room CreateNewRoom(Guid createrId, CreateRoomRequest createRoomInfo);
+        Task<Room> CreateNewRoom(Guid createrId, CreateRoomRequest createRoomInfo);
 
-        void JoinToRoom(Guid userId, Guid roomId, string securityData);
+        Task JoinToRoom(Guid userId, Guid roomId, string securityData);
 
-        void LeaveFromRoom(Guid UserId);
+        Task LeaveFromRoom(Guid UserId);
 
-        IEnumerable<Room> Rooms(Guid userId);
+        Task<IQueryable<Room>> Rooms(Guid userId);
 
-        IEnumerable<Room> FindRooms(Predicate<Room> func);
+        Task<Room> FindRoom(Guid roomId);
 
-        Room FindRoom(Guid roomId);
-
-        void DeleteRoom(Guid userId, Guid roomId);
+        Task DeleteRoom(Guid userId, Guid roomId);
         Task InviteUsersByPhoneToRoom(Guid currentRoomId, List<string> phones);
     }
 }

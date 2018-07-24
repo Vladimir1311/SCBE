@@ -8,6 +8,7 @@ using SituationCenterCore.Data.DatabaseAbstraction;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace SituationCenterCore.Models.Rooms.Security
 {
@@ -103,13 +104,13 @@ namespace SituationCenterCore.Models.Rooms.Security
             logger.LogDebug("success validated invite rule");
         }
 
-        public void AddAdminRole(ApplicationUser user, Room room)
+        public async Task AddAdminRole(ApplicationUser user, Room room)
         {
             var adminRole = roomRolesGenerator.GetAdministratorRole(room);
-            var createResult = repository.CreateRoleAsync(new IdentityRole<Guid>(adminRole)).Result;
+            var createResult = await repository.CreateRoleAsync(new IdentityRole<Guid>(adminRole));
             if (!createResult.Succeeded)
                 throw new Exception("Can't create role for room " + string.Join(" ", createResult.Errors.Select(E => $"{E.Code} {E.Description}")));
-            var addToRoleResult = repository.AddToRoleAsync(user, adminRole).Result;
+            var addToRoleResult = await repository.AddToRoleAsync(user, adminRole);
             if (!addToRoleResult.Succeeded)
                 throw new Exception("Can't add to room" + string.Join(" ", addToRoleResult.Errors.Select(E => $"{E.Code} {E.Description}")));
         }

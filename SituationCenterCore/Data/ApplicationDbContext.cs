@@ -18,30 +18,57 @@ namespace SituationCenterCore.Data
         {
         }
 
+        public DbSet<RoomSecurityRule> Rules { get; set; }
+        public DbSet<Room> Rooms { get; set; }
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
+        public DbSet<RemovedToken> RemovedTokens { get; set; }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
             // Customize the ASP.NET Identity model and override the defaults if needed.
             // For example, you can rename the ASP.NET Identity table names and more.
             // Add your customizations after calling base.OnModelCreating(builder);
+
+            ConfigureUserRoomInvite(builder);
+            ConfigureUserRoomRole(builder);
+        }
+
+        private void ConfigureUserRoomInvite(ModelBuilder builder)
+        {
             builder.Entity<UserRoomInvite>()
-                   .HasKey(uri => new { uri.RoomId, uri.UserId });
+                   .HasKey(uri => new { uri.RoomSecurityRuleId, uri.UserId });
 
             builder.Entity<UserRoomInvite>()
-                   .HasOne(uri => uri.Room)
+                   .HasOne(uri => uri.RoomSecurityRule)
                    .WithMany(r => r.Invites)
-                   .HasForeignKey(uri => uri.RoomId);
+                   .HasForeignKey(uri => uri.RoomSecurityRuleId);
 
             builder.Entity<UserRoomInvite>()
                    .HasOne(uri => uri.User)
                    .WithMany(u => u.Invites)
                    .HasForeignKey(uri => uri.UserId);
-
         }
 
-        public DbSet<RoomSecurityRule> Rules { get; set; }
-        public DbSet<Room> Rooms { get; set; }
-        public DbSet<RefreshToken> RefreshTokens { get; set; }
-        public DbSet<RemovedToken> RemovedTokens { get; set; }
+        private void ConfigureUserRoomRole(ModelBuilder builder)
+        {
+            builder.Entity<UserRoomRole>()
+                   .HasKey(urr => new { urr.RoomId, urr.UserId, urr.RoleId });
+
+            builder.Entity<UserRoomRole>()
+                   .HasOne(urr => urr.User)
+                   .WithOne(u => u.UserRoomRole);
+
+            builder.Entity<UserRoomRole>()
+                   .HasOne(urr => urr.Role)
+                   .WithMany(r => r.UserRoomRoles)
+                   .HasForeignKey(urr => urr.RoleId);
+
+            builder.Entity<UserRoomRole>()
+                   .HasOne(urr => urr.Room)
+                   .WithMany(r => r.UserRoomRoles)
+                   .HasForeignKey(urr => urr.RoomId);
+
+        }
     }
 }

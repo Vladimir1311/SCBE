@@ -15,7 +15,8 @@ namespace SituationCenterCore.Models.Rooms
         public Guid RoomSecurityRuleId { get; set; }
         public RoomSecurityRule SecurityRule { get; set; }
         public List<ApplicationUser> Users { get; set; } = new List<ApplicationUser>();
-        public List<UserRoomInvite> Invites { get; set; } = new List<UserRoomInvite>();
+        public List<UserRoomRole> UserRoomRoles { get; set; }
+
         public DateTime TimeOut { get; set; }
     }
 }

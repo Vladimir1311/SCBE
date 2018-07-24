@@ -86,20 +86,20 @@ namespace SituationCenterCore.Models.Rooms
         }
 
 
-        public void JoinToRoom(Guid userId, Guid roomId, string securityData)
+        public async Task JoinToRoom(Guid userId, Guid roomId, string securityData)
         {
-            var user = dataBase.Users
+            var user = await dataBase.Users
                 .Include(U => U.Room)
-                .FirstOrDefault(U => U.Id == userId)
+                .FirstOrDefaultAsync(U => U.Id == userId)
                 ?? throw new ApiArgumentException($"not user with id {userId}");
 
             if (user.RoomId != null)
                 throw new StatusCodeException(StatusCode.PersonInRoomAtAWrongTime);
 
-            var calledRoom = dataBase
+            var calledRoom = await dataBase
                 .Rooms
                 .Include(R => R.Users)
-                .FirstOrDefault(R => R.Id == roomId)
+                .FirstOrDefaultAsync(R => R.Id == roomId)
                 ?? throw new StatusCodeException(StatusCode.DontExistRoom);
 
             if (calledRoom.Users.Count == calledRoom.PeopleCountLimit)
@@ -109,34 +109,32 @@ namespace SituationCenterCore.Models.Rooms
             roomSecyrityManager.Validate(user, calledRoom, securityData);
             logger.LogDebug("Validated user");
             user.RoomId = calledRoom.Id;
-            dataBase.SaveChanges();
-            //TODO Do async
-            fileServerNotifier.SetRoom(userId, roomId).Wait();
+            await dataBase.SaveChangesAsync();
+
+            await fileServerNotifier.SetRoom(userId, roomId);
         }
 
-        public Room FindRoom(Guid roomId)
-        {
-            var room = dataBase.Rooms
+        public Task<Room> FindRoom(Guid roomId)
+            => dataBase.Rooms
                 .Include(R => R.Users)
                 .Include(R => R.SecurityRule)
-                .FirstOrDefault(R => R.Id == roomId);
-            return room;
-        }
+                .SingleOrDefaultAsync(R => R.Id == roomId);
 
-        public void LeaveFromRoom(Guid userId)
+
+        public async Task LeaveFromRoom(Guid userId)
         {
-            var user = dataBase.Users.FirstOrDefault(U => U.Id == userId);
+            var user = await dataBase.Users.FirstOrDefaultAsync(U => U.Id == userId);
             user.RoomId = null;
-            dataBase.SaveChanges();
-            fileServerNotifier.SetRoom(userId, null).Wait();
+            await dataBase.SaveChangesAsync();
+            await fileServerNotifier.SetRoom(userId, null);
         }
 
-        public void DeleteRoom(Guid userId, Guid roomId)
+        public async Task DeleteRoom(Guid userId, Guid roomId)
         {
-            var room = FindRoom(roomId) ?? throw new StatusCodeException(StatusCode.DontExistRoom);
+            var room = await FindRoom(roomId) ?? throw new StatusCodeException(StatusCode.DontExistRoom);
             var user = room.Users.FirstOrDefault(U => U.Id == userId);
             if (user == null)
-                user = dataBase.Users.FirstOrDefault(U => U.Id == userId);
+                user = await dataBase.Users.FirstOrDefaultAsync(U => U.Id == userId);
 
             if (user == null)
                 throw new Exception("Нет пользователя с указанным Id");
@@ -146,28 +144,18 @@ namespace SituationCenterCore.Models.Rooms
             foreach (var person in room.Users)
             {
                 person.RoomId = null;
-                fileServerNotifier.SetRoom(person.Id, null).Wait();
+                await fileServerNotifier.SetRoom(person.Id, null);
             }
 
-            //TODO Проанализировать EF, слишком много запросов SaveChanges
-            dataBase.SaveChanges();
             roomSecyrityManager.ClearRoles(room);
             dataBase.Rooms.Remove(room);
-            dataBase.SaveChanges();
+            await dataBase.SaveChangesAsync();
             dataBase.Rules.Remove(room.SecurityRule);
-            dataBase.SaveChanges();
+            await dataBase.SaveChangesAsync();
         }
 
         public IQueryable<Room> Rooms(Guid userId)
-        {
-            var user = dataBase.Users.FirstOrDefault(U => U.Id == userId)
-                ?? throw new ApiArgumentException();
-            return dataBase
-                .Rooms
-                .Include(R => R.Users)
-                .Include(R => R.SecurityRule)
-                .Where(R => roomSecyrityManager.CanJoin(user, R));
-        }
+         => roomSecyrityManager.AccessedRooms(dataBase.Rooms, userId);
 
         private ApplicationUser FindUser(Guid userId)
         {

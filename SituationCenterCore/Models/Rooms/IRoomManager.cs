@@ -14,7 +14,7 @@ namespace SituationCenterCore.Models.Rooms
 
         Task LeaveFromRoom(Guid UserId);
 
-        Task<IQueryable<Room>> Rooms(Guid userId);
+        IQueryable<Room> Rooms(Guid userId);
 
         Task<Room> FindRoom(Guid roomId);
 

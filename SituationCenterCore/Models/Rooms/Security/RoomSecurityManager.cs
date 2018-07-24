@@ -67,7 +67,7 @@ namespace SituationCenterCore.Models.Rooms.Security
         public void Validate(ApplicationUser user, Room room, string data)
         {
             logger.LogDebug($"user {user.Email} try to join room {room.Id}, with {data}");
-            var rule = room.SecurityRule ?? repository.GetRuleAsync(room.RoomSecurityRuleId).Result;
+            var rule = room.SecurityRule;
             logger.LogDebug($"room {room.Id} have privacy rule {rule.PrivacyRule}");
             switch (rule.PrivacyRule)
             {
@@ -119,8 +119,7 @@ namespace SituationCenterCore.Models.Rooms.Security
         {
             var adminRole = roomRolesGenerator.GetAdministratorRole(room);
             return repository.IsInRoleAsync(user, adminRole).Result
-                || repository.IsInRoleAsync(user, "Administrator").Result
-                ;
+                || repository.IsInRoleAsync(user, "Administrator").Result;
         }
 
         public void ClearRoles(Room room)
@@ -144,6 +143,14 @@ namespace SituationCenterCore.Models.Rooms.Security
                 return false;
             }
             return true;
+        }
+
+        public IQueryable<Room> AccessedRooms(IQueryable<Room> rooms, Guid userId)
+        {
+            return rooms
+                .Where(r => r.SecurityRule.PrivacyRule == PrivacyRoomType.InvationPrivate)
+                .Where(r => r.SecurityRule.Invites.Any(inv => inv.UserId == userId))
+                .Concat(rooms.Where(r => r.SecurityRule.PrivacyRule != PrivacyRoomType.InvationPrivate));
         }
     }
 }

@@ -53,35 +53,35 @@ namespace SituationCenterCore.Controllers.API.V1
         }
 
         [HttpPost]
-        public OneObjectResponse<Guid> Create([FromBody] CreateRoomRequest info)
+        public async Task<OneObjectResponse<Guid>> CreateAsync([FromBody] CreateRoomRequest info)
         {
-            var room = roomsManager.CreateNewRoom(repository.GetUserId(User), info);
+            var room = await roomsManager.CreateNewRoom(repository.GetUserId(User), info);
             return room.Id;
         }
 
-        public ResponseBase Join(Guid roomId, string data = null)
+        public async Task<ResponseBase> JoinAsync(Guid roomId, string data = null)
         {
-            roomsManager.JoinToRoom(repository.GetUserId(User), roomId, data);
+            await roomsManager.JoinToRoom(repository.GetUserId(User), roomId, data);
             return ResponseBase.OKResponse;
         }
 
-        public ResponseBase Leave()
+        public async Task<ResponseBase> LeaveAsync()
         {
             var userId = repository.GetUserId(User);
-            roomsManager.LeaveFromRoom(userId);
+            await roomsManager.LeaveFromRoom(userId);
             return ResponseBase.OKResponse;
         }
 
-        public ResponseBase Delete(Guid roomId)
+        public async Task<ResponseBase> DeleteAsync(Guid roomId)
         {
             var userId = repository.GetUserId(User);
-            roomsManager.DeleteRoom(userId, roomId);
+            await roomsManager.DeleteRoom(userId, roomId);
             return ResponseBase.OKResponse;
         }
 
-        public OneObjectResponse<RoomView> Info(Guid roomId)
+        public async Task<OneObjectResponse<RoomView>> InfoAsync(Guid roomId)
         {
-            var room = roomsManager.FindRoom(roomId) ??
+            var room = await roomsManager.FindRoom(roomId) ??
                        throw new StatusCodeException(Exceptions.StatusCode.DontExistRoom);
             return mapper.Map<RoomView>(room);
         }
@@ -89,7 +89,7 @@ namespace SituationCenterCore.Controllers.API.V1
         public async Task<OneObjectResponse<RoomView>> Current()
         {
             var user = await repository.FindUser(User);
-            var room = roomsManager.FindRoom(user.RoomId ?? Guid.Empty) ??
+            var room = await roomsManager.FindRoom(user.RoomId ?? Guid.Empty) ??
                        throw new StatusCodeException(Exceptions.StatusCode.YouAreNotInRoom);
             return mapper.Map<RoomView>(room);
         }

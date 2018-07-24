@@ -1,5 +1,6 @@
 ﻿using System;
 using SituationCenterCore.Data;
+using SituationCenterCore.Models.Rooms.Security;
 namespace SituationCenterCore.Models.Rooms
 {
     public class UserRoomInvite
@@ -9,7 +10,7 @@ namespace SituationCenterCore.Models.Rooms
         public Guid UserId { get; set; }
         public ApplicationUser User { get; set; }
 
-        public Guid RoomId { get; set; }
-        public Room Room { get; set; }
+        public Guid RoomSecurityRuleId { get; set; }
+        public RoomSecurityRule RoomSecurityRule { get; set; }
     }
 }

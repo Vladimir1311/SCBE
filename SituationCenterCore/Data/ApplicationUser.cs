@@ -3,6 +3,7 @@ using SituationCenterCore.Models.Rooms;
 using System;
 using System.Collections.Generic;
 using SituationCenterCore.Models.TokenAuthModels;
+using SituationCenterCore.Models.Rooms.Security;
 
 namespace SituationCenterCore.Data
 {
@@ -11,6 +12,8 @@ namespace SituationCenterCore.Data
     {
         public Guid? RoomId { get; set; }
         public Room Room { get; set; }
+        public Guid? UserRoomRoleId { get; set; }
+        public UserRoomRole UserRoomRole { get; set; }
 
         public string Name { get; set; }
         public string Surname { get; set; }

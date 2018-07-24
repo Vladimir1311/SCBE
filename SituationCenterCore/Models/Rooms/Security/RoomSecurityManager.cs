@@ -140,7 +140,8 @@ namespace SituationCenterCore.Models.Rooms.Security
             return rooms
                 .Where(r => r.SecurityRule.PrivacyRule == PrivacyRoomType.InvationPrivate)
                 .Where(r => r.SecurityRule.Invites.Any(inv => inv.UserId == userId))
-                .Concat(rooms.Where(r => r.SecurityRule.PrivacyRule != PrivacyRoomType.InvationPrivate));
+                .Concat(rooms.Where(r => r.SecurityRule.PrivacyRule != PrivacyRoomType.InvationPrivate))
+                .Concat(rooms.Where(r => r.Users.Any(u => u.Id == userId)));
         }
     }
 }

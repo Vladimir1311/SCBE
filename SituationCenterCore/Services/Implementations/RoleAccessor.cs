@@ -13,6 +13,7 @@ namespace SituationCenterCore.Services.Implementations
     {
         private readonly IServiceProvider serviceProvider;
         private const string AdministratorRoleName = "Administrator";
+        private const string InvitedRoleName = "Administrator";
         private ApplicationDbContext dbContext;
 
         public RoleAccessor(IServiceProvider serviceProvider)
@@ -21,7 +22,11 @@ namespace SituationCenterCore.Services.Implementations
         }
 
         private static Guid? adminId;
+        private static Guid? invitedId;
         public Guid AnministratorId => adminId ?? (adminId = GetRoleId(AdministratorRoleName)).Value;
+
+        public Guid InvitedId => invitedId ?? (invitedId = GetRoleId(InvitedRoleName)).Value;
+
         public void SetDbContext(ApplicationDbContext context)
         {
             this.dbContext = context;
@@ -34,7 +39,7 @@ namespace SituationCenterCore.Services.Implementations
             return inDb ?? CreateRole(AdministratorRoleName, dbContext);
         }
 
-        private Guid CreateRole(string roleName, ApplicationDbContext dbContext)
+        private static Guid CreateRole(string roleName, ApplicationDbContext dbContext)
         {
             var role = new Role(roleName);
             dbContext.Roles.Add(role);

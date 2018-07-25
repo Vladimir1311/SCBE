@@ -12,8 +12,7 @@ namespace SituationCenterCore.Data
     {
         public Guid? RoomId { get; set; }
         public Room Room { get; set; }
-        public Guid? UserRoomRoleId { get; set; }
-        public UserRoomRole UserRoomRole { get; set; }
+        public List<UserRoomRole> UserRoomRoles { get; set; }
 
         public string Name { get; set; }
         public string Surname { get; set; }
@@ -22,8 +21,6 @@ namespace SituationCenterCore.Data
         public bool Sex { get; set; }
 
         public List<RefreshToken> RefreshTokens { get; set; }
-        public List<UserRoomInvite> Invites { get; set; } = new List<UserRoomInvite>();
-
 
         public override bool Equals(object obj)
         {

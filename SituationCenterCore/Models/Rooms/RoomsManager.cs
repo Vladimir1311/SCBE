@@ -65,12 +65,11 @@ namespace SituationCenterCore.Models.Rooms
                     break;
 
                 case PrivacyRoomType.InvationPrivate:
-                    var userIds = await dataBase
+                    var users = await dataBase
                         .Users
                         .Where(u => createRoomInfo.InviteUsers.Contains(u.Id))
-                        .Select(u => u.Id)
                         .ToListAsync();
-                    roomSecyrityManager.CreateInvationRule(newRoom, userIds);
+                    roomSecyrityManager.CreateInvationRule(newRoom, users);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(createRoomInfo.PrivacyType));
@@ -115,7 +114,7 @@ namespace SituationCenterCore.Models.Rooms
         public Task<Room> FindRoom(Guid roomId)
             => dataBase.Rooms
                 .Include(r => r.Users)
-                    .ThenInclude(u => u.UserRoomRole)
+                    .ThenInclude(u => u.UserRoomRoles)
                 .Include(r => r.SecurityRule)
                 .SingleOrDefaultAsync(r => r.Id == roomId);
 
@@ -132,7 +131,7 @@ namespace SituationCenterCore.Models.Rooms
             var room = await FindRoom(roomId) ?? throw new StatusCodeException(StatusCode.DontExistRoom);
             var user = room.Users.FirstOrDefault(u => u.Id == userId) ?? await dataBase
                            .Users
-                           .Include(u => u.UserRoomRole)
+                           .Include(u => u.UserRoomRoles)
                            .FirstOrDefaultAsync(u => u.Id == userId);
 
             if (user == null)

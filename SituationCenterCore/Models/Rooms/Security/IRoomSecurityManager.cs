@@ -14,7 +14,7 @@ namespace SituationCenterCore.Models.Rooms.Security
 
         void CreatePasswordRule(Room room, string pasword);
 
-        void CreateInvationRule(Room room, ICollection<Guid> userIds);
+        void CreateInvationRule(Room room, ICollection<ApplicationUser> userIds);
 
         void AddAdminRole(ApplicationUser user, Room room);
         IQueryable<Room> AccessedRooms(IQueryable<Room> rooms, Guid userId);

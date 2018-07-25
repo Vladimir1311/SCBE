@@ -14,12 +14,9 @@ namespace SituationCenterCore.DataFormatting.Mappings
         public RoomMappingProfile()
         {
             CreateMap<Room, RoomView>()
-                .ForMember(rv => rv.MaxPeopleCount, map => map.MapFrom(r => r.PeopleCountLimit))
                 .ForMember(rv => rv.PrivacyType, map => map.MapFrom(r => r.SecurityRule.PrivacyRule));
 
             CreateMap<CreateRoomRequest, Room>();
-            CreateMap<Guid, UserRoomInvite>()
-                .ForMember(uri => uri.UserId, map => map.MapFrom(g => g));
         }
     }
 }

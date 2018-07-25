@@ -11,6 +11,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using SituationCenterCore.Services.Interfaces;
+using Microsoft.EntityFrameworkCore.Internal;
 
 namespace SituationCenterCore.Models.Rooms.Security
 {
@@ -30,17 +31,23 @@ namespace SituationCenterCore.Models.Rooms.Security
             this.roleAccessor = roleAccessor;
         }
 
-        public void CreateInvationRule(Room room, ICollection<Guid> usersIds)
+        public void CreateInvationRule(Room room, ICollection<ApplicationUser> users)
         {
             logger.LogDebug($"creating invation rule");
-            if ((usersIds?.Count ?? 0) == 0)
+            if ((users?.Count ?? 0) == 0)
                 throw new StatusCodeException(StatusCode.EmptyInvationRoom);
             var inviteRule = new RoomSecurityRule
             {
-                PrivacyRule = PrivacyRoomType.InvationPrivate,
-                Invites = usersIds.Select(g => mapper.Map<UserRoomInvite>(g)).ToList()
+                PrivacyRule = PrivacyRoomType.InvationPrivate
             };
-
+            foreach (var user in users)
+            {
+                user.UserRoomRoles.Add(new UserRoomRole
+                {
+                    UserId = user.Id,
+                    RoleId = roleAccessor.InvitedId
+                });
+            }
             room.SecurityRule = inviteRule;
         }
 
@@ -82,7 +89,7 @@ namespace SituationCenterCore.Models.Rooms.Security
                     break;
 
                 case PrivacyRoomType.InvationPrivate:
-                    ValidateInvation(rule, user);
+                    ValidateInvation(room, user);
                     break;
 
                 default:
@@ -99,10 +106,10 @@ namespace SituationCenterCore.Models.Rooms.Security
             logger.LogDebug($"success validated password");
         }
 
-        private void ValidateInvation(RoomSecurityRule rule, ApplicationUser user)
+        private void ValidateInvation(Room room, ApplicationUser user)
         {
             logger.LogDebug("validating invite rule");
-            if (rule.Invites.Any(uri => uri.UserId == user.Id))
+            if (room.UserRoomRoles.Any(urr => urr.UserId == user.Id))
                 logger.LogDebug("success validated invite rule");
             else
                 throw new StatusCodeException(StatusCode.AccessDenied);
@@ -110,15 +117,17 @@ namespace SituationCenterCore.Models.Rooms.Security
 
         public void AddAdminRole(ApplicationUser user, Room room)
         {
-            user.UserRoomRole = new UserRoomRole
+            user.UserRoomRoles.Add(new UserRoomRole
             {
                 Room = room,
                 RoleId = roleAccessor.AnministratorId
-            };
+            });
         }
 
         public bool CanDelete(ApplicationUser user, Room room)
-            => user.UserRoomRole.RoleId == roleAccessor.AnministratorId;
+            => user
+            .UserRoomRoles
+            .Any(urr => urr.RoomId == room.Id && urr.RoleId == roleAccessor.AnministratorId);
 
         public bool CanJoin(ApplicationUser user, Room room)
         {
@@ -126,7 +135,7 @@ namespace SituationCenterCore.Models.Rooms.Security
                 return true;
             try
             {
-                ValidateInvation(room.SecurityRule, user);
+                ValidateInvation(room, user);
             }
             catch
             {
@@ -138,10 +147,8 @@ namespace SituationCenterCore.Models.Rooms.Security
         public IQueryable<Room> AccessedRooms(IQueryable<Room> rooms, Guid userId)
         {
             return rooms
-                .Where(r => r.SecurityRule.PrivacyRule == PrivacyRoomType.InvationPrivate)
-                .Where(r => r.SecurityRule.Invites.Any(inv => inv.UserId == userId))
-                .Concat(rooms.Where(r => r.SecurityRule.PrivacyRule != PrivacyRoomType.InvationPrivate))
-                .Concat(rooms.Where(r => r.Users.Any(u => u.Id == userId)));
+                .Where(r => r.SecurityRule.PrivacyRule != PrivacyRoomType.InvationPrivate
+                       || r.UserRoomRoles.Any(role => role.RoleId == roleAccessor.InvitedId && role.UserId == userId));
         }
     }
 }

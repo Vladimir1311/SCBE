@@ -30,25 +30,9 @@ namespace SituationCenterCore.Data
             // For example, you can rename the ASP.NET Identity table names and more.
             // Add your customizations after calling base.OnModelCreating(builder);
 
-            ConfigureUserRoomInvite(builder);
             ConfigureUserRoomRole(builder);
         }
 
-        private void ConfigureUserRoomInvite(ModelBuilder builder)
-        {
-            builder.Entity<UserRoomInvite>()
-                   .HasKey(uri => new { uri.RoomSecurityRuleId, uri.UserId });
-
-            builder.Entity<UserRoomInvite>()
-                   .HasOne(uri => uri.RoomSecurityRule)
-                   .WithMany(r => r.Invites)
-                   .HasForeignKey(uri => uri.RoomSecurityRuleId);
-
-            builder.Entity<UserRoomInvite>()
-                   .HasOne(uri => uri.User)
-                   .WithMany(u => u.Invites)
-                   .HasForeignKey(uri => uri.UserId);
-        }
 
         private void ConfigureUserRoomRole(ModelBuilder builder)
         {
@@ -57,7 +41,8 @@ namespace SituationCenterCore.Data
 
             builder.Entity<UserRoomRole>()
                    .HasOne(urr => urr.User)
-                   .WithOne(u => u.UserRoomRole);
+                   .WithMany(u => u.UserRoomRoles)
+                   .HasForeignKey(urr => urr.UserId);
 
             builder.Entity<UserRoomRole>()
                    .HasOne(urr => urr.Role)

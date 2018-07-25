@@ -43,12 +43,14 @@ namespace SituationCenterCore.Controllers.API.V1
             this.mapper = mapper;
         }
 
-        public ListResponse<RoomView> List()
+        public ListResponse<RoomView> List(int pageNum = 0, int pageSize = 10)
         {
             var userId = repository.GetUserId(User);
             var roomsPresent = roomsManager
                 .Rooms(userId)
                 .ProjectTo<RoomView>()
+                .Skip(pageNum * pageSize)
+                .Take(pageSize)
                 .ToList();
             return roomsPresent;
         }

@@ -14,13 +14,16 @@ namespace SituationCenterCore.DataFormatting.Mappings
     {
         public UserMappingProfile()
         {
-            CreateMap<ApplicationUser, PersonView>();
+            CreateMap<ApplicationUser, PersonView>()
+                .ForMember(pv => pv.Roles, map => map.MapFrom(au => au.Rol));
             CreateMap<ApplicationUser, MeAndRoom>()
                 .ForMember(mar => mar.Me, map => map.MapFrom(u => u));
 
             CreateMap<RefreshToken, RefreshTokenView>();
             CreateMap<RefreshToken, RemovedToken>()
                 .ForMember(rt => rt.RemovedTokenId, map => map.MapFrom(rt => rt.Id));
+
+            CreateMap<Role, RoleView>();
         }
     }
 }

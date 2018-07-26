@@ -14,6 +14,7 @@ using SituationCenterCore.Models.Rooms;
 using SituationCenterCore.Models.Rooms.Security;
 using SituationCenterBackServer.Interfaces;
 using System;
+using System.Reflection;
 using AutoMapper;
 using SituationCenterCore.Middleware;
 using SituationCenterCore.Models.Settings;
@@ -64,6 +65,9 @@ namespace SituationCenterCore
             var jwtOptions = Configuration
                 .GetSection(nameof(JwtOptions))
                 .Get<JwtOptions>();
+            var jwtOptions2 = Configuration
+                .GetSection(nameof(ServiceBusSettings))
+                .Get<ServiceBusSettings>();
 
             services.AddAuthentication(options =>
                 {
@@ -110,9 +114,14 @@ namespace SituationCenterCore
             services.AddTransient<IWebSocketHandler, WebSocketHandler>();
             services.AddTransient<INotificator, WebSocketNotificator>();
             services.AddScoped<IRoleAccessor, RoleAccessor>();
-            services.AddAutoMapper();
+            services.AddAutoMapper(config => { }, Assembly.GetEntryAssembly());
             services.AddCors();
             services.AddHostedService<RefreshTokenRemover>();
+            services.AddDistributedRedisCache(options =>
+            {
+                options.InstanceName = "localhost";
+                options.Configuration = "127.0.0.1";
+            });
         }
 
 

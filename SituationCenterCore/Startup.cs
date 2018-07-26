@@ -26,6 +26,7 @@ using Microsoft.AspNetCore.Mvc.Authorization;
 using SituationCenterCore.Filters;
 using SituationCenterCore.Services.Implementations.RealTime;
 using SituationCenterCore.Services.Interfaces.RealTime;
+using SituationCenterCore.Services.HostedServices;
 
 namespace SituationCenterCore
 {
@@ -44,6 +45,7 @@ namespace SituationCenterCore
             AddDataBase(services);
 
             services.Configure<ServiceBusSettings>(Configuration.GetSection(nameof(ServiceBusSettings)));
+            services.Configure<JwtOptions>(Configuration.GetSection(nameof(JwtOptions)));
 
             services.AddTransient<IRepository, EntityRepository>();
             services.AddTransient<IRoomManager, RoomsManager>();
@@ -59,6 +61,9 @@ namespace SituationCenterCore
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
+            var jwtOptions = Configuration
+                .GetSection(nameof(JwtOptions))
+                .Get<JwtOptions>();
 
             services.AddAuthentication(options =>
                 {
@@ -71,16 +76,16 @@ namespace SituationCenterCore
                         options.TokenValidationParameters = new TokenValidationParameters
                         {
                             ValidateIssuer = true,
-                            ValidIssuer = MockAuthOptions.ISSUER,
+                            ValidIssuer = jwtOptions.Issuer,
 
                             ValidateAudience = true,
 
-                            ValidAudience = MockAuthOptions.AUDIENCE,
+                            ValidAudience = jwtOptions.Audience,
 
                             ValidateLifetime = true,
                             RequireExpirationTime = true,
 
-                            IssuerSigningKey = MockAuthOptions.GetSymmetricSecurityKey(),
+                            IssuerSigningKey = jwtOptions.GetSymmetricSecurityKey(),
 
                             ValidateIssuerSigningKey = true,
                             ClockSkew = TimeSpan.Zero
@@ -107,6 +112,7 @@ namespace SituationCenterCore
             services.AddScoped<IRoleAccessor, RoleAccessor>();
             services.AddAutoMapper();
             services.AddCors();
+            services.AddHostedService<RefreshTokenRemover>();
         }
 
 

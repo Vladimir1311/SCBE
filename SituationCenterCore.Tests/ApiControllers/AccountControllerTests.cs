@@ -52,17 +52,17 @@ namespace SituationCenterCore.Tests.ApiControllers
         }
 
 
-        private (Mock<IRepository>, AccountController, AuthOptions) GetDefalt()
+        private (Mock<IRepository>, AccountController, JwtOptions) GetDefalt()
         {
             var mock = new Mock<IRepository>();
-            var authOptions = new AuthOptions
+            var authOptions = new JwtOptions
             {
                 SecretKey = "Secure key",
                 Audience= "DemoAudience",
                 Issuer = "DemoIssuer",
                 Expiration = TimeSpan.FromMinutes(10)
             };
-            var options = new Option<AuthOptions>(authOptions);
+            var options = new Option<JwtOptions>(authOptions);
             return (mock, new AccountController(new EmptyLogger<AccountController>(), options, mock.Object), authOptions);
         }
     }

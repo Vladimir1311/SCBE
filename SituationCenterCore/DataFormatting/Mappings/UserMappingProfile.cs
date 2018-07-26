@@ -14,8 +14,8 @@ namespace SituationCenterCore.DataFormatting.Mappings
     {
         public UserMappingProfile()
         {
-            CreateMap<ApplicationUser, PersonView>()
-                .ForMember(pv => pv.Roles, map => map.MapFrom(au => au.Rol));
+            CreateMap<ApplicationUser, PersonView>();
+                //.ForMember(pv => pv.Roles, map => map.MapFrom(au => au.Rol));
             CreateMap<ApplicationUser, MeAndRoom>()
                 .ForMember(mar => mar.Me, map => map.MapFrom(u => u));
 

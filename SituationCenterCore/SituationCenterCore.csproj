@@ -46,6 +46,7 @@
   <ItemGroup>
     <Folder Include="Models\RealTime\" />
     <Folder Include="Models\RealTime\New Folder\" />
+    <Folder Include="Services\HostedServices\" />
   </ItemGroup>
   <ProjectExtensions>
     <VisualStudio><UserProperties appsettings_1json__JSONSchema="http://json.schemastore.org/component" appsettings_1Secret_1json__JSONSchema="appsettings.Secret.Schema.json" /></VisualStudio>

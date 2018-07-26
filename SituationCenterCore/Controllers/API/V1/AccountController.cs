@@ -35,11 +35,11 @@ namespace SituationCenterCore.Controllers.API.V1
         private readonly IRepository repository;
         private readonly ApplicationDbContext dbContext;
         private readonly IMapper mapper;
-        private readonly AuthOptions authOptions;
+        private readonly JwtOptions authOptions;
 
         public AccountController(
             ILogger<AccountController> logger,
-            IOptions<AuthOptions> option,
+            IOptions<JwtOptions> options,
             IRepository repository,
             ApplicationDbContext dbContext,
             IMapper mapper)
@@ -48,7 +48,7 @@ namespace SituationCenterCore.Controllers.API.V1
             this.repository = repository;
             this.dbContext = dbContext;
             this.mapper = mapper;
-            this.authOptions = option.Value;
+            this.authOptions = options.Value;
         }
 
         [HttpGet]
@@ -186,16 +186,17 @@ namespace SituationCenterCore.Controllers.API.V1
         }
 
 
-        private static string CreateAccessToken(Claim[] claims)
+        private string CreateAccessToken(Claim[] claims)
         {
             var now = DateTime.Now;
             var jwt = new JwtSecurityToken(
-                        issuer: MockAuthOptions.ISSUER,
-                        audience: MockAuthOptions.AUDIENCE,
+                        issuer: authOptions.Issuer,
+                        audience: authOptions.Audience,
                         notBefore: now,
                         claims: claims,
-                        expires: now.Add(TimeSpan.FromHours(3)),
-                        signingCredentials: new SigningCredentials(MockAuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
+                        expires: now.Add(authOptions.Expiration),
+                        signingCredentials: 
+                            new SigningCredentials(authOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
             return new JwtSecurityTokenHandler().WriteToken(jwt);
         }
 

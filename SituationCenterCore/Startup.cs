@@ -24,6 +24,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using SituationCenterCore.Filters;
+using SituationCenterCore.Hubs;
 using SituationCenterCore.Services.Implementations.RealTime;
 using SituationCenterCore.Services.Interfaces.RealTime;
 using SituationCenterCore.Services.HostedServices;
@@ -50,7 +51,7 @@ namespace SituationCenterCore
             services.AddTransient<IRepository, EntityRepository>();
             services.AddTransient<IRoomManager, RoomsManager>();
             services.AddTransient<IRoomSecurityManager, RoomSecurityManager>();
-            services.AddTransient<IFileServerNotifier, ServiceBusFileServerNotifier>();
+            services.AddTransient<ISharedUsersState, InMemorySharedUsersState>();
 
             services.AddIdentity<ApplicationUser, Role>(options =>
             {
@@ -113,6 +114,7 @@ namespace SituationCenterCore
             services.AddAutoMapper();
             services.AddCors();
             services.AddHostedService<RefreshTokenRemover>();
+            services.AddSignalR();
         }
 
 
@@ -145,7 +147,10 @@ namespace SituationCenterCore
             app.UseAuthentication();
             app.UseWebSockets();
             app.UseWebSocketMiddleware("/ws");
-
+            app.UseSignalR(routes =>
+            {
+                routes.MapHub<FileServerNotifierHub>("/scfsnotify");
+            });
             app.UseMvc(routes =>
             {
                 routes.MapRoute(

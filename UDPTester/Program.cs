@@ -1,6 +1,5 @@
 ﻿using Castle.DynamicProxy;
 using CCF;
-using DocsToPictures.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
@@ -9,6 +8,7 @@ using System.IO;
 using System.Net.Sockets;
 using System.Reflection;
 using System.Reflection.Emit;
+using Microsoft.AspNetCore.SignalR.Client;
 
 namespace UDPTester
 {
@@ -18,23 +18,17 @@ namespace UDPTester
         
         private static void Main(string[] args)
         {
-            var proccessor = new DocumentProcessor();
-        }
-
-        class N : INotifyer
-        {
-            public void Notify(string message)
+            var connection = new HubConnectionBuilder()
+                .WithUrl("https://localhost:5000/scfs")
+                .Build();
+            connection.StartAsync().Wait();
+            connection.On<Guid, string>("token", (uId, token) =>
             {
-                Console.WriteLine("THIS IS MESSAGE FROM SERVICE!");
-                Console.WriteLine(message);
-                Console.WriteLine("THIS IS MESSAGE FROM SERVICE!");
-                Console.WriteLine(message);
-                Console.WriteLine("THIS IS MESSAGE FROM SERVICE!");
-                Console.WriteLine(message);
-                Console.WriteLine("THIS IS MESSAGE FROM SERVICE!");
-                Console.WriteLine(message);
-            }
+                Console.WriteLine(uId);
+                Console.WriteLine(token);
+            });
         }
+        
 
     }
 }

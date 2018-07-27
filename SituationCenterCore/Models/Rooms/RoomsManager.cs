@@ -22,21 +22,21 @@ namespace SituationCenterCore.Models.Rooms
         private readonly ILogger<RoomsManager> logger;
         private readonly ApplicationDbContext dataBase;
         private readonly IRoomSecurityManager roomSecyrityManager;
-        private readonly IFileServerNotifier fileServerNotifier;
+        private readonly ISharedUsersState sharedUsersState;
         private readonly IMapper mapper;
 
         public RoomsManager(
             ILogger<RoomsManager> logger,
             ApplicationDbContext dataBase,
             IRoomSecurityManager roomSecyrityManager,
-            IFileServerNotifier fileServerNotifier,
+            ISharedUsersState sharedUsersState,
             IMapper mapper)
 
         {
             this.logger = logger;
             this.dataBase = dataBase;
             this.roomSecyrityManager = roomSecyrityManager;
-            this.fileServerNotifier = fileServerNotifier;
+            this.sharedUsersState = sharedUsersState;
             this.mapper = mapper;
         }
 
@@ -78,7 +78,7 @@ namespace SituationCenterCore.Models.Rooms
             creater.Room = newRoom;
             dataBase.Add(newRoom);
             await dataBase.SaveChangesAsync();
-            await fileServerNotifier.SetRoom(createrId, newRoom.Id);
+            await sharedUsersState.SetRoom(createrId, newRoom.Id);
             return newRoom;
         }
 
@@ -108,7 +108,7 @@ namespace SituationCenterCore.Models.Rooms
             user.RoomId = calledRoom.Id;
             await dataBase.SaveChangesAsync();
 
-            await fileServerNotifier.SetRoom(userId, roomId);
+            await sharedUsersState.SetRoom(userId, roomId);
         }
 
         public Task<Room> FindRoom(Guid roomId)
@@ -124,7 +124,7 @@ namespace SituationCenterCore.Models.Rooms
             var user = await dataBase.Users.FirstOrDefaultAsync(u => u.Id == userId);
             user.RoomId = null;
             await dataBase.SaveChangesAsync();
-            await fileServerNotifier.SetRoom(userId, null);
+            await sharedUsersState.SetRoom(userId, null);
         }
         public async Task DeleteRoom(Guid userId, Guid roomId)
         {
@@ -142,7 +142,7 @@ namespace SituationCenterCore.Models.Rooms
             foreach (var person in room.Users)
             {
                 person.RoomId = null;
-                await fileServerNotifier.SetRoom(person.Id, null);
+                await sharedUsersState.SetRoom(person.Id, null);
             }
             
             dataBase.Rooms.Remove(room);

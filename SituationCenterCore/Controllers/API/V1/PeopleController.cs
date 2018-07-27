@@ -29,16 +29,16 @@ namespace SSituationCenterCore.Controllers.API.V1
     public class PeopleController : BaseParamsController
     {
         private readonly IRepository repository;
-        private readonly IFileServerNotifier fileServerNotifier;
+        private readonly ISharedUsersState sharedUsersState;
         private readonly IMapper mapper;
 
         public PeopleController(
             IRepository repository,
-            IFileServerNotifier fileServerNotifier,
+            ISharedUsersState sharedUsersState,
             IMapper mapper)
         {
             this.repository = repository;
-            this.fileServerNotifier = fileServerNotifier;
+            this.sharedUsersState = sharedUsersState;
             this.mapper = mapper;
         }
 
@@ -52,8 +52,8 @@ namespace SSituationCenterCore.Controllers.API.V1
         {
             var token = "".Random(40);
             var user = await repository.FindUser(User);
-            await fileServerNotifier.AddToken(UserId, token);
-            await fileServerNotifier.SetRoom(UserId, user.RoomId);
+            await sharedUsersState.AddToken(UserId, token);
+            await sharedUsersState.SetRoom(UserId, user.RoomId);
             return token;
         }
 

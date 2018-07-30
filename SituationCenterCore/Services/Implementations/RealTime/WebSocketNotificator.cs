@@ -14,20 +14,11 @@ namespace SituationCenterCore.Services.Implementations.RealTime
             this.webSocketManager = webSocketManager;
         }
 
-        public Task Notify(string topic, object data)
-        {
-
-            var targets = webSocketManager
-                .ForTopic(topic).ToList();
-
-            return Task.WhenAll(webSocketManager
-                                .ForTopic(topic)
-                                .Select(wsh => wsh.Send(topic, data)));
-        }
-
         public Task Notify<T>(string topic, T data)
         {
-            throw new NotImplementedException();
+            return Task.WhenAll(webSocketManager
+                .ForTopic(topic)
+                .Select(wsh => wsh.Send(topic, data)));
         }
     }
 }

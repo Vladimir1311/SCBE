@@ -1,7 +1,7 @@
 ﻿using System;
 namespace SituationCenterCore.Models.RealTime
 {
-    public enum MessateType
+    public enum MessageType
     {
         AddTopic,
         RemoveTopic,

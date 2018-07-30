@@ -18,12 +18,12 @@ namespace SituationCenterCore.Services.Implementations.RealTime
     {
         private readonly IWebSocketManager webSocketManager;
         private readonly ILogger<WebSocketHandler> logger;
-        private Guid userId;
         private WebSocket webSocket;
 
         public event Action<string> TopicAdded;
         public event Action<string> TopicRemoved;
-        public Guid UserId => userId;
+        public event Action<Guid> ConnectionLost;
+        public Guid UserId { get; private set; }
 
 
         public WebSocketHandler(IWebSocketManager webSocketManager, ILogger<WebSocketHandler> logger)
@@ -33,7 +33,7 @@ namespace SituationCenterCore.Services.Implementations.RealTime
         }
         public async Task Handle(WebSocket webSocket, Guid userId)
         {
-            this.userId = userId;
+            UserId = userId;
             this.webSocket = webSocket;
             webSocketManager.Add(this);
             var buffer = new byte[1024 * 4];
@@ -43,17 +43,20 @@ namespace SituationCenterCore.Services.Implementations.RealTime
                 {
                     var result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
                     if (result.MessageType == WebSocketMessageType.Close)
+                    {
+                        ConnectionLost?.Invoke(userId);
                         break;
-                    string stringMessage = Encoding.UTF8.GetString(buffer, 0, result.Count);
+                    }
+                    var stringMessage = Encoding.UTF8.GetString(buffer, 0, result.Count);
                     logger.LogDebug($"user {userId} send {stringMessage}");
-                    var messageType = JsonConvert.DeserializeObject<Message>(stringMessage).MessateType;
+                    var messageType = JsonConvert.DeserializeObject<Message>(stringMessage).MessageType;
                     switch (messageType)
                     {
-                        case MessateType.AddTopic:
+                        case MessageType.AddTopic:
                             var addTopic = To<string>(stringMessage);
                             TopicAdded?.Invoke(addTopic.Data);
                             break;
-                        case MessateType.RemoveTopic:
+                        case MessageType.RemoveTopic:
                             var remTopic = To<string>(stringMessage);
                             TopicRemoved?.Invoke(remTopic.Data);
                             break;
@@ -69,14 +72,23 @@ namespace SituationCenterCore.Services.Implementations.RealTime
             catch (Exception ex)
             {
                 logger.LogWarning(ex, "error while web socket connect");
+                ConnectionLost?.Invoke(userId);
             }
         }
-        public Task Send(string topic, object data)
+        public async Task Send(string topic, object data)
         {
-            return webSocket.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(data))),
+            try
+            {
+                await webSocket.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(data))),
                                        WebSocketMessageType.Text,
                                        true,
                                        CancellationToken.None);
+            }
+            catch (Exception e)
+            {
+                logger.LogInformation(e, "Error while sending");
+                ConnectionLost?.Invoke(UserId);
+            }
         }
 
         private static GenericMessage<T> To<T>(string message)

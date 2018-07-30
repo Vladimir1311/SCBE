@@ -14,25 +14,37 @@ namespace SituationCenterCore.Services.Implementations.RealTime
         private ConcurrentDictionary<Guid, IWebSocketHandler> sockets =
             new ConcurrentDictionary<Guid, IWebSocketHandler>();
 
-        private ConcurrentDictionary<string, List<Guid>> topics = 
-            new ConcurrentDictionary<string, List<Guid>>();
+        private List<(string topic, Guid userId)> subscriptions =
+            new List<(string, Guid)>();
         public void Add(IWebSocketHandler webSocketHandler)
         {
             sockets[webSocketHandler.UserId] = webSocketHandler;
-            webSocketHandler.TopicAdded += topic 
-                => topics.AddOrUpdate(topic, new List<Guid>{webSocketHandler.UserId}, 
-                                      (t, list) => list.With(l => l.Add(webSocketHandler.UserId)));
 
-            webSocketHandler.TopicRemoved += topic
-                => topics.GetValueOrDefault(topic)?.Remove(webSocketHandler.UserId);
+            webSocketHandler.TopicAdded += topic =>
+            {
+                subscriptions.Add((topic, webSocketHandler.UserId));
+            };
+
+            webSocketHandler.TopicRemoved += topic =>
+            {
+                subscriptions.RemoveAll(subscr => subscr.topic == topic && subscr.userId == webSocketHandler.UserId);
+            };
+
+            webSocketHandler.ConnectionLost += userId =>
+            {
+                subscriptions.RemoveAll(sub => sub.userId == userId);
+                sockets.TryRemove(userId, out _);
+            };
         }
         public IEnumerable<IWebSocketHandler> ForTopic(string topic)
         {
-            var success = topics.TryGetValue(topic, out var guids);
-            if (!success)
-                return Enumerable.Empty<IWebSocketHandler>();
-            var all = guids.Select(sockets.GetValueOrDefault);
-            return all;
+            return
+                subscriptions
+                    .Where(sub => sub.topic == topic)
+                    .Select(sub => sub.userId)
+                    .Select(sockets.GetValueOrDefault)
+                    //.DefaultIfEmpty()
+                    .ToList();
         }
 
     }

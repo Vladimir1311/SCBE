@@ -95,8 +95,9 @@ namespace SituationCenterCore.Models.Rooms
 
             var calledRoom = await dataBase
                 .Rooms
-                .Include(R => R.Users)
-                .FirstOrDefaultAsync(R => R.Id == roomId)
+                .Include(r => r.Users)
+                .Include(r => r.SecurityRule)
+                .SingleOrDefaultAsync(r => r.Id == roomId)
                 ?? throw new StatusCodeException(StatusCode.DontExistRoom);
 
             if (calledRoom.Users.Count == calledRoom.PeopleCountLimit)
@@ -144,7 +145,7 @@ namespace SituationCenterCore.Models.Rooms
                 person.RoomId = null;
                 await sharedUsersState.SetRoom(person.Id, null);
             }
-            
+
             dataBase.Rooms.Remove(room);
             await dataBase.SaveChangesAsync();
             dataBase.Rules.Remove(room.SecurityRule);

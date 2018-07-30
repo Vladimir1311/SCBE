@@ -18,7 +18,7 @@ namespace SituationCenterCore.Controllers.API.V1
         [HttpGet]
         public async Task<IActionResult> Get(string topic) 
         {
-            await notificator.Notify(topic, (object)new { val = "Azaz" });
+            await notificator.Notify(topic, new { val = "Azaz" });
             return Ok();
         }
     }

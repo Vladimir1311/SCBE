@@ -3,24 +3,31 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using SituationCenterCore.Services.Interfaces;
+using SituationCenterCore.Services.Interfaces.RealTime;
 
 namespace SituationCenterCore.Services.Implementations
 {
     public class InMemorySharedUsersState : ISharedUsersState
     {
+        private readonly INotificator notificator;
         public event Action<Guid, string> TokenCreated;
         public event Action<Guid, Guid?> RoomChanged;
+
+        public InMemorySharedUsersState(INotificator notificator)
+        {
+            this.notificator = notificator;
+        }
 
         public Task AddToken(Guid userId, string token)
         {
             TokenCreated?.Invoke(userId, token);
-            return Task.CompletedTask;
+            return notificator.Notify("new_token", new {userId, token});
         }
 
         public Task SetRoom(Guid userId, Guid? roomId)
         {
             RoomChanged?.Invoke(userId, roomId);
-            return Task.CompletedTask;
+            return notificator.Notify("current_room", new {userId, roomId});
         }
 
     }

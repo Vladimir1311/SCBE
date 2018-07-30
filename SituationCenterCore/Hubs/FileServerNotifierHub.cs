@@ -17,14 +17,20 @@ namespace SituationCenterCore.Hubs
             sharedUsersState.TokenCreated += async (uId, token ) => await AddToken(uId, token);
             sharedUsersState.RoomChanged += async (uId, rId ) => await SetRoom(uId, rId);
         }
+
+        public Task Test(string param)
+        {
+            return Clients.All.SendAsync("token", Guid.NewGuid(), "some string");
+        }
+
         private Task AddToken(Guid userId, string token)
         {
-            return Clients.All.SendAsync("token", new { userId, token });
+            return Clients.All.SendAsync("token", userId, token );
         }
 
         private Task SetRoom(Guid userId, Guid? roomId)
         {
-            return Clients.All.SendAsync("roomId", new { userId, roomId });
+            return Clients.All.SendAsync("roomId", userId, roomId );
         }
     }
 }

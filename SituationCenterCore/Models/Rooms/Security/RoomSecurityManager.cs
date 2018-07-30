@@ -117,6 +117,7 @@ namespace SituationCenterCore.Models.Rooms.Security
 
         public void AddAdminRole(ApplicationUser user, Room room)
         {
+            user.UserRoomRoles = user.UserRoomRoles ?? new List<UserRoomRole>();
             user.UserRoomRoles.Add(new UserRoomRole
             {
                 Room = room,

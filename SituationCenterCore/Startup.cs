@@ -51,7 +51,7 @@ namespace SituationCenterCore
             services.AddTransient<IRepository, EntityRepository>();
             services.AddTransient<IRoomManager, RoomsManager>();
             services.AddTransient<IRoomSecurityManager, RoomSecurityManager>();
-            services.AddTransient<ISharedUsersState, InMemorySharedUsersState>();
+            services.AddSingleton<ISharedUsersState, InMemorySharedUsersState>();
 
             services.AddIdentity<ApplicationUser, Role>(options =>
             {
@@ -113,7 +113,7 @@ namespace SituationCenterCore
             services.AddScoped<IRoleAccessor, RoleAccessor>();
             services.AddAutoMapper();
             services.AddCors();
-            services.AddHostedService<RefreshTokenRemover>();
+            //services.AddHostedService<RefreshTokenRemover>();
             services.AddSignalR();
         }
 

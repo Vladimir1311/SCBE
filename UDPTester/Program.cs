@@ -1,5 +1,4 @@
-﻿using Castle.DynamicProxy;
-using CCF;
+﻿
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
@@ -14,12 +13,10 @@ namespace UDPTester
 {
     public class Program
     {
-        static IServiceProvider provider;
-        
         private static void Main(string[] args)
         {
             var connection = new HubConnectionBuilder()
-                .WithUrl("https://localhost:5000/scfs")
+                .WithUrl("http://localhost:5000/scfsnotify")
                 .Build();
             connection.StartAsync().Wait();
             connection.On<Guid, string>("token", (uId, token) =>
@@ -27,6 +24,9 @@ namespace UDPTester
                 Console.WriteLine(uId);
                 Console.WriteLine(token);
             });
+            connection.SendAsync("Test", "lol");
+            Console.WriteLine($"started");
+            Console.ReadLine();
         }
         
 

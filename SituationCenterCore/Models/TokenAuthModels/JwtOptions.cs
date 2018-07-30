@@ -9,7 +9,7 @@ namespace SituationCenterCore.Models.TokenAuthModels
         public string SecretKey { get; set; } = "very 123strong 65secret 235key_=1@";
         public string Issuer { get; set; }
         public string Audience { get; set; }
-        public TimeSpan Expiration { get; set; } = TimeSpan.FromSeconds(10);
+        public TimeSpan Expiration { get; set; } = TimeSpan.FromHours(4);
 
         public SymmetricSecurityKey GetSymmetricSecurityKey()
         {

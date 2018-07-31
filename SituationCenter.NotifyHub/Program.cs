@@ -19,6 +19,8 @@ namespace SituationCenter.NotifyHub
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
+                .ConfigureAppConfiguration(conf =>
+                                           conf.AddJsonFile("appsettings.Secret.json", false))
                 .UseStartup<Startup>();
     }
 }

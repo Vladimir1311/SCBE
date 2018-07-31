@@ -267,3 +267,4 @@ __pycache__/
 /Storage/Storage.Service/AppData
 /SituationCenterCore/appsettings.Secret.json
 /SituationCenterCore/Migrations
+/SituationCenter.NotifyHub/appsettings.Secret.json

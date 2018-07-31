@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.WebSockets;
 using System.Threading.Tasks;
-using SituationCenterCore.Data;
 
-namespace SituationCenterCore.Services.Interfaces.RealTime
+namespace SituationCenter.NotifyHub.Services.Interfaces
 {
-    public interface IWebSocketHandler
+    public interface IWebSocketHandler : IDisposable
     {
         event Action<string> TopicAdded;
         event Action<string> TopicRemoved;

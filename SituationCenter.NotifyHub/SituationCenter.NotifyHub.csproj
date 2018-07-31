@@ -13,4 +13,8 @@
     <PackageReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\SituationCenter.NotifyProtocol\SituationCenter.NotifyProtocol.csproj" />
+  </ItemGroup>
+
 </Project>

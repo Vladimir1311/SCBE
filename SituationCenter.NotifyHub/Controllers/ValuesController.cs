@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using SituationCenter.NotifyHub.Services.Interfaces;
 
 namespace SituationCenter.NotifyHub.Controllers
 {
@@ -10,10 +11,17 @@ namespace SituationCenter.NotifyHub.Controllers
     [ApiController]
     public class ValuesController : ControllerBase
     {
+        private readonly INotificator notificator;
+
+        public ValuesController(INotificator notificator)
+        {
+            this.notificator = notificator;
+        }
         // GET api/values
         [HttpGet]
         public ActionResult<IEnumerable<string>> Get()
         {
+            notificator.Notify("values", new {data = 123});
             return new string[] { "value1", "value2" };
         }
 

@@ -1,9 +1,8 @@
-﻿using System;
-using SituationCenterCore.Services.Interfaces.RealTime;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
+using SituationCenter.NotifyHub.Services.Interfaces;
 
-namespace SituationCenterCore.Services.Implementations.RealTime
+namespace SituationCenter.NotifyHub.Services.Implementations
 {
 	public class WebSocketNotificator : INotificator
     {

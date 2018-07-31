@@ -1,23 +1,20 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.WebSockets;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using SituationCenterCore.Services.Interfaces.RealTime;
-using System.Text;
 using Newtonsoft.Json;
-using SituationCenterCore.Models.RealTime;
-using Microsoft.EntityFrameworkCore.ValueGeneration.Internal;
-using SituationCenterCore.Data;
+using SituationCenter.NotifyHub.Services.Interfaces;
+using SituationCenter.NotifyProtocol.Messages;
 
-namespace SituationCenterCore.Services.Implementations.RealTime
+namespace SituationCenter.NotifyHub.Services.Implementations
 {
     public class WebSocketHandler : IWebSocketHandler
     {
         private readonly IWebSocketManager webSocketManager;
         private readonly ILogger<WebSocketHandler> logger;
+        private readonly CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
         private WebSocket webSocket;
 
         public event Action<string> TopicAdded;
@@ -37,14 +34,15 @@ namespace SituationCenterCore.Services.Implementations.RealTime
             this.webSocket = webSocket;
             webSocketManager.Add(this);
             var buffer = new byte[1024 * 4];
-            try 
+            try
             {
                 while (webSocket.State != WebSocketState.Closed)
                 {
-                    var result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+                    var result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), cancellationTokenSource.Token);
                     if (result.MessageType == WebSocketMessageType.Close)
                     {
-                        ConnectionLost?.Invoke(userId);
+                        if (!cancellationTokenSource.IsCancellationRequested)
+                            ConnectionLost?.Invoke(userId);
                         break;
                     }
                     var stringMessage = Encoding.UTF8.GetString(buffer, 0, result.Count);
@@ -72,7 +70,8 @@ namespace SituationCenterCore.Services.Implementations.RealTime
             catch (Exception ex)
             {
                 logger.LogWarning(ex, "error while web socket connect");
-                ConnectionLost?.Invoke(userId);
+                if (!cancellationTokenSource.IsCancellationRequested)
+                    ConnectionLost?.Invoke(userId);
             }
         }
         public async Task Send(string topic, object data)
@@ -82,13 +81,20 @@ namespace SituationCenterCore.Services.Implementations.RealTime
                 await webSocket.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(data))),
                                        WebSocketMessageType.Text,
                                        true,
-                                       CancellationToken.None);
+                                       cancellationTokenSource.Token);
             }
             catch (Exception e)
             {
                 logger.LogInformation(e, "Error while sending");
-                ConnectionLost?.Invoke(UserId);
+                if (!cancellationTokenSource.IsCancellationRequested)
+                    ConnectionLost?.Invoke(UserId);
             }
+        }
+
+        public void Dispose()
+        {
+            cancellationTokenSource.Cancel();
+            webSocket?.Dispose();
         }
 
         private static GenericMessage<T> To<T>(string message)

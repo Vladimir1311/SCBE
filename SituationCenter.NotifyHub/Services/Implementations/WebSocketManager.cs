@@ -2,12 +2,10 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.WebSockets;
-using System.Threading.Tasks;
-using SituationCenterCore.Services.Interfaces.RealTime;
-using SituationCenterCore.Extensions;
+using Microsoft.AspNetCore.Hosting;
+using SituationCenter.NotifyHub.Services.Interfaces;
 
-namespace SituationCenterCore.Services.Implementations.RealTime
+namespace SituationCenter.NotifyHub.Services.Implementations
 {
     public class WebSocketManager : IWebSocketManager
     {
@@ -16,6 +14,12 @@ namespace SituationCenterCore.Services.Implementations.RealTime
 
         private List<(string topic, Guid userId)> subscriptions =
             new List<(string, Guid)>();
+
+        public WebSocketManager(IApplicationLifetime lifetime)
+        {
+            lifetime.ApplicationStopping.Register(Dispose);
+        }
+
         public void Add(IWebSocketHandler webSocketHandler)
         {
             sockets[webSocketHandler.UserId] = webSocketHandler;
@@ -47,5 +51,12 @@ namespace SituationCenterCore.Services.Implementations.RealTime
                     .ToList();
         }
 
+        public void Dispose()
+        {
+            foreach (var socketHandler in sockets.Values)
+            {
+                socketHandler.Dispose();
+            }
+        }
     }
 }

@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net.WebSockets;
-using System.Threading.Tasks;
 
-namespace SituationCenterCore.Services.Interfaces.RealTime
+namespace SituationCenter.NotifyHub.Services.Interfaces
 {
-    public interface IWebSocketManager
+    public interface IWebSocketManager : IDisposable
     {
         void Add(IWebSocketHandler webSocketHandler);
         IEnumerable<IWebSocketHandler> ForTopic(string topic);

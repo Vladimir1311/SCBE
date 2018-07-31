@@ -45,7 +45,6 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Models\RealTime\New Folder\" />
     <Folder Include="Services\HostedServices\" />
   </ItemGroup>
   <ProjectExtensions>

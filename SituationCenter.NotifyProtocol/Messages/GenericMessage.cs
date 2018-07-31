@@ -1,5 +1,4 @@
-﻿using System;
-namespace SituationCenterCore.Models.RealTime
+﻿namespace SituationCenter.NotifyProtocol.Messages
 {
 	public class GenericMessage<T> : Message
     {

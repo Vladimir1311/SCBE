@@ -20,6 +20,12 @@
     <ProjectReference Include="..\SituationCenter.NotifyProtocol\SituationCenter.NotifyProtocol.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Update="appsettings.Secret.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
   <ProjectExtensions><VisualStudio><UserProperties appsettings_1Secret_1Schema_1json__JSONSchema="http://json-schema.org/draft-04/schema" appsettings_1Secret_1json__JSONSchema="appsettings.Secret.Schema.json" /></VisualStudio></ProjectExtensions>
 
 </Project>

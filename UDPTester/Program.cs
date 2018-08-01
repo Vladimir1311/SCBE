@@ -20,6 +20,8 @@ namespace UDPTester
 {
     public class Program
     {
+        private static readonly string RemoteUrl = File.ReadAllText("Secret.txt");
+        private const string LocalUrl = "ws://localhost:60955";
         private static async Task Main(string[] args)
         {
             while (true)
@@ -42,8 +44,19 @@ namespace UDPTester
         {
             var tokSource = new CancellationTokenSource();
             var client = new ClientWebSocket();
-            await client.ConnectAsync(new Uri("ws://localhost:60955/ws?userId=5b31fe42-93a5-40bf-bab9-e20706b98991"), tokSource.Token);
-            var receiveTask = Task.Factory.StartNew(() => Receive(client, tokSource.Token));
+            Console.WriteLine($"0 for {RemoteUrl} 1 for {LocalUrl}");
+            var urlNum = int.Parse(Console.ReadLine());
+            var url = "";
+            switch (urlNum)
+            {
+                case 0: url = LocalUrl;
+                    break;
+                case 1: url = RemoteUrl;
+                    break;
+                default: throw new Exception("Incorret url type");
+            }
+            await client.ConnectAsync(new Uri($"{url}/ws?userId=5b31fe42-93a5-40bf-bab9-e20706b98991"), tokSource.Token);
+            var receiveTask = Task.Factory.StartNew(() => Receive(client, tokSource.Token), tokSource.Token);
             while (true)
             {
                 var m = new Message();

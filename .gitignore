@@ -268,3 +268,4 @@ __pycache__/
 /SituationCenterCore/appsettings.Secret.json
 /SituationCenterCore/Migrations
 /SituationCenter.NotifyHub/appsettings.Secret.json
+/UDPTester/Secret.txt

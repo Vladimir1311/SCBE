@@ -62,8 +62,8 @@ namespace SituationCenterCore.Data.DatabaseAbstraction
         public Task<bool> CheckUserPasswordAsync(ApplicationUser user, string password) =>
             userManager.CheckPasswordAsync(user, password);
 
-        public Task<ApplicationUser> FindUser(ClaimsPrincipal user) =>
-            userManager.FindByIdAsync(userManager.GetUserId(user));
+        public IQueryable<ApplicationUser> FindUser(Guid userId) =>
+            dbContext.Users.Where(u => u.Id == userId);
 
         public Guid GetUserId(ClaimsPrincipal user) =>
             Guid.Parse(userManager.GetUserId(user));

@@ -23,7 +23,7 @@ namespace SituationCenterCore.Data.DatabaseAbstraction
         Task<List<ApplicationUser>> FindUsers(Func<ApplicationUser, bool> predicate);
         Task<bool> AnyUser(Func<ApplicationUser, bool> predicate);
         Task<ApplicationUser> FindUserByEmailAsync(string email);
-        Task<ApplicationUser> FindUser(ClaimsPrincipal user);
+        IQueryable<ApplicationUser> FindUser(Guid userId);
         Guid GetUserId(ClaimsPrincipal user);
         Task<bool> CheckUserPasswordAsync(ApplicationUser user, string password);
         IQueryable<ApplicationUser> Users { get; }

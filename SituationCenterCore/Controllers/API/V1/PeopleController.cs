@@ -21,7 +21,7 @@ using SituationCenter.Shared.ResponseObjects.General;
 using SituationCenterCore.DataFormatting;
 using SituationCenter.Shared.Exceptions;
 
-namespace SSituationCenterCore.Controllers.API.V1
+namespace SituationCenterCore.Controllers.API.V1
 {
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Produces("application/json")]
@@ -43,15 +43,15 @@ namespace SSituationCenterCore.Controllers.API.V1
         }
 
         public async Task<OneObjectResponse<MeAndRoom>> Me()
-        {
-            var user = await repository.FindUser(User) ?? throw new ApiArgumentException();
-            return mapper.Map<MeAndRoom>(user);
-        }
+            => await repository
+                .FindUser(UserId)
+                .ProjectTo<MeAndRoom>()
+                .SingleAsync();
 
         public async Task<OneObjectResponse<string>> GetSCFSToken()
         {
             var token = "".Random(40);
-            var user = await repository.FindUser(User);
+            var user = await repository.FindUser(UserId).SingleAsync();
             await sharedUsersState.AddToken(UserId, token);
             await sharedUsersState.SetRoom(UserId, user.RoomId);
             return token;

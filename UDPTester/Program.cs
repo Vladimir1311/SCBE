@@ -44,7 +44,7 @@ namespace UDPTester
         {
             var tokSource = new CancellationTokenSource();
             var client = new ClientWebSocket();
-            Console.WriteLine($"0 for {RemoteUrl} 1 for {LocalUrl}");
+            Console.WriteLine($"0 for {LocalUrl} 1 for {RemoteUrl}");
             var urlNum = int.Parse(Console.ReadLine());
             var url = "";
             switch (urlNum)

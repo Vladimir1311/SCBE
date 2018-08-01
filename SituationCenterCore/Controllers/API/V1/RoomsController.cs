@@ -19,13 +19,14 @@ using Exceptions = SituationCenter.Shared.Exceptions;
 using System.Collections.Generic;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using Microsoft.EntityFrameworkCore;
 using SituationCenter.Shared.ResponseObjects.General;
 
 namespace SituationCenterCore.Controllers.API.V1
 {
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("api/v1/[controller]/[action]")]
-    public class RoomsController : Controller
+    public class RoomsController : BaseParamsController
     {
         private readonly IRoomManager roomsManager;
         private readonly IRepository repository;
@@ -91,7 +92,7 @@ namespace SituationCenterCore.Controllers.API.V1
 
         public async Task<OneObjectResponse<RoomView>> Current()
         {
-            var user = await repository.FindUser(User);
+            var user = await repository.FindUser(UserId).SingleAsync();
             var room = await roomsManager.FindRoom(user.RoomId ?? Guid.Empty) ??
                        throw new StatusCodeException(Exceptions.StatusCode.YouAreNotInRoom);
             return mapper.Map<RoomView>(room);
@@ -100,7 +101,7 @@ namespace SituationCenterCore.Controllers.API.V1
         [HttpPost]
         public async Task<ResponseBase> InvitePerson([FromBody]List<string> phones)
         {
-            var user = await repository.FindUser(User);
+            var user = await repository.FindUser(UserId).SingleAsync();
             var currentRoomId = user.RoomId ?? 
                         throw new StatusCodeException(Exceptions.StatusCode.YouAreNotInRoom);
             await roomsManager.InviteUsersByPhoneToRoom(currentRoomId, phones);

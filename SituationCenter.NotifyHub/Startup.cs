@@ -12,6 +12,8 @@ using Microsoft.Extensions.Options;
 using SituationCenter.NotifyHub.Middleware;
 using SituationCenter.NotifyHub.Services.Implementations;
 using SituationCenter.NotifyHub.Services.Interfaces;
+using SituationCenter.NotifyHub.Models.Settings;
+using System.Runtime.InteropServices.ComTypes;
 
 namespace SituationCenter.NotifyHub
 {
@@ -27,6 +29,8 @@ namespace SituationCenter.NotifyHub
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.Configure<AccessSettings>(Configuration.GetSection(nameof(AccessSettings)));
+
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
             services.AddSingleton<IWebSocketManager, WebSocketManager>();
             services.AddTransient<IWebSocketHandler, WebSocketHandler>();
@@ -43,6 +47,21 @@ namespace SituationCenter.NotifyHub
 
             app.UseWebSockets();
             app.UseWebSocketMiddleware("/ws");
+
+            app.Use(async (ctx, next) =>
+            {
+
+                if (ctx.Request.Headers.TryGetValue("Authorization", out var key))
+                {
+                    var keySettings = ctx.RequestServices.GetService<IOptions<AccessSettings>>();
+                    if (key == keySettings.Value.AccessKey)
+                    {
+                        await next();
+                        return; 
+                    }
+                }
+                ctx.Response.StatusCode = 403;
+            });
             app.UseMvc();
         }
     }

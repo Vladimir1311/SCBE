@@ -8,27 +8,64 @@ using System.Net.Sockets;
 using System.Reflection;
 using System.Reflection.Emit;
 using Microsoft.AspNetCore.SignalR.Client;
+using System.Net.WebSockets;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Linq;
+using Newtonsoft.Json;
+using System.Text;
+using SituationCenter.NotifyProtocol.Messages;
 
 namespace UDPTester
 {
     public class Program
     {
-        private static void Main(string[] args)
+        private static async Task Main(string[] args)
         {
-            var connection = new HubConnectionBuilder()
-                .WithUrl("http://localhost:5000/scfsnotify")
-                .Build();
-            connection.StartAsync().Wait();
-            connection.On<Guid, string>("token", (uId, token) =>
+            var tokSource = new CancellationTokenSource();
+            var client = new ClientWebSocket();
+            await client.ConnectAsync(new Uri("ws://localhost:60955/ws?userId=5b31fe42-93a5-40bf-bab9-e20706b98991"), tokSource.Token);
+            var receiveTask = Task.Factory.StartNew(() => Receive(client, tokSource.Token));
+            while (true)
             {
-                Console.WriteLine(uId);
-                Console.WriteLine(token);
-            });
-            connection.SendAsync("Test", "lol");
-            Console.WriteLine($"started");
-            Console.ReadLine();
+                var m = new Message();
+                var command = Console.ReadLine();
+                var splitted = command.Split(' ');
+                if (splitted.Length != 2)
+                    continue;
+                if (!int.TryParse(splitted[0], out var type))
+                    continue;
+                switch (type)
+                {
+                    case 0:
+                        await Send(client, new GenericMessage<string> { MessageType = MessageType.AddTopic, Data = splitted[1] });
+                        break;
+                    case 1:
+                        await Send(client, new GenericMessage<string> { MessageType = MessageType.RemoveTopic, Data = splitted[1] });
+                        break;
+                }
+            }
         }
-        
 
+        private static async Task Send(ClientWebSocket client, Message data)
+        {
+            var str = JsonConvert.SerializeObject(data);
+            var bytes = Encoding.UTF8.GetBytes(str);
+            await client.SendAsync(new ArraySegment<byte>(bytes), WebSocketMessageType.Text, true, CancellationToken.None);
+        }
+
+        private static async Task Receive(ClientWebSocket client, CancellationToken token)
+        {
+            while (!token.IsCancellationRequested)
+            {
+                var bytes = new byte[4096 * 4];
+                var arraySegment = new ArraySegment<byte>(bytes);
+                var received = await client.ReceiveAsync(arraySegment, token);
+                if (received.MessageType == WebSocketMessageType.Close)
+                    return;
+                var str = Encoding.UTF8.GetString(bytes, 0, received.Count);
+                Console.WriteLine($"received >>{str}<<");
+            }
+        }
     }
 }

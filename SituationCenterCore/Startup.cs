@@ -14,6 +14,7 @@ using SituationCenterCore.Models.Rooms;
 using SituationCenterCore.Models.Rooms.Security;
 using SituationCenterBackServer.Interfaces;
 using System;
+using System.Net.Http.Headers;
 using AutoMapper;
 using SituationCenterCore.Middleware;
 using SituationCenterCore.Models.Settings;
@@ -23,10 +24,11 @@ using System.Runtime.InteropServices;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
+using Microsoft.Extensions.Options;
+using SituationCenter.NotifyProtocol;
+using SituationCenter.NotifyProtocol.Client;
 using SituationCenterCore.Filters;
 using SituationCenterCore.Hubs;
-using SituationCenterCore.Services.Implementations.RealTime;
-using SituationCenterCore.Services.Interfaces.RealTime;
 using SituationCenterCore.Services.HostedServices;
 
 namespace SituationCenterCore
@@ -47,11 +49,7 @@ namespace SituationCenterCore
 
             services.Configure<ServiceBusSettings>(Configuration.GetSection(nameof(ServiceBusSettings)));
             services.Configure<JwtOptions>(Configuration.GetSection(nameof(JwtOptions)));
-
-            services.AddTransient<IRepository, EntityRepository>();
-            services.AddTransient<IRoomManager, RoomsManager>();
-            services.AddTransient<IRoomSecurityManager, RoomSecurityManager>();
-            services.AddSingleton<ISharedUsersState, InMemorySharedUsersState>();
+            services.Configure<NotifyHubSettings>(Configuration.GetSection(nameof(NotifyHubSettings)));
 
             services.AddIdentity<ApplicationUser, Role>(options =>
             {
@@ -104,12 +102,24 @@ namespace SituationCenterCore
                 options.Filters.Add<RefreshTokenFilter>();
             });
 
+
+            services.AddHttpClient(HttpNotificator.HttpClientName, (sp, client) =>
+            {
+                var settings = sp.GetService<IOptions<NotifyHubSettings>>().Value;
+                client.BaseAddress = new Uri(settings.Url);
+                client.DefaultRequestHeaders.Add("Authorization", settings.AccessToken);
+
+            });
+
+            services.AddTransient<IRepository, EntityRepository>();
+            services.AddTransient<IRoomManager, RoomsManager>();
+            services.AddTransient<IRoomSecurityManager, RoomSecurityManager>();
+            services.AddSingleton<ISharedUsersState, InMemorySharedUsersState>();
+
             // Register no-op EmailSender used by account confirmation and password reset during development
             // For more information on how to enable account confirmation and password reset please visit https://go.microsoft.com/fwlink/?LinkID=532713
             services.AddSingleton<IEmailSender, EmailSender>();
-            services.AddSingleton<IWebSocketManager, WebSocketManager>();
-            services.AddTransient<IWebSocketHandler, WebSocketHandler>();
-            services.AddTransient<INotificator, WebSocketNotificator>();
+            services.AddTransient<INotificator, HttpNotificator>();
             services.AddScoped<IRoleAccessor, RoleAccessor>();
             services.AddAutoMapper();
             services.AddCors();
@@ -146,7 +156,6 @@ namespace SituationCenterCore
             });
             app.UseAuthentication();
             app.UseWebSockets();
-            app.UseWebSocketMiddleware("/ws");
             app.UseSignalR(routes =>
             {
                 routes.MapHub<FileServerNotifierHub>("/scfsnotify");

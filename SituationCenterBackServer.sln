@@ -39,9 +39,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocsToPictures.ClIProtocol"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B723F9C9-7A72-4A9E-9A54-62145A3B99A7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SituationCenter.NotifyHub", "SituationCenter.NotifyHub\SituationCenter.NotifyHub.csproj", "{45EA57D9-A7A1-4EA1-AA6F-14C4284AF2E2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SituationCenter.NotifyHub", "SituationCenter.NotifyHub\SituationCenter.NotifyHub.csproj", "{45EA57D9-A7A1-4EA1-AA6F-14C4284AF2E2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SituationCenter.NotifyProtocol", "SituationCenter.NotifyProtocol\SituationCenter.NotifyProtocol.csproj", "{F6974194-EA4A-4BB6-9ABC-2F1C6D829762}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SituationCenter.NotifyProtocol", "SituationCenter.NotifyProtocol\SituationCenter.NotifyProtocol.csproj", "{F6974194-EA4A-4BB6-9ABC-2F1C6D829762}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

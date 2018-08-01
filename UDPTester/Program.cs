@@ -22,6 +22,24 @@ namespace UDPTester
     {
         private static async Task Main(string[] args)
         {
+            while (true)
+            {
+                try
+                {
+                    await WorkCycle();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"exception {ex.Message}");
+                    Console.WriteLine(ex.StackTrace);
+                    Console.WriteLine("Wait 4 seconds for reconnect");
+                    await Task.Delay(TimeSpan.FromSeconds(4));
+                }
+            }
+        }
+
+        private static async Task WorkCycle()
+        {
             var tokSource = new CancellationTokenSource();
             var client = new ClientWebSocket();
             await client.ConnectAsync(new Uri("ws://localhost:60955/ws?userId=5b31fe42-93a5-40bf-bab9-e20706b98991"), tokSource.Token);

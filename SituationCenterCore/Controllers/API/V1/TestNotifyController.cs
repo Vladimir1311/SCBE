@@ -1,7 +1,7 @@
 ﻿using System;
-using SituationCenterCore.Services.Interfaces.RealTime;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
+using SituationCenter.NotifyProtocol;
 
 namespace SituationCenterCore.Controllers.API.V1
 {

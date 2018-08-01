@@ -5,6 +5,7 @@ EXPOSE 80
 FROM microsoft/dotnet:2.1-sdk AS build
 WORKDIR /src
 COPY SituationCenter.NotifyHub/SituationCenter.NotifyHub.csproj SituationCenter.NotifyHub/
+COPY SituationCenter.NotifyProtocol/SituationCenter.NotifyProtocol.csproj SituationCenter.NotifyProtocol/
 RUN dotnet restore SituationCenter.NotifyHub/SituationCenter.NotifyHub.csproj
 COPY . .
 WORKDIR /src/SituationCenter.NotifyHub

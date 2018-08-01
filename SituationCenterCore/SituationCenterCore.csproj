@@ -30,6 +30,7 @@
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="2.0.2" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\SituationCenter.NotifyProtocol\SituationCenter.NotifyProtocol.csproj" />
     <ProjectReference Include="..\SituationCenter.Shared\SituationCenter.Shared.csproj" />
     <ProjectReference Include="..\SituationCenterBackServer.Interfaces\SituationCenterBackServer.Interfaces.csproj" />
   </ItemGroup>

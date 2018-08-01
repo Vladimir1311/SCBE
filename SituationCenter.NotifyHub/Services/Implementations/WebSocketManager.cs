@@ -9,10 +9,10 @@ namespace SituationCenter.NotifyHub.Services.Implementations
 {
     public class WebSocketManager : IWebSocketManager
     {
-        private ConcurrentDictionary<Guid, IWebSocketHandler> sockets =
+        private readonly ConcurrentDictionary<Guid, IWebSocketHandler> sockets =
             new ConcurrentDictionary<Guid, IWebSocketHandler>();
 
-        private List<(string topic, Guid userId)> subscriptions =
+        private readonly List<(string topic, Guid userId)> subscriptions =
             new List<(string, Guid)>();
 
         public WebSocketManager(IApplicationLifetime lifetime)
@@ -47,7 +47,6 @@ namespace SituationCenter.NotifyHub.Services.Implementations
                     .Where(sub => sub.topic == topic)
                     .Select(sub => sub.userId)
                     .Select(sockets.GetValueOrDefault)
-                    //.DefaultIfEmpty()
                     .ToList();
         }
 

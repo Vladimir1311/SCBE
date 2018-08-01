@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
 using SituationCenter.NotifyHub.Services.Interfaces;
+using SituationCenter.NotifyProtocol;
 
 namespace SituationCenter.NotifyHub.Services.Implementations
 {
@@ -13,7 +14,7 @@ namespace SituationCenter.NotifyHub.Services.Implementations
             this.webSocketManager = webSocketManager;
         }
 
-        public Task Notify<T>(string topic, T data)
+        public Task Notify<T>(string topic, T data) where T: class
         {
             return Task.WhenAll(webSocketManager
                 .ForTopic(topic)

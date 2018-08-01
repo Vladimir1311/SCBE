@@ -13,10 +13,13 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.1.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\SituationCenter.NotifyProtocol\SituationCenter.NotifyProtocol.csproj" />
   </ItemGroup>
+
+  <ProjectExtensions><VisualStudio><UserProperties appsettings_1Secret_1Schema_1json__JSONSchema="http://json-schema.org/draft-04/schema" appsettings_1Secret_1json__JSONSchema="appsettings.Secret.Schema.json" /></VisualStudio></ProjectExtensions>
 
 </Project>

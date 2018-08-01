@@ -14,6 +14,7 @@ using SituationCenter.NotifyHub.Services.Implementations;
 using SituationCenter.NotifyHub.Services.Interfaces;
 using SituationCenter.NotifyHub.Models.Settings;
 using System.Runtime.InteropServices.ComTypes;
+using SituationCenter.NotifyProtocol;
 
 namespace SituationCenter.NotifyHub
 {

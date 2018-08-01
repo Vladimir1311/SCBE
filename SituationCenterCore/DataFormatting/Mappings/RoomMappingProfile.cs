@@ -15,6 +15,7 @@ namespace SituationCenterCore.DataFormatting.Mappings
         {
             CreateMap<Room, RoomView>()
                 .ForMember(rv => rv.PrivacyType, map => map.MapFrom(r => r.SecurityRule.PrivacyRule));
+            CreateMap<Room, CompactRoomView>();
 
             CreateMap<CreateRoomRequest, Room>();
         }

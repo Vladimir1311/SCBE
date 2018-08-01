@@ -1,10 +1,11 @@
 ﻿using System;
+using SituationCenter.Shared.ResponseObjects.Rooms;
 
 namespace SituationCenter.Shared.ResponseObjects.People
 {
     public class MeAndRoom : ResponseBase
     {
-        public Guid? RoomId { get; set; }
+        public CompactRoomView Room { get; set; }
         public PersonView Me { get; set; }
     }
 }

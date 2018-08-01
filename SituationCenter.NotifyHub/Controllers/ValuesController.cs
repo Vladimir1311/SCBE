@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using SituationCenter.NotifyHub.Services.Interfaces;
+using SituationCenter.NotifyProtocol;
 
 namespace SituationCenter.NotifyHub.Controllers
 {

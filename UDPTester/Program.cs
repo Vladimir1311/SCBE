@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 using System.Linq;
 using Newtonsoft.Json;
 using System.Text;
-using SituationCenter.NotifyProtocol.Messages;
+using SituationCenter.NotifyProtocol.Messages.Requests;
 
 namespace UDPTester
 {

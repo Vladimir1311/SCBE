@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using SituationCenter.NotifyHub.Services.Interfaces;
-using SituationCenter.NotifyProtocol.Messages;
+using SituationCenter.NotifyProtocol.Messages.Requests;
+using SituationCenter.NotifyProtocol.Messages.Responses;
 
 namespace SituationCenter.NotifyHub.Services.Implementations
 {
@@ -74,11 +75,17 @@ namespace SituationCenter.NotifyHub.Services.Implementations
                     ConnectionLost?.Invoke(userId);
             }
         }
-        public async Task Send(string topic, object data)
+        public async Task Send<T>(string topic, T data)
         {
             try
             {
-                await webSocket.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(data))),
+                var message = new GenericTopicResponse<T>
+                {
+                    Topic = topic,
+                    Data = data
+                };
+                var bytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(message));
+                await webSocket.SendAsync(new ArraySegment<byte>(bytes),
                                        WebSocketMessageType.Text,
                                        true,
                                        cancellationTokenSource.Token);

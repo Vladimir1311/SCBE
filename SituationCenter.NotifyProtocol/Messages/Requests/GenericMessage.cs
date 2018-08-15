@@ -1,4 +1,4 @@
-﻿namespace SituationCenter.NotifyProtocol.Messages
+﻿namespace SituationCenter.NotifyProtocol.Messages.Requests
 {
 	public class GenericMessage<T> : Message
     {

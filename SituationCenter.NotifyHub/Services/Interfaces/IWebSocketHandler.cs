@@ -11,7 +11,7 @@ namespace SituationCenter.NotifyHub.Services.Interfaces
         event Action<Guid> ConnectionLost;
 
         Task Handle(WebSocket webSocket, Guid userId);
-        Task Send(string topic, object data);
+        Task Send<T>(string topic, T data);
         Guid UserId { get; }
     }
 }

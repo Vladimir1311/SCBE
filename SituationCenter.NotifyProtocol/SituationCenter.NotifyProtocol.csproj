@@ -2,6 +2,14 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <PackageId>RTUItLab.SituationCenter.NotifyProtocol</PackageId>
+    <Authors>CAPCHIK</Authors>
+    <Company>RTU IT Laboratory</Company>
+    <Description>Protocol for connect to Notify server</Description>
+    <RepositoryUrl>https://github.com/ITLabRTUMIREA/SCBE</RepositoryUrl>
+    <AssemblyVersion>1.0.0.1</AssemblyVersion>
+    <FileVersion>1.0.0.1</FileVersion>
+    <Version>1.0.0.1</Version>
   </PropertyGroup>
 
   <ItemGroup>
